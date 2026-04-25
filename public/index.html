@@ -1189,7 +1189,6 @@ document.querySelectorAll('.nav-item').forEach(item => {
     currentPage = item.dataset.page;
     window.location.hash = currentPage;
     render();
-    document.getElementById('main').scrollTop = 0;
     closeMobileSidebar();
   });
 });
@@ -1208,6 +1207,9 @@ function render() {
     const num = parseInt(currentPage.split('-')[1]);
     main.innerHTML = renderWeek(num);
   }
+  // Always scroll to top on page change
+  main.scrollTop = 0;
+  window.scrollTo(0, 0);
   highlightCurrentWeek();
 }
 
