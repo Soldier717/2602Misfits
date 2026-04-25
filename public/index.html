@@ -1259,6 +1259,16 @@ function renderHome() {
           `).join('')}
         </div>
       </div>
+      <div class="section">
+        <div class="section-head"><div class="section-title">Instructors</div></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;">
+          ${['Matt Donovan','Justin Diaz','John Richard','John Delashment','Cody Callanan','Daniel Rojas'].map(name => `
+            <div style="padding:10px 16px;background:var(--bg-elev);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:2px;">
+              <span style="font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;letter-spacing:0.04em;text-transform:uppercase;">${name}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
       ${startDateHtml}
       <div class="section">
         <div class="section-head"><div class="section-title">Jump to Week</div></div>
