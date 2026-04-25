@@ -1238,6 +1238,27 @@ function renderHome() {
         <div class="stat-card"><div class="stat-label">Videos</div><div class="stat-value">${totalVideos}</div></div>
         <div class="stat-card"><div class="stat-label">Docs</div><div class="stat-value">${totalDocs}</div></div>
       </div>
+      <div class="section">
+        <div class="section-head"><div class="section-title">Command Staff</div></div>
+        <div style="display:grid;gap:6px;">
+          ${[
+            ['Chris Wolfe', 'Fire Chief'],
+            ['Joshua Bauer', 'Deputy Chief'],
+            ['Chris Diaz', 'Deputy Chief'],
+            ['Nicole Chesser', 'Chief of Staff'],
+            ['Forrest Campbell', 'Assistant Chief / Operations'],
+            ['Andy Krajewski', 'Assistant Chief / Training'],
+            ['Mark Stirns', 'Assistant Chief / Support Services'],
+            ['Shawn Hanson', 'Assistant Chief / Fire & Life Safety'],
+            ['Dennis DiSarro', 'Division Chief / EMS'],
+          ].map(([name, rank]) => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg-elev);border:1px solid var(--border);border-left:3px solid var(--accent-dim);border-radius:2px;">
+              <span style="font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;letter-spacing:0.04em;text-transform:uppercase;">${name}</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:0.05em;">${rank}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
       ${startDateHtml}
       <div class="section">
         <div class="section-head"><div class="section-title">Jump to Week</div></div>
