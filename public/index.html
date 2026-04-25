@@ -861,12 +861,16 @@
       position: fixed;
       top: 0; left: -300px;
       width: 280px;
-      height: 100vh;
+      height: 100%;
+      max-height: 100vh;
+      max-height: 100dvh;
       z-index: 70;
       transition: left 0.25s ease;
       border-right: 1px solid var(--border);
-      overflow-y: auto;
+      overflow-y: scroll;
       -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
     }
     .sidebar.open { left: 0; }
     .mobile-header { display: flex; }
@@ -902,7 +906,7 @@
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
-      <img src="/logo.png" alt="2602 Misfits" style="width:100%;max-width:240px;border-radius:4px;margin-bottom:10px;">
+      <img src="/logo.png" alt="2602 Misfits" style="width:100%;max-width:200px;border-radius:4px;margin-bottom:8px;">
       <div class="brand-sub">GNFR 26-02 // Class</div>
       <div class="brand-motto">Leave it better<br>than you found it.</div>
     </div>
