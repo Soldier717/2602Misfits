@@ -854,6 +854,7 @@
   /* ====== RESPONSIVE ====== */
   @media (max-width: 880px) {
     html, body { overflow: auto; height: auto; }
+    body.sidebar-open { overflow: hidden; position: fixed; width: 100%; }
     .app { grid-template-columns: 1fr; height: auto; min-height: 100vh; }
     .main { overflow: visible; }
     .sidebar {
@@ -1099,14 +1100,17 @@ const overlay = document.getElementById('sidebarOverlay');
 document.getElementById('hamburgerBtn').addEventListener('click', () => {
   sidebar.classList.toggle('open');
   overlay.classList.toggle('show');
+  document.body.classList.toggle('sidebar-open');
 });
 overlay.addEventListener('click', () => {
   sidebar.classList.remove('open');
   overlay.classList.remove('show');
+  document.body.classList.remove('sidebar-open');
 });
 function closeMobileSidebar() {
   sidebar.classList.remove('open');
   overlay.classList.remove('show');
+  document.body.classList.remove('sidebar-open');
 }
 
 // ---------- ADMIN ----------
