@@ -874,7 +874,9 @@
       touch-action: pan-y;
       overscroll-behavior: contain;
       padding-bottom: 60px;
+      visibility: hidden;
     }
+    .sidebar.open { left: 0; visibility: visible; }
     .sidebar-footer { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
     .sidebar.open { left: 0; }
     .mobile-header { display: flex; }
