@@ -442,6 +442,93 @@
   .video-actions { display: none; position: absolute; top: 8px; right: 8px; gap: 4px; z-index: 5; }
   body.admin-mode .video-actions { display: flex; }
 
+  /* ====== IMAGES / RESOURCES ====== */
+  .image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .image-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    transition: all 0.2s;
+    position: relative;
+    cursor: pointer;
+  }
+  .image-card:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+  .image-card img {
+    width: 100%;
+    display: block;
+    object-fit: cover;
+    max-height: 300px;
+  }
+  .image-info { padding: 12px 16px; }
+  .image-title {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+  }
+  .image-actions { display: none; position: absolute; top: 8px; right: 8px; gap: 4px; z-index: 5; }
+  body.admin-mode .image-actions { display: flex; }
+
+  .image-lightbox {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 150;
+    cursor: pointer;
+    padding: 20px;
+  }
+  .image-lightbox.show { display: flex; }
+  .image-lightbox img {
+    max-width: 95%;
+    max-height: 95vh;
+    border-radius: 4px;
+    object-fit: contain;
+  }
+
+  .upload-area {
+    border: 2px dashed var(--border-bright);
+    border-radius: 4px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    margin-bottom: 16px;
+    display: none;
+  }
+  body.admin-mode .upload-area { display: block; }
+  .upload-area:hover { border-color: var(--accent); }
+  .upload-area.dragging { border-color: var(--gold); background: rgba(212,163,65,0.05); }
+  .upload-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .upload-progress {
+    margin-top: 8px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    display: none;
+  }
+  .upload-progress.show { display: block; }
+  .upload-progress-bar {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.3s;
+  }
+
   /* ====== DOCS ====== */
   .doc-list { display: grid; gap: 8px; }
   .doc-item {
@@ -883,6 +970,10 @@
   </div>
 </div>
 
+<div class="image-lightbox" id="lightbox" onclick="this.classList.remove('show')">
+  <img id="lightboxImg" src="" alt="">
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -943,6 +1034,7 @@ async function loadDataFromServer() {
       if (!data.weeks[i]) data.weeks[i] = { title: 'Week ' + i, schedule: [], videos: [] };
       if (!Array.isArray(data.weeks[i].schedule)) data.weeks[i].schedule = [];
       if (!Array.isArray(data.weeks[i].videos)) data.weeks[i].videos = [];
+      if (!Array.isArray(data.weeks[i].images)) data.weeks[i].images = [];
     }
     if (!Array.isArray(data.docs)) data.docs = [];
     if (!data.settings) data.settings = { start_date: null };
@@ -1213,6 +1305,19 @@ function renderWeek(num) {
         </div>
       `).join('');
 
+  const imageCards = (week.images || []).length === 0
+    ? `<div class="empty">No images yet${isAdmin ? ' — drop files above or click to upload' : ''}</div>`
+    : week.images.map((img, i) => `
+        <div class="image-card" onclick="openLightbox('${escapeAttr(img.url)}')">
+          <div class="image-actions">
+            <button class="icon-btn" onclick="event.stopPropagation();editImage(${num}, ${i})">✎</button>
+            <button class="icon-btn danger" onclick="event.stopPropagation();deleteImage(${num}, ${i})">×</button>
+          </div>
+          <img src="${escapeAttr(img.url)}" alt="${escapeAttr(img.title || '')}" loading="lazy">
+          ${img.title ? `<div class="image-info"><div class="image-title">${escapeHtml(img.title)}</div></div>` : ''}
+        </div>
+      `).join('');
+
   return `
     <div class="header">
       <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> WEEK ${String(num).padStart(2, '0')}</div>
@@ -1233,6 +1338,17 @@ function renderWeek(num) {
           <button class="add-btn" onclick="addVideoItem(${num})">+ Add Video</button>
         </div>
         <div class="video-grid">${videoCards}</div>
+      </div>
+      <div class="section">
+        <div class="section-head">
+          <div class="section-title">Images & Resources</div>
+        </div>
+        <div class="upload-area" id="uploadArea" ondragover="event.preventDefault();this.classList.add('dragging')" ondragleave="this.classList.remove('dragging')" ondrop="event.preventDefault();this.classList.remove('dragging');handleImageDrop(event,${num})">
+          <div class="upload-label">Drop images here or click to upload</div>
+          <input type="file" id="imageFileInput" accept="image/*" multiple style="display:none" onchange="handleImageSelect(event,${num})">
+          <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
+        </div>
+        <div class="image-grid">${imageCards}</div>
       </div>
     </div>
   `;
@@ -1526,6 +1642,99 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function escapeAttr(s) { return escapeHtml(s); }
+
+// ---------- IMAGES ----------
+function openLightbox(url) {
+  document.getElementById('lightboxImg').src = url;
+  document.getElementById('lightbox').classList.add('show');
+}
+
+// Make upload area clickable
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.upload-area') && !e.target.closest('input')) {
+    const input = document.getElementById('imageFileInput');
+    if (input) input.click();
+  }
+});
+
+function handleImageDrop(event, weekNum) {
+  const files = event.dataTransfer.files;
+  if (files.length) uploadImages(files, weekNum);
+}
+
+function handleImageSelect(event, weekNum) {
+  const files = event.target.files;
+  if (files.length) uploadImages(files, weekNum);
+}
+
+async function uploadImages(files, weekNum) {
+  if (!isAdmin || !adminPassword) return;
+  const progress = document.getElementById('uploadProgress');
+  const bar = document.getElementById('uploadProgressBar');
+  progress.classList.add('show');
+
+  if (!data.weeks[weekNum].images) data.weeks[weekNum].images = [];
+
+  let uploaded = 0;
+  for (const file of files) {
+    if (!file.type.startsWith('image/')) continue;
+    bar.style.width = `${(uploaded / files.length) * 100}%`;
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'x-admin-password': adminPassword,
+          'x-filename': `week${weekNum}-${Date.now()}-${file.name}`,
+          'Content-Type': file.type,
+        },
+        body: file,
+      });
+      const result = await res.json();
+      if (res.ok && result.url) {
+        data.weeks[weekNum].images.push({
+          url: result.url,
+          title: file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '),
+        });
+      } else {
+        showToast(result.error || 'Upload failed', true);
+      }
+    } catch (err) {
+      showToast('Upload failed', true);
+    }
+    uploaded++;
+    bar.style.width = `${(uploaded / files.length) * 100}%`;
+  }
+
+  await saveDataToServer();
+  progress.classList.remove('show');
+  bar.style.width = '0%';
+  render();
+}
+
+function editImage(weekNum, i) {
+  if (!isAdmin) return;
+  const img = data.weeks[weekNum].images[i];
+  showEditModal('Edit Image', `
+    <div class="field">
+      <label>Title</label>
+      <input type="text" id="f_title" value="${escapeAttr(img.title || '')}">
+    </div>
+    <div style="margin-bottom:16px;"><img src="${escapeAttr(img.url)}" style="max-width:100%;max-height:200px;border-radius:2px;border:1px solid var(--border);"></div>
+  `, async () => {
+    data.weeks[weekNum].images[i].title = document.getElementById('f_title').value.trim();
+    if (await saveDataToServer()) render();
+  });
+}
+
+function deleteImage(weekNum, i) {
+  if (!isAdmin) return;
+  if (!confirm('Delete this image?')) return;
+  const removed = data.weeks[weekNum].images.splice(i, 1)[0];
+  saveDataToServer().then(ok => {
+    if (ok) render();
+    else { data.weeks[weekNum].images.splice(i, 0, removed); render(); }
+  });
+}
 
 // ---------- DRAG & DROP (schedule reorder) ----------
 document.addEventListener('dragstart', (e) => {
