@@ -1035,6 +1035,7 @@ async function loadDataFromServer() {
       if (!Array.isArray(data.weeks[i].schedule)) data.weeks[i].schedule = [];
       if (!Array.isArray(data.weeks[i].videos)) data.weeks[i].videos = [];
       if (!Array.isArray(data.weeks[i].images)) data.weeks[i].images = [];
+      if (!Array.isArray(data.weeks[i].pdfs)) data.weeks[i].pdfs = [];
     }
     if (!Array.isArray(data.docs)) data.docs = [];
     if (!data.settings) data.settings = { start_date: null };
@@ -1344,7 +1345,7 @@ function renderWeek(num) {
       `).join('');
 
   const imageCards = (week.images || []).length === 0
-    ? `<div class="empty">No images yet${isAdmin ? ' — drop files above or click to upload' : ''}</div>`
+    ? ''
     : week.images.map((img, i) => `
         <div class="image-card" onclick="openLightbox('${escapeAttr(img.url)}')">
           <div class="image-actions">
@@ -1355,6 +1356,31 @@ function renderWeek(num) {
           ${img.title ? `<div class="image-info"><div class="image-title">${escapeHtml(img.title)}</div></div>` : ''}
         </div>
       `).join('');
+
+  const weekPdfs = (week.pdfs || []);
+  const pdfCards = weekPdfs.length === 0
+    ? ((week.images || []).length === 0 ? `<div class="empty">No files yet${isAdmin ? ' — drop images or PDFs above' : ''}</div>` : '')
+    : `<div class="doc-list" style="margin-top:16px;">${weekPdfs.map((p, i) => `
+        <div class="doc-item-wrap">
+          <a class="doc-item" href="#" onclick="event.preventDefault();toggleWeekEmbed(${num},${i})">
+            <div class="doc-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </div>
+            <div class="doc-meta">
+              <div class="doc-name">${escapeHtml(p.title)}</div>
+            </div>
+            <div class="doc-type">PDF</div>
+            <div class="doc-actions">
+              <button class="icon-btn" onclick="event.preventDefault();event.stopPropagation();editWeekPdf(${num},${i})">✎</button>
+              <button class="icon-btn danger" onclick="event.preventDefault();event.stopPropagation();deleteWeekPdf(${num},${i})">×</button>
+            </div>
+          </a>
+          <div class="embed-wrapper" id="weekembed-${num}-${i}"><iframe src="${escapeAttr(p.url)}" loading="lazy"></iframe></div>
+        </div>
+      `).join('')}</div>`;
 
   return `
     <div class="header">
@@ -1381,12 +1407,13 @@ function renderWeek(num) {
         <div class="section-head">
           <div class="section-title">Images & Resources</div>
         </div>
-        <div class="upload-area" id="uploadArea" ondragover="event.preventDefault();this.classList.add('dragging')" ondragleave="this.classList.remove('dragging')" ondrop="event.preventDefault();this.classList.remove('dragging');handleImageDrop(event,${num})">
-          <div class="upload-label">Drop images here or click to upload</div>
-          <input type="file" id="imageFileInput" accept="image/*" multiple style="display:none" onchange="handleImageSelect(event,${num})">
+        <div class="upload-area" id="uploadArea" ondragover="event.preventDefault();this.classList.add('dragging')" ondragleave="this.classList.remove('dragging')" ondrop="event.preventDefault();this.classList.remove('dragging');handleFileDrop(event,${num})">
+          <div class="upload-label">Drop images or PDFs here — or click to upload</div>
+          <input type="file" id="fileUploadInput" accept="image/*,application/pdf" multiple style="display:none" onchange="handleFileSelect(event,${num})">
           <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadProgressBar"></div></div>
         </div>
         <div class="image-grid">${imageCards}</div>
+        ${pdfCards}
       </div>
     </div>
   `;
@@ -1430,7 +1457,11 @@ function renderDocs() {
       <div class="section">
         <div class="section-head">
           <div class="section-title">All Documents</div>
-          <button class="add-btn" onclick="addDoc()">+ Add Document</button>
+          <button class="add-btn" onclick="addDoc()">+ Add Link</button>
+        </div>
+        <div class="upload-area" ondragover="event.preventDefault();this.classList.add('dragging')" ondragleave="this.classList.remove('dragging')" ondrop="event.preventDefault();this.classList.remove('dragging');handleDocUpload(event)">
+          <div class="upload-label">Drop PDFs or images here to upload</div>
+          <input type="file" accept="image/*,application/pdf" multiple style="display:none" onchange="handleDocUpload(event)">
         </div>
         <div class="doc-list">${docList}</div>
       </div>
@@ -1687,35 +1718,40 @@ function openLightbox(url) {
   document.getElementById('lightbox').classList.add('show');
 }
 
-// Make upload area clickable
+// Make upload areas clickable
 document.addEventListener('click', (e) => {
-  if (e.target.closest('.upload-area') && !e.target.closest('input')) {
-    const input = document.getElementById('imageFileInput');
+  const area = e.target.closest('.upload-area');
+  if (area && !e.target.closest('input')) {
+    const input = area.querySelector('input[type="file"]');
     if (input) input.click();
   }
 });
 
-function handleImageDrop(event, weekNum) {
+function handleFileDrop(event, weekNum) {
   const files = event.dataTransfer.files;
-  if (files.length) uploadImages(files, weekNum);
+  if (files.length) uploadFiles(files, weekNum);
 }
 
-function handleImageSelect(event, weekNum) {
+function handleFileSelect(event, weekNum) {
   const files = event.target.files;
-  if (files.length) uploadImages(files, weekNum);
+  if (files.length) uploadFiles(files, weekNum);
 }
 
-async function uploadImages(files, weekNum) {
+async function uploadFiles(files, weekNum) {
   if (!isAdmin || !adminPassword) return;
   const progress = document.getElementById('uploadProgress');
   const bar = document.getElementById('uploadProgressBar');
   progress.classList.add('show');
 
   if (!data.weeks[weekNum].images) data.weeks[weekNum].images = [];
+  if (!data.weeks[weekNum].pdfs) data.weeks[weekNum].pdfs = [];
 
   let uploaded = 0;
   for (const file of files) {
-    if (!file.type.startsWith('image/')) continue;
+    const isPdf = file.type === 'application/pdf';
+    const isImage = file.type.startsWith('image/');
+    if (!isPdf && !isImage) continue;
+
     bar.style.width = `${(uploaded / files.length) * 100}%`;
     try {
       const res = await fetch('/api/upload', {
@@ -1729,10 +1765,12 @@ async function uploadImages(files, weekNum) {
       });
       const result = await res.json();
       if (res.ok && result.url) {
-        data.weeks[weekNum].images.push({
-          url: result.url,
-          title: file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '),
-        });
+        const title = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+        if (isPdf) {
+          data.weeks[weekNum].pdfs.push({ url: result.url, title });
+        } else {
+          data.weeks[weekNum].images.push({ url: result.url, title });
+        }
       } else {
         showToast(result.error || 'Upload failed', true);
       }
@@ -1772,6 +1810,75 @@ function deleteImage(weekNum, i) {
     if (ok) render();
     else { data.weeks[weekNum].images.splice(i, 0, removed); render(); }
   });
+}
+
+function toggleWeekEmbed(weekNum, i) {
+  const el = document.getElementById(`weekembed-${weekNum}-${i}`);
+  if (el) el.classList.toggle('show');
+}
+
+function editWeekPdf(weekNum, i) {
+  if (!isAdmin) return;
+  const pdf = data.weeks[weekNum].pdfs[i];
+  showEditModal('Edit PDF', `
+    <div class="field">
+      <label>Title</label>
+      <input type="text" id="f_title" value="${escapeAttr(pdf.title || '')}">
+    </div>
+  `, async () => {
+    data.weeks[weekNum].pdfs[i].title = document.getElementById('f_title').value.trim();
+    if (await saveDataToServer()) render();
+  });
+}
+
+function deleteWeekPdf(weekNum, i) {
+  if (!isAdmin) return;
+  if (!confirm('Delete this PDF?')) return;
+  const removed = data.weeks[weekNum].pdfs.splice(i, 1)[0];
+  saveDataToServer().then(ok => {
+    if (ok) render();
+    else { data.weeks[weekNum].pdfs.splice(i, 0, removed); render(); }
+  });
+}
+
+// ---------- DOC CENTER UPLOAD ----------
+function handleDocUpload(event) {
+  const files = event.target?.files || event.dataTransfer?.files;
+  if (files && files.length) uploadDocs(files);
+}
+
+async function uploadDocs(files) {
+  if (!isAdmin || !adminPassword) return;
+  for (const file of files) {
+    const isPdf = file.type === 'application/pdf';
+    const isImage = file.type.startsWith('image/');
+    if (!isPdf && !isImage) continue;
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'x-admin-password': adminPassword,
+          'x-filename': `docs-${Date.now()}-${file.name}`,
+          'Content-Type': file.type,
+        },
+        body: file,
+      });
+      const result = await res.json();
+      if (res.ok && result.url) {
+        data.docs.push({
+          name: file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '),
+          description: '',
+          type: isPdf ? 'PDF' : 'IMAGE',
+          url: result.url,
+          embed: isPdf,
+        });
+      } else {
+        showToast(result.error || 'Upload failed', true);
+      }
+    } catch { showToast('Upload failed', true); }
+  }
+  await saveDataToServer();
+  render();
 }
 
 // ---------- DRAG & DROP (schedule reorder) ----------
