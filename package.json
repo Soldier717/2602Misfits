@@ -1,0 +1,9 @@
+{
+  "name": "gnfr2602-dashboard",
+  "version": "1.0.0",
+  "description": "GNFR 26-02 Fire Academy Class Dashboard",
+  "private": true,
+  "dependencies": {
+    "@vercel/kv": "^2.0.0"
+  }
+}

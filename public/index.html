@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GNFR 26-02 // 2602 Misfits</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0e10;
+    --bg-elev: #14161a;
+    --bg-elev-2: #1c1f24;
+    --border: #2a2e35;
+    --border-bright: #3a3f48;
+    --text: #e8e9eb;
+    --text-dim: #8b9098;
+    --text-muted: #5a6068;
+    --accent: #c8341a;
+    --accent-bright: #e8412a;
+    --accent-dim: #6b1c0e;
+    --gold: #d4a341;
+    --success: #4a9d5f;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    overflow: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 0%, rgba(200,52,26,0.08), transparent 50%),
+      radial-gradient(circle at 80% 100%, rgba(212,163,65,0.04), transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ====== MOBILE HAMBURGER ====== */
+  .mobile-header {
+    display: none;
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .hamburger {
+    background: none;
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    width: 40px; height: 40px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+  .hamburger span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--text);
+    transition: all 0.2s;
+  }
+  .mobile-brand {
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .mobile-admin-toggle {
+    background: none;
+    border: 1px solid var(--border-bright);
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  .mobile-admin-toggle.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 60;
+  }
+  .sidebar-overlay.show { display: block; }
+
+  /* ====== SIDEBAR ====== */
+  .sidebar {
+    background: var(--bg-elev);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .brand {
+    padding: 24px 22px 20px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .brand::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 22px;
+    width: 60px; height: 2px;
+    background: var(--accent);
+  }
+  .brand-mark {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .brand-shield {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+  }
+  .brand-shield svg { width: 100%; height: 100%; }
+  .brand-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .brand-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .brand-motto {
+    margin-top: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
+
+  .nav-section { padding: 20px 14px 8px; }
+  .nav-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0 8px 10px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    margin-bottom: 2px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: all 0.15s ease;
+    border-left: 2px solid transparent;
+    position: relative;
+  }
+  .nav-item:hover { background: var(--bg-elev-2); color: var(--text); }
+  .nav-item.active { background: var(--bg-elev-2); color: var(--text); border-left-color: var(--accent); }
+  .nav-item.active .nav-num { color: var(--accent); }
+  .nav-item.current-week::after {
+    content: 'CURRENT';
+    position: absolute;
+    right: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    background: rgba(212,163,65,0.12);
+    padding: 2px 6px;
+    border-radius: 2px;
+  }
+  .nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 28px;
+  }
+  .nav-text { flex: 1; }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px 22px;
+    border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .admin-toggle {
+    background: none;
+    border: 1px solid var(--border-bright);
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+  .admin-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .admin-toggle.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+  /* ====== MAIN ====== */
+  .main { overflow-y: auto; padding: 0; }
+
+  .header {
+    padding: 36px 48px 24px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(28,31,36,0.4), transparent);
+  }
+  .breadcrumb {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .breadcrumb .sep { color: var(--accent); margin: 0 8px; }
+
+  .page-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .page-title .accent { color: var(--accent); }
+
+  .page-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+  }
+
+  .content { padding: 32px 48px 60px; }
+
+  /* ====== SECTIONS ====== */
+  .section { margin-bottom: 40px; }
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::before {
+    content: '';
+    width: 4px; height: 18px;
+    background: var(--accent);
+  }
+
+  .add-btn {
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border-bright);
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+    display: none;
+  }
+  .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+  body.admin-mode .add-btn { display: inline-block; }
+
+  /* ====== SCHEDULE ====== */
+  .schedule { display: grid; gap: 8px; }
+  .day-row {
+    display: grid;
+    grid-template-columns: 100px 90px 1fr auto;
+    gap: 18px;
+    align-items: center;
+    padding: 14px 18px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-dim);
+    border-radius: 2px;
+    transition: border-color 0.15s;
+  }
+  .day-row:hover { border-left-color: var(--accent); }
+  .day-name {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 14px;
+  }
+  .day-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--gold);
+  }
+  .day-topic { font-size: 14px; color: var(--text); }
+  .day-topic .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-right: 8px;
+  }
+  .day-actions { display: none; }
+  body.admin-mode .day-actions { display: flex; gap: 6px; }
+  .icon-btn {
+    background: transparent;
+    border: 1px solid var(--border-bright);
+    color: var(--text-muted);
+    width: 26px; height: 26px;
+    border-radius: 2px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    transition: all 0.15s;
+  }
+  .icon-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .icon-btn.danger:hover { color: #ff6b4a; border-color: #ff6b4a; }
+
+  /* ====== DRAG HANDLE (admin) ====== */
+  .drag-handle {
+    display: none;
+    cursor: grab;
+    color: var(--text-muted);
+    margin-right: 4px;
+    font-size: 14px;
+  }
+  body.admin-mode .drag-handle { display: inline-block; }
+  .day-row.dragging { opacity: 0.4; border-color: var(--accent); }
+
+  /* ====== VIDEOS ====== */
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+  .video-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .video-card:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+  .video-thumb {
+    position: relative;
+    aspect-ratio: 16/9;
+    background: #000;
+    overflow: hidden;
+  }
+  .video-thumb iframe { width: 100%; height: 100%; border: 0; }
+  .video-info { padding: 14px 16px; }
+  .video-cat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .video-title {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+  }
+  .video-actions { display: none; position: absolute; top: 8px; right: 8px; gap: 4px; z-index: 5; }
+  body.admin-mode .video-actions { display: flex; }
+
+  /* ====== DOCS ====== */
+  .doc-list { display: grid; gap: 8px; }
+  .doc-item {
+    display: grid;
+    grid-template-columns: 36px 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 18px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.15s;
+  }
+  .doc-item:hover { border-color: var(--accent); background: var(--bg-elev-2); }
+  .doc-icon {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg-elev-2);
+    color: var(--accent);
+    border-radius: 2px;
+  }
+  .doc-icon svg { width: 18px; height: 18px; }
+  .doc-meta { display: flex; flex-direction: column; gap: 2px; }
+  .doc-name {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+  }
+  .doc-desc { font-size: 12px; color: var(--text-dim); }
+  .doc-type {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border: 1px solid var(--border-bright);
+    border-radius: 2px;
+  }
+  .doc-actions { display: none; }
+  body.admin-mode .doc-actions { display: flex; gap: 6px; }
+
+  .embed-wrapper {
+    margin-top: 16px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    height: 600px;
+    display: none;
+  }
+  .embed-wrapper.show { display: block; }
+  .embed-wrapper iframe { width: 100%; height: 100%; border: 0; }
+
+  .empty {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px dashed var(--border);
+    border-radius: 2px;
+  }
+
+  /* ====== MODALS ====== */
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: var(--bg-elev);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-head {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-title {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .modal-close {
+    background: none; border: none;
+    color: var(--text-dim);
+    font-size: 22px; cursor: pointer;
+    line-height: 1;
+  }
+  .modal-body { padding: 24px; }
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .field input, .field textarea, .field select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 80px; font-family: inherit; }
+  .field-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+  .modal-foot {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .btn {
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 9px 18px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+  .btn:hover { border-color: var(--text-dim); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent-bright); border-color: var(--accent-bright); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ====== TOAST ====== */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--bg-elev-2);
+    border: 1px solid var(--success);
+    border-left: 3px solid var(--success);
+    color: var(--text);
+    padding: 12px 18px;
+    border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.error { border-color: var(--accent); border-left-color: var(--accent); }
+
+  /* ====== HOME PAGE ====== */
+  .home-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .stat-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 20px;
+    border-radius: 2px;
+  }
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .stat-value {
+    font-family: 'Oswald', sans-serif;
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.02em;
+  }
+
+  .week-jump {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  .week-tile {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 18px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    color: var(--text);
+    font-family: inherit;
+  }
+  .week-tile:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .week-tile.is-current { border-color: var(--gold); }
+  .week-tile.is-current .week-tile-num { color: var(--gold); }
+  .week-tile-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 8px;
+  }
+  .week-tile-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    background: rgba(212,163,65,0.12);
+    padding: 2px 6px;
+    border-radius: 2px;
+    margin-left: 6px;
+  }
+  .week-tile-title {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* ====== LOADING ====== */
+  .loading-screen {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .loading-screen.hide { display: none; }
+  .loading-spinner {
+    width: 40px; height: 40px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  .loading-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .saving-indicator {
+    display: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-right: 8px;
+  }
+  .saving-indicator.show { display: inline-flex; align-items: center; gap: 6px; }
+  .saving-indicator::before {
+    content: '';
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: pulse 1s infinite;
+  }
+  @keyframes pulse { 50% { opacity: 0.3; } }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 0; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  /* ====== RESPONSIVE ====== */
+  @media (max-width: 880px) {
+    body { overflow: auto; }
+    .app { grid-template-columns: 1fr; height: auto; min-height: 100vh; }
+    .sidebar {
+      position: fixed;
+      top: 0; left: -300px;
+      width: 280px;
+      height: 100vh;
+      z-index: 70;
+      transition: left 0.25s ease;
+      border-right: 1px solid var(--border);
+    }
+    .sidebar.open { left: 0; }
+    .mobile-header { display: flex; }
+    .header { padding: 24px 20px 18px; }
+    .content { padding: 20px; }
+    .page-title { font-size: 32px; }
+    .day-row { grid-template-columns: 1fr; gap: 6px; }
+    .video-grid { grid-template-columns: 1fr; }
+    .doc-item { grid-template-columns: 36px 1fr auto; }
+    .doc-type { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Loading Dashboard</div>
+</div>
+
+<!-- Mobile header (only visible on small screens) -->
+<div class="mobile-header" id="mobileHeader">
+  <button class="hamburger" id="hamburgerBtn">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="mobile-brand">2602 Misfits</div>
+  <button class="mobile-admin-toggle" id="mobileAdminToggle">Admin</button>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <div class="brand-shield">
+          <svg viewBox="0 0 36 36" fill="none">
+            <path d="M18 2 L32 8 L32 18 C32 26 26 32 18 34 C10 32 4 26 4 18 L4 8 Z" stroke="currentColor" stroke-width="2" fill="none"/>
+            <path d="M18 8 L18 26 M9 17 L27 17 M11 11 L25 23 M25 11 L11 23" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">2602 Misfits</div>
+          <div class="brand-sub">GNFR 26-02 // Class</div>
+        </div>
+      </div>
+      <div class="brand-motto">Leave it better<br>than you found it.</div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Overview</div>
+      <div class="nav-item active" data-page="home">
+        <span class="nav-num">00</span>
+        <span class="nav-text">Command</span>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Training Weeks</div>
+      <div class="nav-item" data-page="week-1"><span class="nav-num">01</span><span class="nav-text">Week 1</span></div>
+      <div class="nav-item" data-page="week-2"><span class="nav-num">02</span><span class="nav-text">Week 2</span></div>
+      <div class="nav-item" data-page="week-3"><span class="nav-num">03</span><span class="nav-text">Week 3</span></div>
+      <div class="nav-item" data-page="week-4"><span class="nav-num">04</span><span class="nav-text">Week 4</span></div>
+      <div class="nav-item" data-page="week-5"><span class="nav-num">05</span><span class="nav-text">Week 5</span></div>
+      <div class="nav-item" data-page="week-6"><span class="nav-num">06</span><span class="nav-text">Week 6</span></div>
+      <div class="nav-item" data-page="week-7"><span class="nav-num">07</span><span class="nav-text">Week 7</span></div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Resources</div>
+      <div class="nav-item" data-page="docs">
+        <span class="nav-num">DC</span>
+        <span class="nav-text">Doc Center</span>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <span><span class="saving-indicator" id="savingIndicator">Saving</span>EST. 2026</span>
+      <button class="admin-toggle" id="adminToggle">Admin</button>
+    </div>
+  </aside>
+
+  <main class="main" id="main"></main>
+</div>
+
+<div class="modal-bg" id="loginModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Admin Access</div>
+      <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPassword" autocomplete="current-password">
+        <div class="field-hint">Enter the admin password to edit content.</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('loginModal')">Cancel</button>
+      <button class="btn btn-primary" id="loginBtn" onclick="attemptLogin()">Sign In</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="editModalTitle">Edit</div>
+      <button class="modal-close" onclick="closeModal('editModal')">&times;</button>
+    </div>
+    <div class="modal-body" id="editModalBody"></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('editModal')">Cancel</button>
+      <button class="btn btn-primary" id="editModalSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   GNFR 26-02 // 2602 MISFITS DASHBOARD
+   ============================================================ */
+
+const SESSION_KEY = 'gnfr2602-admin-pw';
+
+const DEFAULT_DATA = {
+  weeks: {
+    1: { title: 'Orientation & Foundations', schedule: [], videos: [] },
+    2: { title: 'PPE & SCBA', schedule: [], videos: [] },
+    3: { title: 'Hose Operations', schedule: [], videos: [] },
+    4: { title: 'Ladders & Forcible Entry', schedule: [], videos: [] },
+    5: { title: 'Search & Rescue', schedule: [], videos: [] },
+    6: { title: 'Live Fire Evolutions', schedule: [], videos: [] },
+    7: { title: 'Final Skills & Graduation', schedule: [], videos: [] }
+  },
+  docs: [],
+  settings: { start_date: null }
+};
+
+let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+let currentPage = 'home';
+let isAdmin = false;
+let adminPassword = null;
+
+// ---------- CURRENT WEEK CALCULATION ----------
+function getCurrentWeek() {
+  const startStr = data.settings?.start_date;
+  if (!startStr) return null;
+  const start = new Date(startStr);
+  const now = new Date();
+  const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+  if (diff < 0) return null;
+  const week = Math.floor(diff / 7) + 1;
+  return week >= 1 && week <= 7 ? week : null;
+}
+
+function highlightCurrentWeek() {
+  const cw = getCurrentWeek();
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.remove('current-week');
+    if (cw && n.dataset.page === `week-${cw}`) {
+      n.classList.add('current-week');
+    }
+  });
+}
+
+// ---------- DATA: LOAD / SAVE ----------
+async function loadDataFromServer() {
+  try {
+    const res = await fetch('/api/data', { cache: 'no-store' });
+    if (!res.ok) throw new Error('Load failed: ' + res.status);
+    data = await res.json();
+    for (let i = 1; i <= 7; i++) {
+      if (!data.weeks[i]) data.weeks[i] = { title: 'Week ' + i, schedule: [], videos: [] };
+      if (!Array.isArray(data.weeks[i].schedule)) data.weeks[i].schedule = [];
+      if (!Array.isArray(data.weeks[i].videos)) data.weeks[i].videos = [];
+    }
+    if (!Array.isArray(data.docs)) data.docs = [];
+    if (!data.settings) data.settings = { start_date: null };
+  } catch (err) {
+    console.error('Load error:', err);
+    showToast('Failed to load data', true);
+  }
+}
+
+async function saveDataToServer() {
+  if (!adminPassword) { showToast('Not signed in', true); return false; }
+  document.getElementById('savingIndicator').classList.add('show');
+  try {
+    const res = await fetch('/api/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPassword },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || ('Save failed: ' + res.status));
+    }
+    showToast('Saved');
+    return true;
+  } catch (err) {
+    console.error('Save error:', err);
+    showToast(err.message || 'Save failed', true);
+    return false;
+  } finally {
+    document.getElementById('savingIndicator').classList.remove('show');
+  }
+}
+
+// ---------- TOAST / MODAL ----------
+function showToast(msg, isError = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.toggle('error', isError);
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2500);
+}
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// ---------- MOBILE SIDEBAR ----------
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+document.getElementById('hamburgerBtn').addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+});
+overlay.addEventListener('click', () => {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('show');
+});
+function closeMobileSidebar() {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('show');
+}
+
+// ---------- ADMIN ----------
+function toggleAdmin() {
+  if (isAdmin) {
+    isAdmin = false;
+    adminPassword = null;
+    sessionStorage.removeItem(SESSION_KEY);
+    document.body.classList.remove('admin-mode');
+    document.getElementById('adminToggle').classList.remove('active');
+    document.getElementById('adminToggle').textContent = 'Admin';
+    document.getElementById('mobileAdminToggle').classList.remove('active');
+    document.getElementById('mobileAdminToggle').textContent = 'Admin';
+    showToast('Signed out');
+    render();
+  } else {
+    openModal('loginModal');
+    setTimeout(() => document.getElementById('loginPassword').focus(), 100);
+  }
+}
+document.getElementById('adminToggle').addEventListener('click', toggleAdmin);
+document.getElementById('mobileAdminToggle').addEventListener('click', toggleAdmin);
+
+document.getElementById('loginPassword').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') attemptLogin();
+});
+
+async function attemptLogin() {
+  const pw = document.getElementById('loginPassword').value;
+  if (!pw) return;
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.textContent = 'Verifying...';
+  try {
+    const res = await fetch('/api/auth', { method: 'POST', headers: { 'x-admin-password': pw } });
+    if (res.ok) {
+      adminPassword = pw;
+      isAdmin = true;
+      try { sessionStorage.setItem(SESSION_KEY, pw); } catch (e) {}
+      document.body.classList.add('admin-mode');
+      document.getElementById('adminToggle').classList.add('active');
+      document.getElementById('adminToggle').textContent = 'Editing';
+      document.getElementById('mobileAdminToggle').classList.add('active');
+      document.getElementById('mobileAdminToggle').textContent = 'Editing';
+      closeModal('loginModal');
+      document.getElementById('loginPassword').value = '';
+      showToast('Admin mode on');
+      render();
+    } else {
+      showToast('Wrong password', true);
+      document.getElementById('loginPassword').value = '';
+    }
+  } catch (err) {
+    showToast('Login failed', true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+}
+
+async function tryRestoreSession() {
+  try {
+    const pw = sessionStorage.getItem(SESSION_KEY);
+    if (!pw) return;
+    const res = await fetch('/api/auth', { method: 'POST', headers: { 'x-admin-password': pw } });
+    if (res.ok) {
+      adminPassword = pw;
+      isAdmin = true;
+      document.body.classList.add('admin-mode');
+      document.getElementById('adminToggle').classList.add('active');
+      document.getElementById('adminToggle').textContent = 'Editing';
+      document.getElementById('mobileAdminToggle').classList.add('active');
+      document.getElementById('mobileAdminToggle').textContent = 'Editing';
+    } else { sessionStorage.removeItem(SESSION_KEY); }
+  } catch (e) {}
+}
+
+// ---------- NAVIGATION ----------
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    currentPage = item.dataset.page;
+    window.location.hash = currentPage;
+    render();
+    document.getElementById('main').scrollTop = 0;
+    closeMobileSidebar();
+  });
+});
+
+// ---------- RENDER ----------
+function render() {
+  const main = document.getElementById('main');
+  if (currentPage === 'home') {
+    main.innerHTML = renderHome();
+    bindHomeEvents();
+  } else if (currentPage === 'docs') {
+    main.innerHTML = renderDocs();
+  } else if (currentPage.startsWith('week-')) {
+    const num = parseInt(currentPage.split('-')[1]);
+    main.innerHTML = renderWeek(num);
+  }
+  highlightCurrentWeek();
+}
+
+function renderHome() {
+  const totalVideos = Object.values(data.weeks).reduce((s, w) => s + (w.videos?.length || 0), 0);
+  const totalSessions = Object.values(data.weeks).reduce((s, w) => s + (w.schedule?.length || 0), 0);
+  const totalDocs = data.docs.length;
+  const cw = getCurrentWeek();
+
+  const weekTiles = Object.entries(data.weeks).map(([num, w]) => `
+    <button class="week-tile ${cw == num ? 'is-current' : ''}" data-week="${num}">
+      <div class="week-tile-num">WEEK ${String(num).padStart(2, '0')}${cw == num ? '<span class="week-tile-badge">CURRENT</span>' : ''}</div>
+      <div class="week-tile-title">${escapeHtml(w.title || 'Untitled')}</div>
+    </button>
+  `).join('');
+
+  const startDateHtml = isAdmin ? `
+    <div class="section">
+      <div class="section-head"><div class="section-title">Class Settings</div></div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <label style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;">Start Date</label>
+        <input type="date" id="startDateInput" value="${data.settings?.start_date || ''}"
+          style="background:var(--bg);border:1px solid var(--border-bright);color:var(--text);padding:8px 12px;border-radius:2px;font-family:'Inter',sans-serif;font-size:14px;">
+        <button class="btn btn-primary" onclick="saveStartDate()">Set</button>
+      </div>
+      <div class="field-hint" style="margin-top:6px;">Set the first day of Week 1. This auto-highlights the current week.</div>
+    </div>
+  ` : '';
+
+  return `
+    <div class="header">
+      <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> COMMAND</div>
+      <h1 class="page-title">Class <span class="accent">Dashboard</span></h1>
+      <div class="page-meta">7-week fire academy program // GNFR 26-02${cw ? ` // Currently Week ${cw}` : ''}</div>
+    </div>
+    <div class="content">
+      <div class="home-grid">
+        <div class="stat-card"><div class="stat-label">Current Week</div><div class="stat-value">${cw || '—'}</div></div>
+        <div class="stat-card"><div class="stat-label">Sessions</div><div class="stat-value">${totalSessions}</div></div>
+        <div class="stat-card"><div class="stat-label">Videos</div><div class="stat-value">${totalVideos}</div></div>
+        <div class="stat-card"><div class="stat-label">Docs</div><div class="stat-value">${totalDocs}</div></div>
+      </div>
+      ${startDateHtml}
+      <div class="section">
+        <div class="section-head"><div class="section-title">Jump to Week</div></div>
+        <div class="week-jump">${weekTiles}</div>
+      </div>
+    </div>
+  `;
+}
+
+function saveStartDate() {
+  const val = document.getElementById('startDateInput').value;
+  if (!data.settings) data.settings = {};
+  data.settings.start_date = val || null;
+  saveDataToServer().then(ok => { if (ok) render(); });
+}
+
+function bindHomeEvents() {
+  document.querySelectorAll('.week-tile').forEach(t => {
+    t.addEventListener('click', () => {
+      currentPage = `week-${t.dataset.week}`;
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelector(`.nav-item[data-page="${currentPage}"]`).classList.add('active');
+      window.location.hash = currentPage;
+      render();
+      document.getElementById('main').scrollTop = 0;
+    });
+  });
+}
+
+function renderWeek(num) {
+  const week = data.weeks[num];
+  if (!week) return '<div class="content">Week not found</div>';
+  const cw = getCurrentWeek();
+  const isCurrentBadge = cw === num ? '<span style="font-family:JetBrains Mono,monospace;font-size:10px;color:var(--gold);background:rgba(212,163,65,0.12);padding:2px 8px;border-radius:2px;margin-left:12px;vertical-align:middle;letter-spacing:0.15em;">CURRENT WEEK</span>' : '';
+
+  const scheduleRows = (week.schedule || []).length === 0
+    ? `<div class="empty">No schedule entries yet${isAdmin ? ' — click + Add Entry' : ''}</div>`
+    : week.schedule.map((s, i) => `
+        <div class="day-row" draggable="${isAdmin}" data-type="schedule" data-week="${num}" data-index="${i}">
+          <div class="day-name"><span class="drag-handle">⠿</span>${escapeHtml(s.day)}</div>
+          <div class="day-time">${escapeHtml(s.time || '')}</div>
+          <div class="day-topic"><span class="label">Topic</span>${escapeHtml(s.topic)}</div>
+          <div class="day-actions">
+            <button class="icon-btn" onclick="editScheduleItem(${num}, ${i})">✎</button>
+            <button class="icon-btn danger" onclick="deleteScheduleItem(${num}, ${i})">×</button>
+          </div>
+        </div>
+      `).join('');
+
+  const videoCards = (week.videos || []).length === 0
+    ? `<div class="empty">No videos yet${isAdmin ? ' — click + Add Video' : ''}</div>`
+    : week.videos.map((v, i) => `
+        <div class="video-card">
+          <div class="video-actions">
+            <button class="icon-btn" onclick="editVideoItem(${num}, ${i})">✎</button>
+            <button class="icon-btn danger" onclick="deleteVideoItem(${num}, ${i})">×</button>
+          </div>
+          <div class="video-thumb">
+            <iframe src="https://www.youtube.com/embed/${escapeHtml(v.youtubeId)}" allowfullscreen loading="lazy"></iframe>
+          </div>
+          <div class="video-info">
+            ${v.category ? `<div class="video-cat">${escapeHtml(v.category)}</div>` : ''}
+            <div class="video-title">${escapeHtml(v.title)}</div>
+          </div>
+        </div>
+      `).join('');
+
+  return `
+    <div class="header">
+      <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> WEEK ${String(num).padStart(2, '0')}</div>
+      <h1 class="page-title">Week <span class="accent">${String(num).padStart(2, '0')}</span> ${isAdmin ? `<button class="icon-btn" style="vertical-align:middle;margin-left:8px" onclick="editWeekTitle(${num})">✎</button>` : ''}${isCurrentBadge}</h1>
+      <div class="page-meta">${escapeHtml(week.title || 'Untitled')}</div>
+    </div>
+    <div class="content">
+      <div class="section">
+        <div class="section-head">
+          <div class="section-title">Weekly Schedule</div>
+          <button class="add-btn" onclick="addScheduleItem(${num})">+ Add Entry</button>
+        </div>
+        <div class="schedule" id="scheduleList">${scheduleRows}</div>
+      </div>
+      <div class="section">
+        <div class="section-head">
+          <div class="section-title">Videos & Subjects</div>
+          <button class="add-btn" onclick="addVideoItem(${num})">+ Add Video</button>
+        </div>
+        <div class="video-grid">${videoCards}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderDocs() {
+  const docList = data.docs.length === 0
+    ? `<div class="empty">No documents yet${isAdmin ? ' — click + Add Document' : ''}</div>`
+    : data.docs.map((d, i) => `
+        <div class="doc-item-wrap">
+          <a class="doc-item" ${d.url && !d.embed ? `href="${escapeAttr(d.url)}" target="_blank"` : 'href="#"'} onclick="${d.embed ? `event.preventDefault();toggleEmbed(${i});return false;` : (!d.url ? 'event.preventDefault();return false;' : '')}">
+            <div class="doc-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="9" y1="13" x2="15" y2="13"/>
+                <line x1="9" y1="17" x2="15" y2="17"/>
+              </svg>
+            </div>
+            <div class="doc-meta">
+              <div class="doc-name">${escapeHtml(d.name)}</div>
+              ${d.description ? `<div class="doc-desc">${escapeHtml(d.description)}</div>` : ''}
+            </div>
+            <div class="doc-type">${escapeHtml(d.type || 'LINK')}</div>
+            <div class="doc-actions">
+              <button class="icon-btn" onclick="event.preventDefault();event.stopPropagation();editDoc(${i})">✎</button>
+              <button class="icon-btn danger" onclick="event.preventDefault();event.stopPropagation();deleteDoc(${i})">×</button>
+            </div>
+          </a>
+          ${d.embed ? `<div class="embed-wrapper" id="embed-${i}"><iframe src="${escapeAttr(d.url)}" loading="lazy"></iframe></div>` : ''}
+        </div>
+      `).join('');
+
+  return `
+    <div class="header">
+      <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> DOC CENTER</div>
+      <h1 class="page-title">Doc <span class="accent">Center</span></h1>
+      <div class="page-meta">Class resources, references, and study materials</div>
+    </div>
+    <div class="content">
+      <div class="section">
+        <div class="section-head">
+          <div class="section-title">All Documents</div>
+          <button class="add-btn" onclick="addDoc()">+ Add Document</button>
+        </div>
+        <div class="doc-list">${docList}</div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleEmbed(i) {
+  const el = document.getElementById('embed-' + i);
+  if (el) el.classList.toggle('show');
+}
+
+// ---------- EDIT FUNCTIONS ----------
+function editWeekTitle(num) {
+  if (!isAdmin) return;
+  showEditModal('Edit Week Title', `
+    <div class="field">
+      <label>Title</label>
+      <input type="text" id="f_title" value="${escapeAttr(data.weeks[num].title || '')}">
+    </div>
+  `, async () => {
+    data.weeks[num].title = document.getElementById('f_title').value.trim();
+    if (await saveDataToServer()) render();
+  });
+}
+
+function addScheduleItem(num) {
+  if (!isAdmin) return;
+  showEditModal('Add Schedule Entry', scheduleFormHtml({day:'Monday', time:'08:00', topic:''}), async () => {
+    const item = readScheduleForm();
+    if (!item.topic) { showToast('Topic required', true); return false; }
+    data.weeks[num].schedule.push(item);
+    if (await saveDataToServer()) render();
+    else { data.weeks[num].schedule.pop(); return false; }
+  });
+}
+
+function editScheduleItem(num, i) {
+  if (!isAdmin) return;
+  showEditModal('Edit Schedule Entry', scheduleFormHtml(data.weeks[num].schedule[i]), async () => {
+    const item = readScheduleForm();
+    if (!item.topic) { showToast('Topic required', true); return false; }
+    const old = data.weeks[num].schedule[i];
+    data.weeks[num].schedule[i] = item;
+    if (await saveDataToServer()) render();
+    else { data.weeks[num].schedule[i] = old; return false; }
+  });
+}
+
+function deleteScheduleItem(num, i) {
+  if (!isAdmin) return;
+  if (!confirm('Delete this schedule entry?')) return;
+  const removed = data.weeks[num].schedule.splice(i, 1)[0];
+  saveDataToServer().then(ok => {
+    if (ok) render();
+    else { data.weeks[num].schedule.splice(i, 0, removed); render(); }
+  });
+}
+
+function scheduleFormHtml(s) {
+  const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  return `
+    <div class="field">
+      <label>Day</label>
+      <select id="f_day">${days.map(d => `<option ${d===s.day?'selected':''}>${d}</option>`).join('')}</select>
+    </div>
+    <div class="field">
+      <label>Time</label>
+      <input type="text" id="f_time" value="${escapeAttr(s.time||'')}" placeholder="08:00 - 12:00">
+    </div>
+    <div class="field">
+      <label>Topic / Activity</label>
+      <textarea id="f_topic" placeholder="What's happening this day?">${escapeHtml(s.topic||'')}</textarea>
+    </div>
+  `;
+}
+function readScheduleForm() {
+  return {
+    day: document.getElementById('f_day').value,
+    time: document.getElementById('f_time').value.trim(),
+    topic: document.getElementById('f_topic').value.trim()
+  };
+}
+
+function addVideoItem(num) {
+  if (!isAdmin) return;
+  showEditModal('Add Video', videoFormHtml({title:'', category:'', youtubeId:''}), async () => {
+    const item = readVideoForm();
+    if (!item.title || !item.youtubeId) { showToast('Title and YouTube URL required', true); return false; }
+    data.weeks[num].videos.push(item);
+    if (await saveDataToServer()) render();
+    else { data.weeks[num].videos.pop(); return false; }
+  });
+}
+
+function editVideoItem(num, i) {
+  if (!isAdmin) return;
+  showEditModal('Edit Video', videoFormHtml(data.weeks[num].videos[i]), async () => {
+    const item = readVideoForm();
+    if (!item.title || !item.youtubeId) { showToast('Title and YouTube URL required', true); return false; }
+    const old = data.weeks[num].videos[i];
+    data.weeks[num].videos[i] = item;
+    if (await saveDataToServer()) render();
+    else { data.weeks[num].videos[i] = old; return false; }
+  });
+}
+
+function deleteVideoItem(num, i) {
+  if (!isAdmin) return;
+  if (!confirm('Delete this video?')) return;
+  const removed = data.weeks[num].videos.splice(i, 1)[0];
+  saveDataToServer().then(ok => {
+    if (ok) render();
+    else { data.weeks[num].videos.splice(i, 0, removed); render(); }
+  });
+}
+
+function videoFormHtml(v) {
+  return `
+    <div class="field">
+      <label>Video Title</label>
+      <input type="text" id="f_title" value="${escapeAttr(v.title||'')}" placeholder="Fire Behavior Fundamentals">
+    </div>
+    <div class="field">
+      <label>Category / Subject</label>
+      <input type="text" id="f_category" value="${escapeAttr(v.category||'')}" placeholder="Fire Behavior">
+    </div>
+    <div class="field">
+      <label>YouTube URL or Video ID</label>
+      <input type="text" id="f_youtubeId" value="${escapeAttr(v.youtubeId||'')}" placeholder="https://youtube.com/watch?v=...">
+      <div class="field-hint">Paste any YouTube URL — the ID will be extracted automatically.</div>
+    </div>
+  `;
+}
+function readVideoForm() {
+  let id = document.getElementById('f_youtubeId').value.trim();
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+    /^([a-zA-Z0-9_-]{11})$/
+  ];
+  for (const p of patterns) {
+    const m = id.match(p);
+    if (m) { id = m[1]; break; }
+  }
+  return {
+    title: document.getElementById('f_title').value.trim(),
+    category: document.getElementById('f_category').value.trim(),
+    youtubeId: id
+  };
+}
+
+function addDoc() {
+  if (!isAdmin) return;
+  showEditModal('Add Document', docFormHtml({name:'', description:'', type:'PDF', url:'', embed:false}), async () => {
+    const item = readDocForm();
+    if (!item.name) { showToast('Name required', true); return false; }
+    data.docs.push(item);
+    if (await saveDataToServer()) render();
+    else { data.docs.pop(); return false; }
+  });
+}
+
+function editDoc(i) {
+  if (!isAdmin) return;
+  showEditModal('Edit Document', docFormHtml(data.docs[i]), async () => {
+    const item = readDocForm();
+    if (!item.name) { showToast('Name required', true); return false; }
+    const old = data.docs[i];
+    data.docs[i] = item;
+    if (await saveDataToServer()) render();
+    else { data.docs[i] = old; return false; }
+  });
+}
+
+function deleteDoc(i) {
+  if (!isAdmin) return;
+  if (!confirm('Delete this document?')) return;
+  const removed = data.docs.splice(i, 1)[0];
+  saveDataToServer().then(ok => {
+    if (ok) render();
+    else { data.docs.splice(i, 0, removed); render(); }
+  });
+}
+
+function docFormHtml(d) {
+  const types = ['PDF','DOC','LINK','SHEET','IMAGE','VIDEO'];
+  return `
+    <div class="field">
+      <label>Document Name</label>
+      <input type="text" id="f_name" value="${escapeAttr(d.name||'')}" placeholder="Class Roster">
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <input type="text" id="f_description" value="${escapeAttr(d.description||'')}" placeholder="Optional short description">
+    </div>
+    <div class="field">
+      <label>Type</label>
+      <select id="f_type">${types.map(t => `<option ${t===(d.type||'LINK')?'selected':''}>${t}</option>`).join('')}</select>
+    </div>
+    <div class="field">
+      <label>URL</label>
+      <input type="text" id="f_url" value="${escapeAttr(d.url||'')}" placeholder="https://drive.google.com/...">
+      <div class="field-hint">For Google Drive: use the "preview" link. For PDFs: direct link to the .pdf file.</div>
+    </div>
+    <div class="field">
+      <label><input type="checkbox" id="f_embed" ${d.embed?'checked':''} style="width:auto;margin-right:8px;vertical-align:middle"> Embed in page (instead of opening in new tab)</label>
+      <div class="field-hint">Check this for PDFs / Google Drive previews you want to view inline.</div>
+    </div>
+  `;
+}
+function readDocForm() {
+  return {
+    name: document.getElementById('f_name').value.trim(),
+    description: document.getElementById('f_description').value.trim(),
+    type: document.getElementById('f_type').value,
+    url: document.getElementById('f_url').value.trim(),
+    embed: document.getElementById('f_embed').checked
+  };
+}
+
+function showEditModal(title, bodyHtml, onSave) {
+  document.getElementById('editModalTitle').textContent = title;
+  document.getElementById('editModalBody').innerHTML = bodyHtml;
+  const saveBtn = document.getElementById('editModalSave');
+  const newBtn = saveBtn.cloneNode(true);
+  saveBtn.parentNode.replaceChild(newBtn, saveBtn);
+  newBtn.addEventListener('click', async () => {
+    newBtn.disabled = true;
+    newBtn.textContent = 'Saving...';
+    try {
+      const result = await onSave();
+      if (result !== false) closeModal('editModal');
+    } finally {
+      newBtn.disabled = false;
+      newBtn.textContent = 'Save';
+    }
+  });
+  openModal('editModal');
+  setTimeout(() => {
+    const first = document.querySelector('#editModalBody input, #editModalBody textarea, #editModalBody select');
+    if (first) first.focus();
+  }, 100);
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+// ---------- DRAG & DROP (schedule reorder) ----------
+document.addEventListener('dragstart', (e) => {
+  if (!isAdmin || !e.target.classList?.contains('day-row')) return;
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', e.target.dataset.index);
+});
+document.addEventListener('dragend', (e) => {
+  if (e.target.classList?.contains('day-row')) e.target.classList.remove('dragging');
+});
+document.addEventListener('dragover', (e) => {
+  const row = e.target.closest('.day-row');
+  if (row) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+});
+document.addEventListener('drop', (e) => {
+  const target = e.target.closest('.day-row');
+  if (!target || !isAdmin) return;
+  e.preventDefault();
+  const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+  const toIdx = parseInt(target.dataset.index);
+  const weekNum = parseInt(target.dataset.week);
+  if (isNaN(fromIdx) || isNaN(toIdx) || fromIdx === toIdx) return;
+  const arr = data.weeks[weekNum].schedule;
+  const [moved] = arr.splice(fromIdx, 1);
+  arr.splice(toIdx, 0, moved);
+  saveDataToServer().then(ok => { if (ok) render(); });
+});
+
+// ---------- GLOBAL EVENT HANDLERS ----------
+document.querySelectorAll('.modal-bg').forEach(bg => {
+  bg.addEventListener('click', (e) => { if (e.target === bg) bg.classList.remove('show'); });
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-bg.show').forEach(m => m.classList.remove('show'));
+});
+
+// ---------- BOOT ----------
+(async function init() {
+  const hash = window.location.hash.replace('#', '');
+  if (hash) {
+    const navItem = document.querySelector(`.nav-item[data-page="${hash}"]`);
+    if (navItem) {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      navItem.classList.add('active');
+      currentPage = hash;
+    }
+  }
+
+  await loadDataFromServer();
+  await tryRestoreSession();
+  render();
+  document.getElementById('loadingScreen').classList.add('hide');
+})();
+</script>
+</body>
+</html>
