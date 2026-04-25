@@ -853,8 +853,9 @@
 
   /* ====== RESPONSIVE ====== */
   @media (max-width: 880px) {
-    body { overflow: auto; }
+    html, body { overflow: auto; height: auto; }
     .app { grid-template-columns: 1fr; height: auto; min-height: 100vh; }
+    .main { overflow: visible; }
     .sidebar {
       position: fixed;
       top: 0; left: -300px;
@@ -863,6 +864,8 @@
       z-index: 70;
       transition: left 0.25s ease;
       border-right: 1px solid var(--border);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     .sidebar.open { left: 0; }
     .mobile-header { display: flex; }
