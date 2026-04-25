@@ -264,7 +264,19 @@
     padding: 36px 48px 24px;
     border-bottom: 1px solid var(--border);
     background: linear-gradient(180deg, rgba(28,31,36,0.4), transparent);
+    position: relative;
   }
+  .header-badge {
+    position: absolute;
+    top: 20px;
+    right: 48px;
+    width: 56px;
+    height: 56px;
+    cursor: pointer;
+    transition: transform 0.15s;
+    border-radius: 50%;
+  }
+  .header-badge:hover { transform: scale(1.1); }
   .breadcrumb {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
@@ -855,6 +867,7 @@
     .sidebar.open { left: 0; }
     .mobile-header { display: flex; }
     .header { padding: 24px 20px 18px; }
+    .header-badge { top: 14px; right: 16px; width: 44px; height: 44px; }
     .content { padding: 20px; }
     .page-title { font-size: 32px; }
     .day-row { grid-template-columns: 1fr; gap: 6px; }
@@ -1226,6 +1239,7 @@ function renderHome() {
 
   return `
     <div class="header">
+      <img src="/gnfr-badge.jpg" alt="GNFR" class="header-badge" onclick="document.querySelector('.nav-item[data-page=home]').click()" title="Back to Command">
       <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> COMMAND</div>
       <h1 class="page-title">Class <span class="accent">Dashboard</span></h1>
       <div class="page-meta">7-week fire academy program // GNFR 26-02${cw ? ` // Currently Week ${cw}` : ''}</div>
@@ -1382,6 +1396,7 @@ function renderWeek(num) {
 
   return `
     <div class="header">
+      <img src="/gnfr-badge.jpg" alt="GNFR" class="header-badge" onclick="document.querySelector('.nav-item[data-page=home]').click()" title="Back to Command">
       <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> WEEK ${String(num).padStart(2, '0')}</div>
       <h1 class="page-title">Week <span class="accent">${String(num).padStart(2, '0')}</span> ${isAdmin ? `<button class="icon-btn" style="vertical-align:middle;margin-left:8px" onclick="editWeekTitle(${num})">✎</button>` : ''}${isCurrentBadge}</h1>
       <div class="page-meta">${escapeHtml(week.title || 'Untitled')}</div>
@@ -1447,6 +1462,7 @@ function renderDocs() {
 
   return `
     <div class="header">
+      <img src="/gnfr-badge.jpg" alt="GNFR" class="header-badge" onclick="document.querySelector('.nav-item[data-page=home]').click()" title="Back to Command">
       <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> DOC CENTER</div>
       <h1 class="page-title">Doc <span class="accent">Center</span></h1>
       <div class="page-meta">Class resources, references, and study materials</div>
@@ -1492,6 +1508,7 @@ function renderLinks() {
 
   return `
     <div class="header">
+      <img src="/gnfr-badge.jpg" alt="GNFR" class="header-badge" onclick="document.querySelector('.nav-item[data-page=home]').click()" title="Back to Command">
       <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> QUICK LINKS</div>
       <h1 class="page-title">Quick <span class="accent">Links</span></h1>
       <div class="page-meta">Important links and resources</div>
