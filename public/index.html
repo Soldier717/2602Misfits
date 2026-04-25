@@ -861,11 +861,11 @@
     .main { overflow: visible; }
     .sidebar {
       position: fixed;
-      top: 0; left: -300px;
+      top: 56px; left: -300px;
       width: 280px;
-      height: 100%;
-      max-height: 100vh;
-      max-height: 100dvh;
+      height: calc(100% - 56px);
+      max-height: calc(100vh - 56px);
+      max-height: calc(100dvh - 56px);
       z-index: 70;
       transition: left 0.25s ease;
       border-right: 1px solid var(--border);
