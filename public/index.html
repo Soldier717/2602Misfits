@@ -925,6 +925,10 @@
         <span class="nav-num">DC</span>
         <span class="nav-text">Doc Center</span>
       </div>
+      <div class="nav-item" data-page="links">
+        <span class="nav-num">QL</span>
+        <span class="nav-text">Quick Links</span>
+      </div>
     </div>
 
     <div class="sidebar-footer">
@@ -994,6 +998,7 @@ const DEFAULT_DATA = {
     7: { title: 'Final Skills & Graduation', schedule: [], videos: [] }
   },
   docs: [],
+  quickLinks: [],
   settings: { start_date: null }
 };
 
@@ -1038,6 +1043,7 @@ async function loadDataFromServer() {
       if (!Array.isArray(data.weeks[i].pdfs)) data.weeks[i].pdfs = [];
     }
     if (!Array.isArray(data.docs)) data.docs = [];
+    if (!Array.isArray(data.quickLinks)) data.quickLinks = [];
     if (!data.settings) data.settings = { start_date: null };
   } catch (err) {
     console.error('Load error:', err);
@@ -1193,6 +1199,8 @@ function render() {
     bindHomeEvents();
   } else if (currentPage === 'docs') {
     main.innerHTML = renderDocs();
+  } else if (currentPage === 'links') {
+    main.innerHTML = renderLinks();
   } else if (currentPage.startsWith('week-')) {
     const num = parseInt(currentPage.split('-')[1]);
     main.innerHTML = renderWeek(num);
@@ -1467,6 +1475,111 @@ function renderDocs() {
       </div>
     </div>
   `;
+}
+
+function renderLinks() {
+  const linkList = data.quickLinks.length === 0
+    ? `<div class="empty">No quick links yet${isAdmin ? ' — click + Add Link' : ''}</div>`
+    : data.quickLinks.map((l, i) => `
+        <a class="doc-item" href="${escapeAttr(l.url)}" target="_blank" style="border-left:3px solid var(--gold);">
+          <div class="doc-icon" style="color:var(--gold);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+          </div>
+          <div class="doc-meta">
+            <div class="doc-name">${escapeHtml(l.name)}</div>
+            ${l.description ? `<div class="doc-desc">${escapeHtml(l.description)}</div>` : ''}
+          </div>
+          <div class="doc-type">${escapeHtml(l.category || 'LINK')}</div>
+          <div class="doc-actions">
+            <button class="icon-btn" onclick="event.preventDefault();event.stopPropagation();editLink(${i})">✎</button>
+            <button class="icon-btn danger" onclick="event.preventDefault();event.stopPropagation();deleteLink(${i})">×</button>
+          </div>
+        </a>
+      `).join('');
+
+  return `
+    <div class="header">
+      <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> QUICK LINKS</div>
+      <h1 class="page-title">Quick <span class="accent">Links</span></h1>
+      <div class="page-meta">Important links and resources</div>
+    </div>
+    <div class="content">
+      <div class="section">
+        <div class="section-head">
+          <div class="section-title">All Links</div>
+          <button class="add-btn" onclick="addLink()">+ Add Link</button>
+        </div>
+        <div class="doc-list">${linkList}</div>
+      </div>
+    </div>
+  `;
+}
+
+function addLink() {
+  if (!isAdmin) return;
+  showEditModal('Add Quick Link', linkFormHtml({name:'', description:'', url:'', category:''}), async () => {
+    const item = readLinkForm();
+    if (!item.name || !item.url) { showToast('Name and URL required', true); return false; }
+    data.quickLinks.push(item);
+    if (await saveDataToServer()) render();
+    else { data.quickLinks.pop(); return false; }
+  });
+}
+
+function editLink(i) {
+  if (!isAdmin) return;
+  showEditModal('Edit Quick Link', linkFormHtml(data.quickLinks[i]), async () => {
+    const item = readLinkForm();
+    if (!item.name || !item.url) { showToast('Name and URL required', true); return false; }
+    const old = data.quickLinks[i];
+    data.quickLinks[i] = item;
+    if (await saveDataToServer()) render();
+    else { data.quickLinks[i] = old; return false; }
+  });
+}
+
+function deleteLink(i) {
+  if (!isAdmin) return;
+  if (!confirm('Delete this link?')) return;
+  const removed = data.quickLinks.splice(i, 1)[0];
+  saveDataToServer().then(ok => {
+    if (ok) render();
+    else { data.quickLinks.splice(i, 0, removed); render(); }
+  });
+}
+
+function linkFormHtml(l) {
+  const categories = ['LINK','PORTAL','FORM','MAP','VIDEO','TRAINING','HR','BENEFITS'];
+  return `
+    <div class="field">
+      <label>Link Name</label>
+      <input type="text" id="f_name" value="${escapeAttr(l.name||'')}" placeholder="Target Solutions Login">
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <input type="text" id="f_description" value="${escapeAttr(l.description||'')}" placeholder="Online training portal">
+    </div>
+    <div class="field">
+      <label>URL</label>
+      <input type="text" id="f_url" value="${escapeAttr(l.url||'')}" placeholder="https://...">
+    </div>
+    <div class="field">
+      <label>Category</label>
+      <select id="f_category">${categories.map(c => `<option ${c===(l.category||'LINK')?'selected':''}>${c}</option>`).join('')}</select>
+    </div>
+  `;
+}
+
+function readLinkForm() {
+  return {
+    name: document.getElementById('f_name').value.trim(),
+    description: document.getElementById('f_description').value.trim(),
+    url: document.getElementById('f_url').value.trim(),
+    category: document.getElementById('f_category').value,
+  };
 }
 
 function toggleEmbed(i) {
