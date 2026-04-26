@@ -744,26 +744,39 @@
     margin-bottom: 40px;
   }
   .stat-card {
-    background: var(--bg-elev);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    padding: 20px;
-    border-radius: 2px;
+    background: linear-gradient(135deg, #1a1c20 0%, #22252a 100%);
+    border: 1px solid #3a3f48;
+    border-top: 3px solid #e8c840;
+    padding: 22px 20px;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 60px; height: 60px;
+    background: radial-gradient(circle at top right, rgba(232,200,64,0.08), transparent 70%);
+    pointer-events: none;
   }
   .stat-label {
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
-    color: var(--text-muted);
+    color: #e8c840;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     margin-bottom: 10px;
+    font-weight: 700;
   }
   .stat-value {
     font-family: 'Oswald', sans-serif;
-    font-size: 38px;
+    font-size: 42px;
     font-weight: 700;
     line-height: 1;
     letter-spacing: 0.02em;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(232,200,64,0.15);
   }
 
   .week-jump {
