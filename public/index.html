@@ -1048,9 +1048,11 @@ let adminPassword = null;
 
 // ---------- CURRENT WEEK CALCULATION ----------
 function getCurrentWeek() {
+  // Academy weeks run Mon-Fri. Start date should be the first Monday.
+  // Sat/Sun stays on the same week. New week starts each Monday.
   const startStr = data.settings?.start_date;
   if (!startStr) return null;
-  const start = new Date(startStr);
+  const start = new Date(startStr + 'T00:00:00');
   const now = new Date();
   const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
   if (diff < 0) return null;
