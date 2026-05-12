@@ -2872,17 +2872,24 @@ function ccGetAirway() {
     info.io = '25 mm BLUE (proximal humerus or tibia)';
     info.ioDetail = 'EZ-IO. Adult proximal humerus = fastest flow.';
   } else if (band === 'pediatric') {
-    if (age > 0) {
-      info.ettCuffed = (age / 4 + 3.5).toFixed(1) + ' mm ID';
-      info.ettUncuffed = (age / 4 + 4).toFixed(1) + ' mm ID';
-      info.ettDepth = (3 * (age / 4 + 4)).toFixed(0) + ' cm at lip';
-      info.ettDetail = 'Formula: (age/4)+3.5 cuffed | (age/4)+4 uncuffed';
-    } else {
-      info.ettCuffed = 'Enter age'; info.ettUncuffed = 'Enter age'; info.ettDepth = '—'; info.ettDetail = 'Age required for formula';
-    }
-    if (age < 1) info.bladeSize = 'Miller 0–1';
-    else if (age < 4) info.bladeSize = 'Miller 1 / Mac 2';
-    else if (age < 8) info.bladeSize = 'Mac 2';
+    // Weight-based ETT size (Broselow-style ranges)
+    let cuffed, uncuffed, depth;
+    if (kg < 6) { cuffed = '3.0'; uncuffed = '3.5'; depth = '9–10'; }
+    else if (kg < 10) { cuffed = '3.5'; uncuffed = '4.0'; depth = '10–11'; }
+    else if (kg < 12) { cuffed = '4.0'; uncuffed = '4.5'; depth = '11–12'; }
+    else if (kg < 15) { cuffed = '4.5'; uncuffed = '5.0'; depth = '13'; }
+    else if (kg < 19) { cuffed = '5.0'; uncuffed = '5.5'; depth = '14'; }
+    else if (kg < 24) { cuffed = '5.5'; uncuffed = '6.0'; depth = '15'; }
+    else if (kg < 30) { cuffed = '6.0'; uncuffed = '6.5'; depth = '16'; }
+    else { cuffed = '6.5'; uncuffed = '7.0'; depth = '17'; }
+    info.ettCuffed = cuffed + ' mm ID';
+    info.ettUncuffed = uncuffed + ' mm ID';
+    info.ettDepth = depth + ' cm at lip';
+    info.ettDetail = 'Weight-based ranges (Broselow-style)';
+    // Blade by weight
+    if (kg < 6) info.bladeSize = 'Miller 0–1';
+    else if (kg < 12) info.bladeSize = 'Miller 1 / Mac 2';
+    else if (kg < 24) info.bladeSize = 'Mac 2';
     else info.bladeSize = 'Mac 3';
     if (kg < 5) info.lma = 'Size 1 (<5 kg)';
     else if (kg < 10) info.lma = 'Size 1.5 (5–10 kg)';
@@ -3282,14 +3289,24 @@ function ccPartialRender() {
 /* ============================================================
    RUN A CODE — merged timer + weight-based drug doses
 ============================================================ */
+function rcDeriveBand(kg) {
+  if (kg < 5) return 'neonatal';
+  if (kg < 40) return 'pediatric';
+  return 'adult';
+}
+
 function renderRunCode() {
   ctLoadSettings();
-  const kg = ccGetWeightKg();
+  // Force kg + auto-derive band from weight
+  ccState.unit = 'kg';
+  const kg = parseFloat(ccState.weight) || 0;
   const valid = kg > 0 && kg < 300;
-  const showAgeInput = ccState.ageBand === 'pediatric';
+  ccState.ageBand = rcDeriveBand(kg);
+  ccState.ageYears = ''; // not used
   const elec = valid ? ccGetElectrical() : null;
   const drugs = valid ? ccGetDrugs() : [];
   const a = valid ? ccGetAirway() : null;
+  const bandLabel = valid ? (ccState.ageBand === 'adult' ? 'Adult' : ccState.ageBand === 'pediatric' ? 'Pediatric' : 'Neonatal') : '';
 
   const drugButtons = valid ? drugs.map((d, i) => `
     <button class="rc-drug-btn ${d.primary ? 'primary' : ''}" data-drug-idx="${i}">
@@ -3314,30 +3331,12 @@ function renderRunCode() {
         to log it. Always confirm against current GNFR protocols and medical control.
       </div>
 
-      <div class="rc-patient-bar ${ctState.running ? 'active' : ''} ${showAgeInput ? 'with-age' : ''}">
+      <div class="rc-patient-bar ${ctState.running ? 'active' : ''}" style="grid-template-columns: 1.5fr auto auto auto;">
         <div class="cc-field">
-          <div class="cc-field-label">Patient Weight</div>
-          <div class="cc-weight-row">
-            <input type="number" id="rc-weight" value="${ccState.weight}" min="0" step="0.1" inputmode="decimal">
-            <div class="cc-unit-toggle">
-              <button id="rc-unit-kg" class="${ccState.unit==='kg'?'active':''}">kg</button>
-              <button id="rc-unit-lbs" class="${ccState.unit==='lbs'?'active':''}">lbs</button>
-            </div>
-          </div>
+          <div class="cc-field-label">Patient Weight (kg) ${valid ? `— ${bandLabel}` : ''}</div>
+          <input type="number" id="rc-weight" value="${ccState.weight}" min="0" step="0.5" inputmode="decimal" placeholder="kg"
+            style="background:var(--bg);border:1px solid var(--border-bright);color:var(--text);font-family:'Oswald',sans-serif;font-size:24px;font-weight:600;padding:10px 14px;border-radius:2px;outline:none;text-align:center;width:100%;box-sizing:border-box;">
         </div>
-        <div class="cc-field">
-          <div class="cc-field-label">Age Group</div>
-          <div class="cc-age-band">
-            <button class="cc-age-btn ${ccState.ageBand==='adult'?'active':''}" data-band="adult">Adult</button>
-            <button class="cc-age-btn ${ccState.ageBand==='pediatric'?'active':''}" data-band="pediatric">Peds</button>
-            <button class="cc-age-btn ${ccState.ageBand==='neonatal'?'active':''}" data-band="neonatal">Neo</button>
-          </div>
-        </div>
-        ${showAgeInput ? `
-        <div class="cc-field">
-          <div class="cc-field-label">Age (yr)</div>
-          <input class="cc-age-input" type="number" id="rc-age" value="${ccState.ageYears}" min="0" max="17" step="0.5" placeholder="e.g. 4" inputmode="decimal">
-        </div>` : ''}
         <button class="ct-btn ${ctState.running ? 'stop' : 'start'}" id="ct-start-btn" ${valid ? '' : 'disabled'}>
           ${ctState.running ? '⏸ Pause' : (ctState.elapsedMs > 0 ? '▶ Resume' : '▶ Start Code')}
         </button>
@@ -3457,29 +3456,12 @@ function renderRunCode() {
 }
 
 function bindRunCodeEvents() {
-  // Patient bar inputs
+  // Patient weight — kg only, drives everything
   const w = document.getElementById('rc-weight');
-  if (w) w.addEventListener('input', (e) => { ccState.weight = e.target.value; render(); });
-  const age = document.getElementById('rc-age');
-  if (age) age.addEventListener('input', (e) => { ccState.ageYears = e.target.value; render(); });
-  const kgBtn = document.getElementById('rc-unit-kg');
-  const lbsBtn = document.getElementById('rc-unit-lbs');
-  if (kgBtn) kgBtn.addEventListener('click', () => {
-    if (ccState.unit === 'kg') return;
-    ccState.weight = ((parseFloat(ccState.weight) || 0) / 2.2046).toFixed(1);
-    ccState.unit = 'kg'; render();
-  });
-  if (lbsBtn) lbsBtn.addEventListener('click', () => {
-    if (ccState.unit === 'lbs') return;
-    ccState.weight = ((parseFloat(ccState.weight) || 0) * 2.2046).toFixed(1);
-    ccState.unit = 'lbs'; render();
-  });
-  document.querySelectorAll('.cc-age-btn').forEach(b => {
-    b.addEventListener('click', () => {
-      ccState.ageBand = b.dataset.band;
-      if (ccState.ageBand !== 'pediatric') ccState.ageYears = '';
-      render();
-    });
+  if (w) w.addEventListener('input', (e) => {
+    ccState.weight = e.target.value;
+    ccState.unit = 'kg';
+    render();
   });
 
   // Timer controls — reuse Code Timer state/functions
