@@ -1146,6 +1146,33 @@
     .cc-code-card .big { font-size: 28px; }
     .cc-code-content { padding: 16px 16px 60px; }
   }
+
+  /* ====== RUN A CODE (merged tool) ====== */
+  .rc-patient-bar { display: grid; grid-template-columns: 1.2fr 1.5fr auto auto; gap: 12px; align-items: end; background: var(--bg-elev); border: 1px solid var(--border); border-radius: 4px; padding: 16px 20px; margin-bottom: 20px; }
+  .rc-patient-bar.with-age { grid-template-columns: 1.2fr 1.5fr 0.8fr auto auto; }
+  .rc-patient-bar.active { border-color: var(--gold); border-left: 3px solid var(--gold); }
+  .rc-drug-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+  .rc-drug-btn { background: var(--bg-elev); border: 1px solid var(--border); border-left: 3px solid var(--accent-dim); border-radius: 4px; padding: 14px 16px; cursor: pointer; text-align: left; transition: all 0.15s; color: var(--text); font-family: inherit; }
+  .rc-drug-btn:hover { border-left-color: var(--accent); transform: translateY(-1px); }
+  .rc-drug-btn.primary { border-left-color: var(--accent); }
+  .rc-drug-btn .name { font-family: 'Oswald', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 4px; }
+  .rc-drug-btn .dose { font-family: 'Oswald', sans-serif; font-size: 22px; font-weight: 700; color: var(--accent-bright); line-height: 1; }
+  .rc-drug-btn .vol { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold); margin-top: 4px; }
+  .rc-drug-btn .ind { font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+  .rc-drug-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .rc-shock-btn { background: var(--accent); border: 1px solid var(--accent); border-left: 3px solid #fff; color: white; }
+  .rc-shock-btn:hover { background: var(--accent-bright); }
+  .rc-shock-btn .dose { color: white; font-size: 28px; }
+  .rc-shock-btn .vol { color: rgba(255,255,255,0.85); }
+  .rc-action-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 16px; }
+  .rc-rhythm-btn { background: var(--bg-elev-2); border: 1px solid var(--border-bright); color: var(--text); font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; padding: 10px; border-radius: 2px; cursor: pointer; }
+  .rc-rhythm-btn:hover { border-color: var(--accent); color: var(--accent-bright); }
+  .rc-rhythm-btn.rosc { border-color: var(--success); color: var(--success); }
+  .rc-rhythm-btn.rosc:hover { background: var(--success); color: white; }
+
+  @media (max-width: 720px) {
+    .rc-patient-bar, .rc-patient-bar.with-age { grid-template-columns: 1fr 1fr; }
+  }
 </style>
 </head>
 <body>
@@ -1203,13 +1230,9 @@
         <span class="nav-num">QL</span>
         <span class="nav-text">Quick Links</span>
       </div>
-      <div class="nav-item" data-page="codetimer">
-        <span class="nav-num">CT</span>
-        <span class="nav-text">Code Timer</span>
-      </div>
-      <div class="nav-item" data-page="codecalc">
-        <span class="nav-num">CC</span>
-        <span class="nav-text">Code Calc</span>
+      <div class="nav-item" data-page="coderun">
+        <span class="nav-num">CR</span>
+        <span class="nav-text">Run a Code</span>
       </div>
     </div>
 
@@ -1490,12 +1513,9 @@ function render() {
     main.innerHTML = renderDocs();
   } else if (currentPage === 'links') {
     main.innerHTML = renderLinks();
-  } else if (currentPage === 'codetimer') {
-    main.innerHTML = renderCodeTimer();
-    bindCodeTimerEvents();
-  } else if (currentPage === 'codecalc') {
-    main.innerHTML = renderCodeCalc();
-    bindCodeCalcEvents();
+  } else if (currentPage === 'coderun') {
+    main.innerHTML = renderRunCode();
+    bindRunCodeEvents();
   } else if (currentPage.startsWith('week-')) {
     const num = parseInt(currentPage.split('-')[1]);
     main.innerHTML = renderWeek(num);
@@ -3257,6 +3277,296 @@ function ccPartialRender() {
   const wrapper = document.createElement('div');
   wrapper.innerHTML = `${ccRenderSummary()}${ccRenderVitalsSection()}${ccRenderAirwaySection()}${ccRenderElectricalSection()}${ccRenderDrugsSection()}${ccRenderHsTsSection()}`;
   while (wrapper.firstChild) content.appendChild(wrapper.firstChild);
+}
+
+/* ============================================================
+   RUN A CODE — merged timer + weight-based drug doses
+============================================================ */
+function renderRunCode() {
+  ctLoadSettings();
+  const kg = ccGetWeightKg();
+  const valid = kg > 0 && kg < 300;
+  const showAgeInput = ccState.ageBand === 'pediatric';
+  const elec = valid ? ccGetElectrical() : null;
+  const drugs = valid ? ccGetDrugs() : [];
+  const a = valid ? ccGetAirway() : null;
+
+  const drugButtons = valid ? drugs.map((d, i) => `
+    <button class="rc-drug-btn ${d.primary ? 'primary' : ''}" data-drug-idx="${i}">
+      <div class="name">${d.name}</div>
+      <div class="dose">${d.weightDose}</div>
+      <div class="vol">${d.readyVol}</div>
+      <div class="ind">${d.indication}</div>
+    </button>
+  `).join('') : '';
+
+  return `
+    <div class="header">
+      <img src="/gnfr-badge.jpg" alt="GNFR" class="header-badge" onclick="document.querySelector('.nav-item[data-page=home]').click()" title="Back to Command">
+      <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> RUN A CODE</div>
+      <h1 class="page-title">Run a <span class="accent">Code</span></h1>
+      <div class="page-meta">CPR timer + weight-based ACLS dosing in one tool</div>
+    </div>
+    <div class="content ct-wrap">
+      <div class="cc-disclaimer">
+        <strong>⚠ Training & Reference Tool</strong>
+        Enter patient weight + age group, then Start. Drug doses calculate automatically. Tap a drug
+        to log it. Always confirm against current GNFR protocols and medical control.
+      </div>
+
+      <div class="rc-patient-bar ${ctState.running ? 'active' : ''} ${showAgeInput ? 'with-age' : ''}">
+        <div class="cc-field">
+          <div class="cc-field-label">Patient Weight</div>
+          <div class="cc-weight-row">
+            <input type="number" id="rc-weight" value="${ccState.weight}" min="0" step="0.1" inputmode="decimal">
+            <div class="cc-unit-toggle">
+              <button id="rc-unit-kg" class="${ccState.unit==='kg'?'active':''}">kg</button>
+              <button id="rc-unit-lbs" class="${ccState.unit==='lbs'?'active':''}">lbs</button>
+            </div>
+          </div>
+        </div>
+        <div class="cc-field">
+          <div class="cc-field-label">Age Group</div>
+          <div class="cc-age-band">
+            <button class="cc-age-btn ${ccState.ageBand==='adult'?'active':''}" data-band="adult">Adult</button>
+            <button class="cc-age-btn ${ccState.ageBand==='pediatric'?'active':''}" data-band="pediatric">Peds</button>
+            <button class="cc-age-btn ${ccState.ageBand==='neonatal'?'active':''}" data-band="neonatal">Neo</button>
+          </div>
+        </div>
+        ${showAgeInput ? `
+        <div class="cc-field">
+          <div class="cc-field-label">Age (yr)</div>
+          <input class="cc-age-input" type="number" id="rc-age" value="${ccState.ageYears}" min="0" max="17" step="0.5" placeholder="e.g. 4" inputmode="decimal">
+        </div>` : ''}
+        <button class="ct-btn ${ctState.running ? 'stop' : 'start'}" id="ct-start-btn" ${valid ? '' : 'disabled'}>
+          ${ctState.running ? '⏸ Pause' : (ctState.elapsedMs > 0 ? '▶ Resume' : '▶ Start Code')}
+        </button>
+        <button class="ct-btn" id="ct-reset-btn">↻ Reset</button>
+      </div>
+
+      <div class="ct-audio-hint" id="ct-audio-hint">🔊 Tap "Start Code" to enable audio cues. Some phones require this gesture before sound will play.</div>
+      <div class="ct-cue-banner" id="ct-cue-banner"></div>
+
+      <div class="ct-display" id="ct-display">
+        <div class="ct-total-time">Total: <span class="v" id="ct-total-val">${ctFormatTime(ctState.elapsedMs)}</span></div>
+        <div class="ct-cycle-label">Cycle <span class="ct-cycle-num" id="ct-cycle-num">${ctState.cycleNum}</span> · CPR Time</div>
+        <div class="ct-time" id="ct-time">${ctFormatTime(ctState.elapsedMs % 120000)}</div>
+        <div class="ct-time-sub">of 2:00 — rhythm check</div>
+        <div class="ct-pulse-area">
+          <div class="ct-pulse-dot" id="ct-pulse-dot"></div>
+          <div class="ct-pulse-label"><span class="v">${ctState.bpm}</span> BPM</div>
+        </div>
+      </div>
+
+      ${valid ? `
+        <div class="cc-section priority" style="margin-bottom:20px;">
+          <div class="cc-section-head">
+            <span class="cc-section-num">⚡</span>
+            <span class="cc-section-title">Shock / Rhythm</span>
+            <span class="cc-section-tag">Tap to log</span>
+          </div>
+          <div class="rc-drug-grid">
+            <button class="rc-drug-btn rc-shock-btn" id="rc-shock-defib">
+              <div class="name">Defibrillation</div>
+              <div class="dose">${elec.defib.primary}</div>
+              <div class="vol">${elec.defib.secondary}</div>
+              <div class="ind">VF / pVT</div>
+            </button>
+            <button class="rc-drug-btn rc-shock-btn" id="rc-shock-cv">
+              <div class="name">Cardioversion</div>
+              <div class="dose">${elec.cardiovert.primary}</div>
+              <div class="vol">Synchronized</div>
+              <div class="ind">Unstable tachycardia</div>
+            </button>
+          </div>
+          <div class="rc-action-row" style="margin-top:10px;">
+            <button class="rc-rhythm-btn" data-rhythm="VF/pVT">VF / pVT</button>
+            <button class="rc-rhythm-btn" data-rhythm="PEA">PEA</button>
+            <button class="rc-rhythm-btn" data-rhythm="Asystole">Asystole</button>
+            <button class="rc-rhythm-btn rosc" data-rhythm="ROSC" id="rc-rosc-btn">✓ ROSC</button>
+          </div>
+        </div>
+
+        <div class="cc-section priority" style="margin-bottom:20px;">
+          <div class="cc-section-head">
+            <span class="cc-section-num">💉</span>
+            <span class="cc-section-title">Drugs — Calculated for ${ccFmt(kg, 1)} kg</span>
+            <span class="cc-section-tag">Tap to log</span>
+          </div>
+          <div class="rc-drug-grid">${drugButtons}</div>
+        </div>
+
+        <details class="cc-section" style="margin-bottom:20px;">
+          <summary style="cursor:pointer;font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:10px 0;border-bottom:1px solid var(--border);">Airway Reference</summary>
+          <div class="cc-info-grid" style="margin-top:14px;">
+            <div class="cc-info-card"><div class="label">ET Tube</div><div class="value">${a.ettCuffed}</div><div class="detail">Depth: ${a.ettDepth}</div></div>
+            <div class="cc-info-card"><div class="label">IO Needle</div><div class="value" style="font-size:16px;">${a.io}</div></div>
+            <div class="cc-info-card"><div class="label">Supraglottic</div><div class="value" style="font-size:16px;">${a.lma}</div></div>
+            <div class="cc-info-card"><div class="label">BVM</div><div class="value" style="font-size:14px;">${a.bvm}</div></div>
+          </div>
+        </details>
+
+        <details class="cc-section" style="margin-bottom:20px;">
+          <summary style="cursor:pointer;font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:10px 0;border-bottom:1px solid var(--border);">H's & T's — Reversible Causes</summary>
+          <div class="cc-hts-grid" style="margin-top:14px;">
+            ${CC_HS_TS.map(item => `<div class="cc-ht-card"><div class="label">${item.label}</div><div class="detail">${item.detail}</div></div>`).join('')}
+          </div>
+        </details>
+
+        <details class="ct-settings" style="margin-bottom:20px;">
+          <summary style="cursor:pointer;font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);">Timer & Audio Settings</summary>
+          <div style="margin-top:14px;">
+            <div class="ct-toggle-row">
+              <div class="ct-toggle-label"><div class="main">Compression Metronome</div><div class="sub">${ctState.bpm} BPM clicks</div></div>
+              <div class="ct-toggle ${ctState.metronomeOn ? 'on' : ''}" data-setting="metronomeOn"></div>
+            </div>
+            <div class="ct-bpm-row">
+              <div class="ct-toggle-label" style="flex:1"><div class="main">Compression Rate</div><div class="sub">AHA: 100–120 BPM</div></div>
+              <input type="range" id="ct-bpm-slider" min="100" max="120" step="1" value="${ctState.bpm}">
+              <div class="ct-bpm-val" id="ct-bpm-val">${ctState.bpm} BPM</div>
+            </div>
+            <div class="ct-toggle-row">
+              <div class="ct-toggle-label"><div class="main">Advanced Airway</div><div class="sub">Enables 1 breath / 6s cue</div></div>
+              <div class="ct-toggle ${ctState.advancedAirway ? 'on' : ''}" data-setting="advancedAirway"></div>
+            </div>
+            <div class="ct-toggle-row">
+              <div class="ct-toggle-label"><div class="main">Voice Cues</div><div class="sub">"Prepare to charge" · "Rhythm check"</div></div>
+              <div class="ct-toggle ${ctState.voiceOn ? 'on' : ''}" data-setting="voiceOn"></div>
+            </div>
+            <div class="ct-toggle-row">
+              <div class="ct-toggle-label"><div class="main">Tones</div><div class="sub">Beeps for cues & metronome</div></div>
+              <div class="ct-toggle ${ctState.toneOn ? 'on' : ''}" data-setting="toneOn"></div>
+            </div>
+            <div class="ct-toggle-row">
+              <div class="ct-toggle-label"><div class="main">Epi Reminder</div><div class="sub">Every ${Math.round(ctState.epiIntervalMs/60000*10)/10} min</div></div>
+              <div class="ct-toggle ${ctState.epiReminderOn ? 'on' : ''}" data-setting="epiReminderOn"></div>
+            </div>
+          </div>
+        </details>
+
+        <div class="ct-log">
+          <div class="ct-log-title">
+            Code Log
+            <button class="ct-log-clear" id="ct-log-clear">Clear</button>
+          </div>
+          <div id="ct-log-list"><div class="ct-log-empty">No events logged yet</div></div>
+        </div>
+      ` : '<div class="cc-empty">Enter patient weight to load doses</div>'}
+    </div>
+  `;
+}
+
+function bindRunCodeEvents() {
+  // Patient bar inputs
+  const w = document.getElementById('rc-weight');
+  if (w) w.addEventListener('input', (e) => { ccState.weight = e.target.value; render(); });
+  const age = document.getElementById('rc-age');
+  if (age) age.addEventListener('input', (e) => { ccState.ageYears = e.target.value; render(); });
+  const kgBtn = document.getElementById('rc-unit-kg');
+  const lbsBtn = document.getElementById('rc-unit-lbs');
+  if (kgBtn) kgBtn.addEventListener('click', () => {
+    if (ccState.unit === 'kg') return;
+    ccState.weight = ((parseFloat(ccState.weight) || 0) / 2.2046).toFixed(1);
+    ccState.unit = 'kg'; render();
+  });
+  if (lbsBtn) lbsBtn.addEventListener('click', () => {
+    if (ccState.unit === 'lbs') return;
+    ccState.weight = ((parseFloat(ccState.weight) || 0) * 2.2046).toFixed(1);
+    ccState.unit = 'lbs'; render();
+  });
+  document.querySelectorAll('.cc-age-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      ccState.ageBand = b.dataset.band;
+      if (ccState.ageBand !== 'pediatric') ccState.ageYears = '';
+      render();
+    });
+  });
+
+  // Timer controls — reuse Code Timer state/functions
+  ctState.pulseDotEl = document.getElementById('ct-pulse-dot');
+  const startBtn = document.getElementById('ct-start-btn');
+  if (startBtn) startBtn.addEventListener('click', () => {
+    if (ctState.running) ctPause(); else ctStart();
+    const hint = document.getElementById('ct-audio-hint');
+    if (hint) hint.classList.remove('show');
+  });
+  const resetBtn = document.getElementById('ct-reset-btn');
+  if (resetBtn) resetBtn.addEventListener('click', () => {
+    if (ctState.elapsedMs > 0 && !confirm('Reset timer? Code log will be kept.')) return;
+    ctReset();
+  });
+
+  // Drug buttons — log with calculated dose
+  const drugs = ccGetDrugs();
+  document.querySelectorAll('[data-drug-idx]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const d = drugs[parseInt(btn.dataset.drugIdx)];
+      if (!d) return;
+      ctLogEvent('Drug', `${d.name} ${d.weightDose} (${d.readyVol})`);
+      ctShowCueBanner(`${d.name} logged`, d.primary ? 'epi' : 'normal', 1800);
+      // Update epi timer if epinephrine
+      if (d.name === 'Epinephrine') ctState.lastEpiMs = ctState.elapsedMs;
+    });
+  });
+
+  // Shock buttons
+  const defibBtn = document.getElementById('rc-shock-defib');
+  if (defibBtn) defibBtn.addEventListener('click', () => {
+    const e = ccGetElectrical();
+    ctLogEvent('Shock', `Defib ${e.defib.primary} (${e.defib.secondary})`);
+    ctShowCueBanner('Shock logged', 'normal', 1800);
+  });
+  const cvBtn = document.getElementById('rc-shock-cv');
+  if (cvBtn) cvBtn.addEventListener('click', () => {
+    const e = ccGetElectrical();
+    ctLogEvent('Cardiovert', `${e.cardiovert.primary} sync`);
+    ctShowCueBanner('Cardioversion logged', 'normal', 1800);
+  });
+
+  // Rhythm buttons
+  document.querySelectorAll('.rc-rhythm-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      const r = b.dataset.rhythm;
+      if (r === 'ROSC') { ctMarkROSC(); }
+      else { ctMarkRhythm(r); }
+    });
+  });
+
+  // Settings toggles
+  document.querySelectorAll('.ct-toggle').forEach(t => {
+    t.addEventListener('click', () => {
+      const setting = t.dataset.setting;
+      ctState[setting] = !ctState[setting];
+      t.classList.toggle('on', ctState[setting]);
+      ctSaveSettings();
+    });
+  });
+  const bpmSlider = document.getElementById('ct-bpm-slider');
+  if (bpmSlider) bpmSlider.addEventListener('input', (e) => {
+    ctState.bpm = parseInt(e.target.value);
+    document.getElementById('ct-bpm-val').textContent = ctState.bpm + ' BPM';
+    document.querySelector('.ct-pulse-label .v').textContent = ctState.bpm;
+    if (ctState.running) {
+      const cycleMs = performance.now() - ctState.cycleStartMs;
+      ctState.metronomeBeats = Math.floor(cycleMs / (60000 / ctState.bpm));
+    }
+    ctSaveSettings();
+  });
+
+  // Log clear
+  const clearBtn = document.getElementById('ct-log-clear');
+  if (clearBtn) clearBtn.addEventListener('click', () => {
+    if (ctState.log.length === 0) return;
+    if (confirm('Clear all logged events?')) ctClearLog();
+  });
+
+  // Show audio hint if not yet unlocked
+  if (!ctState.audioUnlocked) {
+    const hint = document.getElementById('ct-audio-hint');
+    if (hint) hint.classList.add('show');
+  }
+  ctUpdateDisplay(ctState.elapsedMs % 120000, ctState.elapsedMs);
+  ctRenderLog();
 }
 </script>
 </body>
