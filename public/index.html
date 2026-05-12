@@ -3457,16 +3457,143 @@ function renderRunCode() {
   `;
 }
 
+function rcPartialRender() {
+  // Re-render only the calculated sections — don't touch the patient bar input
+  const content = document.querySelector('.content.ct-wrap');
+  if (!content) return;
+  const patientBar = content.querySelector('.rc-patient-bar');
+  if (!patientBar) return;
+
+  const kg = parseFloat(ccState.weight) || 0;
+  const valid = kg > 0 && kg < 300;
+  ccState.ageBand = rcDeriveBand(kg);
+  ccState.unit = 'kg';
+  const bandLabel = valid ? (ccState.ageBand === 'adult' ? 'Adult' : ccState.ageBand === 'pediatric' ? 'Pediatric' : 'Neonatal') : '';
+
+  // Update the band label inline
+  const fieldLabel = patientBar.querySelector('.cc-field-label');
+  if (fieldLabel) {
+    fieldLabel.innerHTML = `Patient Weight (kg) ${valid ? `— <span style="color:var(--gold);">${bandLabel}</span>` : ''}`;
+  }
+  // Update Start button disabled state
+  const startBtn = document.getElementById('ct-start-btn');
+  if (startBtn) startBtn.disabled = !valid;
+
+  // Remove old calculated sections, keep patient bar + audio hint + cue banner + display
+  const display = content.querySelector('.ct-display');
+  if (!display) return;
+  while (display.nextSibling) display.parentNode.removeChild(display.nextSibling);
+
+  // Re-append the calculated sections
+  if (valid) {
+    const elec = ccGetElectrical();
+    const drugs = ccGetDrugs();
+    const a = ccGetAirway();
+    const drugButtons = drugs.map((d, i) => `
+      <button class="rc-drug-btn ${d.primary ? 'primary' : ''}" data-drug-idx="${i}">
+        <div class="name">${d.name}</div>
+        <div class="dose">${d.weightDose}</div>
+        <div class="vol">${d.readyVol}</div>
+        <div class="ind">${d.indication}</div>
+      </button>
+    `).join('');
+    const html = `
+      <div class="cc-section priority" style="margin-bottom:20px;">
+        <div class="cc-section-head"><span class="cc-section-num">⚡</span><span class="cc-section-title">Shock / Rhythm</span><span class="cc-section-tag">Tap to log</span></div>
+        <div class="rc-drug-grid">
+          <button class="rc-drug-btn rc-shock-btn" id="rc-shock-defib"><div class="name">Defibrillation</div><div class="dose">${elec.defib.primary}</div><div class="vol">${elec.defib.secondary}</div><div class="ind">VF / pVT</div></button>
+          <button class="rc-drug-btn rc-shock-btn" id="rc-shock-cv"><div class="name">Cardioversion</div><div class="dose">${elec.cardiovert.primary}</div><div class="vol">Synchronized</div><div class="ind">Unstable tachycardia</div></button>
+        </div>
+        <div class="rc-action-row" style="margin-top:10px;">
+          <button class="rc-rhythm-btn" data-rhythm="VF/pVT">VF / pVT</button>
+          <button class="rc-rhythm-btn" data-rhythm="PEA">PEA</button>
+          <button class="rc-rhythm-btn" data-rhythm="Asystole">Asystole</button>
+          <button class="rc-rhythm-btn rosc" data-rhythm="ROSC" id="rc-rosc-btn">✓ ROSC</button>
+        </div>
+      </div>
+      <div class="cc-section priority" style="margin-bottom:20px;">
+        <div class="cc-section-head"><span class="cc-section-num">💉</span><span class="cc-section-title">Drugs — Calculated for ${ccFmt(kg, 1)} kg</span><span class="cc-section-tag">Tap to log</span></div>
+        <div class="rc-drug-grid">${drugButtons}</div>
+      </div>
+      <details class="cc-section" style="margin-bottom:20px;">
+        <summary style="cursor:pointer;font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:10px 0;border-bottom:1px solid var(--border);">Airway Reference</summary>
+        <div class="cc-info-grid" style="margin-top:14px;">
+          <div class="cc-info-card"><div class="label">ET Tube</div><div class="value">${a.ettCuffed}</div><div class="detail">Depth: ${a.ettDepth}</div></div>
+          <div class="cc-info-card"><div class="label">IO Needle</div><div class="value" style="font-size:16px;">${a.io}</div></div>
+          <div class="cc-info-card"><div class="label">Supraglottic</div><div class="value" style="font-size:16px;">${a.lma}</div></div>
+          <div class="cc-info-card"><div class="label">BVM</div><div class="value" style="font-size:14px;">${a.bvm}</div></div>
+        </div>
+      </details>
+      <details class="cc-section" style="margin-bottom:20px;">
+        <summary style="cursor:pointer;font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:10px 0;border-bottom:1px solid var(--border);">H's & T's — Reversible Causes</summary>
+        <div class="cc-hts-grid" style="margin-top:14px;">
+          ${CC_HS_TS.map(item => `<div class="cc-ht-card"><div class="label">${item.label}</div><div class="detail">${item.detail}</div></div>`).join('')}
+        </div>
+      </details>
+      <div class="ct-log">
+        <div class="ct-log-title">Code Log<button class="ct-log-clear" id="ct-log-clear">Clear</button></div>
+        <div id="ct-log-list"></div>
+      </div>
+    `;
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = html;
+    while (wrapper.firstChild) content.appendChild(wrapper.firstChild);
+    rcBindDynamicElements();
+  } else {
+    const empty = document.createElement('div');
+    empty.className = 'cc-empty';
+    empty.textContent = 'Enter patient weight to load doses';
+    content.appendChild(empty);
+  }
+}
+
+function rcBindDynamicElements() {
+  const drugs = ccGetDrugs();
+  document.querySelectorAll('[data-drug-idx]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const d = drugs[parseInt(btn.dataset.drugIdx)];
+      if (!d) return;
+      ctLogEvent('Drug', `${d.name} ${d.weightDose} (${d.readyVol})`);
+      ctShowCueBanner(`${d.name} logged`, d.primary ? 'epi' : 'normal', 1800);
+      if (d.name === 'Epinephrine') ctState.lastEpiMs = ctState.elapsedMs;
+    });
+  });
+  const defibBtn = document.getElementById('rc-shock-defib');
+  if (defibBtn) defibBtn.addEventListener('click', () => {
+    const e = ccGetElectrical();
+    ctLogEvent('Shock', `Defib ${e.defib.primary} (${e.defib.secondary})`);
+    ctShowCueBanner('Shock logged', 'normal', 1800);
+  });
+  const cvBtn = document.getElementById('rc-shock-cv');
+  if (cvBtn) cvBtn.addEventListener('click', () => {
+    const e = ccGetElectrical();
+    ctLogEvent('Cardiovert', `${e.cardiovert.primary} sync`);
+    ctShowCueBanner('Cardioversion logged', 'normal', 1800);
+  });
+  document.querySelectorAll('.rc-rhythm-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      const r = b.dataset.rhythm;
+      if (r === 'ROSC') ctMarkROSC();
+      else ctMarkRhythm(r);
+    });
+  });
+  const clearBtn = document.getElementById('ct-log-clear');
+  if (clearBtn) clearBtn.addEventListener('click', () => {
+    if (ctState.log.length === 0) return;
+    if (confirm('Clear all logged events?')) ctClearLog();
+  });
+  ctRenderLog();
+}
+
 function bindRunCodeEvents() {
-  // Patient weight — kg only, drives everything
+  // Patient weight — kg only, drives everything (partial render keeps input focused)
   const w = document.getElementById('rc-weight');
   if (w) {
     w.addEventListener('input', (e) => {
       ccState.weight = e.target.value;
       ccState.unit = 'kg';
-      render();
+      rcPartialRender();
     });
-    // Select all text on focus for easy re-entry
     w.addEventListener('focus', (e) => e.target.select());
     w.addEventListener('click', (e) => e.target.select());
   }
