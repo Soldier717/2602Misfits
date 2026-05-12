@@ -3331,16 +3331,18 @@ function renderRunCode() {
         to log it. Always confirm against current GNFR protocols and medical control.
       </div>
 
-      <div class="rc-patient-bar ${ctState.running ? 'active' : ''}" style="grid-template-columns: 1.5fr auto auto auto;">
+      <div class="rc-patient-bar ${ctState.running ? 'active' : ''}" style="grid-template-columns: 1fr; gap: 14px;">
         <div class="cc-field">
-          <div class="cc-field-label">Patient Weight (kg) ${valid ? `— ${bandLabel}` : ''}</div>
-          <input type="number" id="rc-weight" value="${ccState.weight}" min="0" step="0.5" inputmode="decimal" placeholder="kg"
-            style="background:var(--bg);border:1px solid var(--border-bright);color:var(--text);font-family:'Oswald',sans-serif;font-size:24px;font-weight:600;padding:10px 14px;border-radius:2px;outline:none;text-align:center;width:100%;box-sizing:border-box;">
+          <div class="cc-field-label" style="font-size:12px;letter-spacing:0.2em;margin-bottom:10px;">Patient Weight (kg) ${valid ? `— <span style="color:var(--gold);">${bandLabel}</span>` : ''}</div>
+          <input type="number" id="rc-weight" value="${ccState.weight}" min="0" max="300" step="1" inputmode="numeric" pattern="[0-9]*" placeholder="0" autocomplete="off"
+            style="background:#000;border:2px solid var(--border-bright);color:var(--accent-bright);font-family:'Oswald',sans-serif;font-size:64px;font-weight:700;padding:16px 20px;border-radius:6px;outline:none;text-align:center;width:100%;box-sizing:border-box;letter-spacing:0.05em;line-height:1;">
         </div>
-        <button class="ct-btn ${ctState.running ? 'stop' : 'start'}" id="ct-start-btn" ${valid ? '' : 'disabled'}>
-          ${ctState.running ? '⏸ Pause' : (ctState.elapsedMs > 0 ? '▶ Resume' : '▶ Start Code')}
-        </button>
-        <button class="ct-btn" id="ct-reset-btn">↻ Reset</button>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;">
+          <button class="ct-btn ${ctState.running ? 'stop' : 'start'}" id="ct-start-btn" ${valid ? '' : 'disabled'} style="font-size:18px;padding:18px;">
+            ${ctState.running ? '⏸ Pause' : (ctState.elapsedMs > 0 ? '▶ Resume' : '▶ Start Code')}
+          </button>
+          <button class="ct-btn" id="ct-reset-btn" style="padding:18px;">↻ Reset</button>
+        </div>
       </div>
 
       <div class="ct-audio-hint" id="ct-audio-hint">🔊 Tap "Start Code" to enable audio cues. Some phones require this gesture before sound will play.</div>
@@ -3458,11 +3460,16 @@ function renderRunCode() {
 function bindRunCodeEvents() {
   // Patient weight — kg only, drives everything
   const w = document.getElementById('rc-weight');
-  if (w) w.addEventListener('input', (e) => {
-    ccState.weight = e.target.value;
-    ccState.unit = 'kg';
-    render();
-  });
+  if (w) {
+    w.addEventListener('input', (e) => {
+      ccState.weight = e.target.value;
+      ccState.unit = 'kg';
+      render();
+    });
+    // Select all text on focus for easy re-entry
+    w.addEventListener('focus', (e) => e.target.select());
+    w.addEventListener('click', (e) => e.target.select());
+  }
 
   // Timer controls — reuse Code Timer state/functions
   ctState.pulseDotEl = document.getElementById('ct-pulse-dot');
