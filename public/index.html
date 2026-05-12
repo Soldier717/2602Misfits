@@ -2439,6 +2439,43 @@ function ctEnsureAudio() {
   return ctState.audioCtx;
 }
 
+function ctUnlockIOSAudio() {
+  // iOS Safari needs:
+  //  1. AudioContext resumed during a user gesture
+  //  2. A silent audio element played to flip the audio session to "playback"
+  //     (otherwise the hardware silent switch mutes Web Audio)
+  const ctx = ctEnsureAudio();
+  if (ctx) {
+    // Play a silent buffer to fully unlock
+    try {
+      const buffer = ctx.createBuffer(1, 1, 22050);
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(ctx.destination);
+      source.start(0);
+    } catch (e) {}
+  }
+  // Prime speech synthesis with a silent utterance
+  if ('speechSynthesis' in window) {
+    try {
+      const u = new SpeechSynthesisUtterance(' ');
+      u.volume = 0;
+      window.speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+  // Play a silent HTML5 audio to set session category to "playback" on iOS
+  // (this is what lets sound play with the mute switch on)
+  if (!ctState._silentAudio) {
+    try {
+      const audio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+      audio.loop = true;
+      audio.play().catch(() => {});
+      ctState._silentAudio = audio;
+    } catch (e) {}
+  }
+  ctState.audioUnlocked = true;
+}
+
 function ctPlayTone(freq, durationMs, volume = 0.3, type = 'sine') {
   if (!ctState.toneOn) return;
   const ctx = ctEnsureAudio();
@@ -2601,11 +2638,7 @@ function ctRenderLog() {
 }
 
 function ctStart() {
-  ctEnsureAudio();
-  if (ctState.voiceOn && 'speechSynthesis' in window) {
-    try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; window.speechSynthesis.speak(u); } catch (e) {}
-  }
-  ctState.audioUnlocked = true;
+  ctUnlockIOSAudio();
   if (ctState.running) return;
   ctState.running = true;
   const now = performance.now();
@@ -2680,7 +2713,7 @@ function renderCodeTimer() {
         and 2:00 (rhythm check). Epi reminder is configurable. Always follow current protocols and direction
         from medical control. Not a medical device.
       </div>
-      <div class="ct-audio-hint" id="ct-audio-hint">🔊 Tap "Start CPR" to enable audio cues. Some phones require this gesture before sound will play.</div>
+      <div class="ct-audio-hint" id="ct-audio-hint">🔊 Tap <strong>Start CPR</strong> to enable audio cues. <strong style="color:var(--gold);">iPhone:</strong> turn OFF the silent/mute switch on the side of the phone, or audio will not play.</div>
       <div class="ct-cue-banner" id="ct-cue-banner"></div>
       <div class="ct-display" id="ct-display">
         <div class="ct-total-time">Total: <span class="v" id="ct-total-val">0:00</span></div>
@@ -3345,7 +3378,7 @@ function renderRunCode() {
         </div>
       </div>
 
-      <div class="ct-audio-hint" id="ct-audio-hint">🔊 Tap "Start Code" to enable audio cues. Some phones require this gesture before sound will play.</div>
+      <div class="ct-audio-hint" id="ct-audio-hint">🔊 Tap <strong>Start Code</strong> to enable audio cues. <strong style="color:var(--gold);">iPhone:</strong> turn OFF the silent/mute switch on the side of the phone, or audio will not play.</div>
       <div class="ct-cue-banner" id="ct-cue-banner"></div>
 
       <div class="ct-display" id="ct-display">
