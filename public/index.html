@@ -911,6 +911,125 @@
     .doc-item { grid-template-columns: 36px 1fr auto; }
     .doc-type { display: none; }
   }
+
+  /* ============================================================
+     CODE TIMER
+  ============================================================ */
+  .ct-wrap { max-width: 980px; }
+
+  .ct-disclaimer {
+    background: linear-gradient(90deg, rgba(200,52,26,0.15), rgba(200,52,26,0.05));
+    border: 1px solid var(--accent);
+    border-left: 4px solid var(--accent);
+    padding: 14px 18px;
+    border-radius: 2px;
+    margin-bottom: 24px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .ct-disclaimer strong {
+    display: block;
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-bright);
+    margin-bottom: 6px;
+  }
+
+  .ct-display {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 40px 24px;
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .ct-display::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(200,52,26,0.1), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .ct-display.warning::before { opacity: 0.6; }
+  .ct-display.critical::before { opacity: 1; background: radial-gradient(circle at center, rgba(200,52,26,0.25), transparent 60%); }
+  .ct-display.flash { animation: ct-flash 0.3s ease-out; }
+  @keyframes ct-flash { 0% { background: var(--accent); } 100% { background: var(--bg-elev); } }
+
+  .ct-cycle-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 8px; position: relative; }
+  .ct-cycle-num { color: var(--gold); font-weight: 700; }
+  .ct-time { font-family: 'Oswald', sans-serif; font-size: 140px; font-weight: 700; line-height: 0.9; letter-spacing: -0.02em; color: var(--text); margin: 4px 0; position: relative; font-variant-numeric: tabular-nums; transition: color 0.3s; }
+  .ct-display.warning .ct-time { color: var(--gold); }
+  .ct-display.critical .ct-time { color: var(--accent-bright); }
+  .ct-time-sub { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase; position: relative; }
+  .ct-total-time { position: absolute; top: 16px; right: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); letter-spacing: 0.15em; }
+  .ct-total-time .v { color: var(--text); font-weight: 700; }
+
+  .ct-pulse-area { display: flex; justify-content: center; align-items: center; margin-top: 24px; height: 60px; position: relative; }
+  .ct-pulse-dot { width: 20px; height: 20px; border-radius: 50%; background: var(--accent); opacity: 0.2; transition: opacity 0.05s, transform 0.05s; }
+  .ct-pulse-dot.beat { opacity: 1; transform: scale(1.6); box-shadow: 0 0 30px rgba(200,52,26,0.7); }
+  .ct-pulse-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase; margin-left: 14px; }
+  .ct-pulse-label .v { color: var(--accent-bright); font-weight: 700; }
+
+  .ct-cue-banner { background: var(--accent); color: white; text-align: center; padding: 0 20px; border-radius: 2px; margin-bottom: 20px; font-family: 'Oswald', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0; transform: translateY(-10px); transition: all 0.3s; pointer-events: none; height: 0; overflow: hidden; }
+  .ct-cue-banner.show { opacity: 1; transform: translateY(0); height: auto; padding: 14px 20px; }
+  .ct-cue-banner.epi { background: var(--gold); color: #000; }
+
+  .ct-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+  .ct-btn { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 16px; letter-spacing: 0.12em; text-transform: uppercase; padding: 16px 20px; border-radius: 2px; cursor: pointer; border: 1px solid var(--border-bright); background: var(--bg-elev-2); color: var(--text); transition: all 0.15s; }
+  .ct-btn:hover { border-color: var(--text-dim); }
+  .ct-btn.start { background: var(--success); border-color: var(--success); color: white; }
+  .ct-btn.start:hover { background: #5ab06f; border-color: #5ab06f; }
+  .ct-btn.stop { background: var(--accent); border-color: var(--accent); color: white; }
+  .ct-btn.stop:hover { background: var(--accent-bright); border-color: var(--accent-bright); }
+  .ct-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .ct-settings { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 2px; padding: 20px; margin-bottom: 24px; }
+  .ct-settings-title { font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .ct-toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .ct-toggle-row:last-child { border-bottom: none; }
+  .ct-toggle-label { display: flex; flex-direction: column; gap: 2px; }
+  .ct-toggle-label .main { font-family: 'Oswald', sans-serif; font-weight: 500; font-size: 14px; letter-spacing: 0.04em; }
+  .ct-toggle-label .sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); letter-spacing: 0.1em; }
+  .ct-toggle { position: relative; width: 44px; height: 24px; background: var(--bg-elev-2); border: 1px solid var(--border-bright); border-radius: 12px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+  .ct-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: var(--text-dim); border-radius: 50%; transition: all 0.2s; }
+  .ct-toggle.on { background: var(--accent); border-color: var(--accent); }
+  .ct-toggle.on::after { left: 22px; background: white; }
+  .ct-bpm-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .ct-bpm-row input[type="range"] { flex: 1; accent-color: var(--accent); }
+  .ct-bpm-row .ct-bpm-val { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 18px; color: var(--accent-bright); min-width: 70px; text-align: right; }
+
+  .ct-log { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 2px; padding: 16px 20px; max-height: 240px; overflow-y: auto; }
+  .ct-log-title { font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .ct-log-clear { background: none; border: 1px solid var(--border-bright); color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; cursor: pointer; }
+  .ct-log-clear:hover { border-color: var(--accent); color: var(--accent); }
+  .ct-log-entry { display: grid; grid-template-columns: 70px 80px 1fr; gap: 12px; padding: 6px 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); border-bottom: 1px solid rgba(255,255,255,0.03); }
+  .ct-log-entry:last-child { border-bottom: none; }
+  .ct-log-entry .time { color: var(--gold); font-weight: 700; }
+  .ct-log-entry .type { color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .ct-log-entry .note { color: var(--text); }
+  .ct-log-empty { text-align: center; padding: 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; }
+
+  .ct-events { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 24px; }
+  .ct-event-btn { background: var(--bg-elev-2); border: 1px solid var(--border-bright); color: var(--text); font-family: 'Oswald', sans-serif; font-weight: 500; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 12px; border-radius: 2px; cursor: pointer; transition: all 0.15s; }
+  .ct-event-btn:hover { border-color: var(--accent); color: var(--accent-bright); }
+
+  .ct-audio-hint { background: rgba(212,163,65,0.1); border: 1px solid var(--gold); border-left: 3px solid var(--gold); padding: 10px 14px; border-radius: 2px; margin-bottom: 16px; font-size: 12px; color: var(--text-dim); display: none; }
+  .ct-audio-hint.show { display: block; }
+
+  @media (max-width: 720px) {
+    .ct-time { font-size: 96px; }
+    .ct-controls { grid-template-columns: 1fr; }
+    .ct-display { padding: 28px 16px; }
+    .ct-total-time { position: static; margin-bottom: 12px; }
+    .ct-cue-banner.show { font-size: 16px; }
+  }
 </style>
 </head>
 <body>
@@ -967,6 +1086,10 @@
       <div class="nav-item" data-page="links">
         <span class="nav-num">QL</span>
         <span class="nav-text">Quick Links</span>
+      </div>
+      <div class="nav-item" data-page="codetimer">
+        <span class="nav-num">CT</span>
+        <span class="nav-text">Code Timer</span>
       </div>
     </div>
 
@@ -1245,6 +1368,9 @@ function render() {
     main.innerHTML = renderDocs();
   } else if (currentPage === 'links') {
     main.innerHTML = renderLinks();
+  } else if (currentPage === 'codetimer') {
+    main.innerHTML = renderCodeTimer();
+    bindCodeTimerEvents();
   } else if (currentPage.startsWith('week-')) {
     const num = parseInt(currentPage.split('-')[1]);
     main.innerHTML = renderWeek(num);
@@ -2098,6 +2224,453 @@ document.addEventListener('keydown', (e) => {
   render();
   document.getElementById('loadingScreen').classList.add('hide');
 })();
+
+/* ============================================================
+   CODE TIMER — CPR Metronome + Cycle Cues
+============================================================ */
+const ctState = {
+  running: false,
+  startedAt: 0,
+  elapsedMs: 0,
+  cycleStartMs: 0,
+  cycleNum: 1,
+  lastEpiMs: 0,
+  epiIntervalMs: 3 * 60 * 1000,
+  log: [],
+  bpm: 110,
+  metronomeOn: true,
+  ventCueOn: true,
+  voiceOn: true,
+  toneOn: true,
+  epiReminderOn: true,
+  advancedAirway: false,
+  audioCtx: null,
+  audioUnlocked: false,
+  rafId: null,
+  metronomeBeats: 0,
+  ventCount: 0,
+  cuesFired: {},
+  pulseDotEl: null,
+};
+
+const CT_STORAGE_KEY = 'gnfr-codetimer-settings-v1';
+
+function ctLoadSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem(CT_STORAGE_KEY));
+    if (s) {
+      ctState.bpm = s.bpm ?? 110;
+      ctState.metronomeOn = s.metronomeOn ?? true;
+      ctState.ventCueOn = s.ventCueOn ?? true;
+      ctState.voiceOn = s.voiceOn ?? true;
+      ctState.toneOn = s.toneOn ?? true;
+      ctState.epiReminderOn = s.epiReminderOn ?? true;
+      ctState.advancedAirway = s.advancedAirway ?? false;
+      ctState.epiIntervalMs = s.epiIntervalMs ?? 3 * 60 * 1000;
+    }
+  } catch (e) {}
+}
+function ctSaveSettings() {
+  try {
+    localStorage.setItem(CT_STORAGE_KEY, JSON.stringify({
+      bpm: ctState.bpm,
+      metronomeOn: ctState.metronomeOn,
+      ventCueOn: ctState.ventCueOn,
+      voiceOn: ctState.voiceOn,
+      toneOn: ctState.toneOn,
+      epiReminderOn: ctState.epiReminderOn,
+      advancedAirway: ctState.advancedAirway,
+      epiIntervalMs: ctState.epiIntervalMs,
+    }));
+  } catch (e) {}
+}
+
+function ctEnsureAudio() {
+  if (!ctState.audioCtx) {
+    try { ctState.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { return null; }
+  }
+  if (ctState.audioCtx.state === 'suspended') ctState.audioCtx.resume();
+  return ctState.audioCtx;
+}
+
+function ctPlayTone(freq, durationMs, volume = 0.3, type = 'sine') {
+  if (!ctState.toneOn) return;
+  const ctx = ctEnsureAudio();
+  if (!ctx) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + 0.005);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + durationMs / 1000);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + durationMs / 1000 + 0.02);
+}
+
+function ctClickTick() { ctPlayTone(1200, 30, 0.12, 'square'); }
+function ctVentTone() { ctPlayTone(660, 100, 0.2, 'sine'); }
+function ctCueTone() { ctPlayTone(880, 120, 0.35, 'triangle'); setTimeout(() => ctPlayTone(1100, 180, 0.35, 'triangle'), 150); }
+function ctEpiTone() { ctPlayTone(523, 200, 0.3, 'sine'); }
+
+function ctSpeak(text, options = {}) {
+  if (!ctState.voiceOn) return;
+  if (!('speechSynthesis' in window)) return;
+  try {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = options.rate || 1.05;
+    u.pitch = options.pitch || 1.0;
+    u.volume = options.volume || 0.9;
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+function ctFireCue(type) {
+  if (ctState.cuesFired[type]) return;
+  ctState.cuesFired[type] = true;
+  if (type === 'prepare-charge') {
+    ctShowCueBanner('Prepare to charge', 'normal', 3500);
+    ctCueTone();
+    ctSpeak('Prepare to charge');
+    ctLogEvent('Cue', 'Prepare to charge (1:45)');
+  } else if (type === 'rhythm-check') {
+    ctShowCueBanner('Rhythm Check', 'normal', 3500);
+    ctCueTone();
+    ctSpeak('Rhythm check');
+    ctLogEvent('Cycle End', `End cycle ${ctState.cycleNum} — rhythm check`);
+  }
+}
+
+function ctShowCueBanner(text, style, durationMs) {
+  const banner = document.getElementById('ct-cue-banner');
+  if (!banner) return;
+  banner.textContent = text;
+  banner.classList.remove('epi');
+  if (style === 'epi') banner.classList.add('epi');
+  banner.classList.add('show');
+  clearTimeout(banner._t);
+  banner._t = setTimeout(() => banner.classList.remove('show'), durationMs);
+}
+
+function ctTick() {
+  if (!ctState.running) return;
+  const now = performance.now();
+  ctState.elapsedMs = now - ctState.startedAt;
+  const cycleElapsedMs = now - ctState.cycleStartMs;
+  const cycleSec = Math.floor(cycleElapsedMs / 1000);
+  ctUpdateDisplay(cycleElapsedMs, ctState.elapsedMs);
+
+  if (ctState.metronomeOn) {
+    const beatIntervalMs = 60000 / ctState.bpm;
+    const expectedBeats = Math.floor(cycleElapsedMs / beatIntervalMs);
+    while (ctState.metronomeBeats < expectedBeats) {
+      ctState.metronomeBeats++;
+      ctClickTick();
+      ctFlashPulse();
+    }
+  }
+
+  if (ctState.ventCueOn && ctState.advancedAirway) {
+    const expectedVents = Math.floor(cycleElapsedMs / 6000);
+    while (ctState.ventCount < expectedVents) {
+      ctState.ventCount++;
+      if (ctState.ventCount > 0) {
+        ctVentTone();
+        ctSpeak('breathe', { rate: 1.15, volume: 0.7 });
+      }
+    }
+  }
+
+  if (cycleElapsedMs >= 105000 && cycleElapsedMs < 106000) ctFireCue('prepare-charge');
+  if (cycleElapsedMs >= 120000) { ctFireCue('rhythm-check'); ctStartNewCycle(); }
+
+  if (ctState.epiReminderOn && ctState.elapsedMs - ctState.lastEpiMs >= ctState.epiIntervalMs) {
+    ctState.lastEpiMs = ctState.elapsedMs;
+    ctShowCueBanner('Consider epinephrine', 'epi', 4000);
+    ctEpiTone();
+    ctSpeak('Consider epinephrine');
+    ctLogEvent('Epi Cue', `Consider epi @ ${ctFormatTime(ctState.elapsedMs)}`);
+  }
+
+  const display = document.getElementById('ct-display');
+  if (display) {
+    display.classList.remove('warning', 'critical');
+    if (cycleSec >= 105) display.classList.add('critical');
+    else if (cycleSec >= 90) display.classList.add('warning');
+  }
+  ctState.rafId = requestAnimationFrame(ctTick);
+}
+
+function ctStartNewCycle() {
+  ctState.cycleNum++;
+  ctState.cycleStartMs = performance.now();
+  ctState.metronomeBeats = 0;
+  ctState.ventCount = 0;
+  ctState.cuesFired = {};
+  const display = document.getElementById('ct-display');
+  if (display) { display.classList.add('flash'); setTimeout(() => display.classList.remove('flash'), 300); }
+}
+
+function ctFlashPulse() {
+  if (!ctState.pulseDotEl) return;
+  ctState.pulseDotEl.classList.add('beat');
+  setTimeout(() => { if (ctState.pulseDotEl) ctState.pulseDotEl.classList.remove('beat'); }, 80);
+}
+
+function ctUpdateDisplay(cycleMs, totalMs) {
+  const timeEl = document.getElementById('ct-time');
+  const cycleEl = document.getElementById('ct-cycle-num');
+  const totalEl = document.getElementById('ct-total-val');
+  if (timeEl) timeEl.textContent = ctFormatTime(cycleMs);
+  if (cycleEl) cycleEl.textContent = ctState.cycleNum;
+  if (totalEl) totalEl.textContent = ctFormatTime(totalMs);
+}
+
+function ctFormatTime(ms) {
+  const totalSec = Math.floor(ms / 1000);
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  return `${min}:${sec.toString().padStart(2, '0')}`;
+}
+
+function ctLogEvent(type, note) {
+  const entry = { time: ctFormatTime(ctState.elapsedMs), type, note, ts: Date.now() };
+  ctState.log.unshift(entry);
+  ctRenderLog();
+}
+
+function ctRenderLog() {
+  const logEl = document.getElementById('ct-log-list');
+  if (!logEl) return;
+  if (ctState.log.length === 0) { logEl.innerHTML = '<div class="ct-log-empty">No events logged yet</div>'; return; }
+  logEl.innerHTML = ctState.log.map(e => `
+    <div class="ct-log-entry">
+      <div class="time">${e.time}</div>
+      <div class="type">${e.type}</div>
+      <div class="note">${e.note}</div>
+    </div>
+  `).join('');
+}
+
+function ctStart() {
+  ctEnsureAudio();
+  if (ctState.voiceOn && 'speechSynthesis' in window) {
+    try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; window.speechSynthesis.speak(u); } catch (e) {}
+  }
+  ctState.audioUnlocked = true;
+  if (ctState.running) return;
+  ctState.running = true;
+  const now = performance.now();
+  if (ctState.elapsedMs > 0) {
+    ctState.startedAt = now - ctState.elapsedMs;
+    const cyclePos = ctState.elapsedMs % 120000;
+    ctState.cycleStartMs = now - cyclePos;
+  } else {
+    ctState.startedAt = now;
+    ctState.cycleStartMs = now;
+    ctState.cycleNum = 1;
+    ctState.metronomeBeats = 0;
+    ctState.ventCount = 0;
+    ctState.cuesFired = {};
+    ctState.lastEpiMs = 0;
+    ctLogEvent('Start', 'Code timer started');
+  }
+  ctUpdateControlButtons();
+  ctTick();
+}
+
+function ctPause() {
+  if (!ctState.running) return;
+  ctState.running = false;
+  cancelAnimationFrame(ctState.rafId);
+  ctLogEvent('Pause', `Paused @ ${ctFormatTime(ctState.elapsedMs)}`);
+  ctUpdateControlButtons();
+}
+
+function ctReset() {
+  ctState.running = false;
+  cancelAnimationFrame(ctState.rafId);
+  ctState.elapsedMs = 0;
+  ctState.cycleNum = 1;
+  ctState.metronomeBeats = 0;
+  ctState.ventCount = 0;
+  ctState.cuesFired = {};
+  ctState.lastEpiMs = 0;
+  ctUpdateDisplay(0, 0);
+  const display = document.getElementById('ct-display');
+  if (display) display.classList.remove('warning', 'critical');
+  ctUpdateControlButtons();
+}
+
+function ctClearLog() { ctState.log = []; ctRenderLog(); }
+function ctMarkEpiGiven() { ctLogEvent('Drug', `Epinephrine given @ ${ctFormatTime(ctState.elapsedMs)}`); ctState.lastEpiMs = ctState.elapsedMs; ctShowCueBanner('Epi logged', 'epi', 1800); }
+function ctMarkShock() { ctLogEvent('Shock', `Shock delivered @ ${ctFormatTime(ctState.elapsedMs)}`); ctShowCueBanner('Shock logged', 'normal', 1800); }
+function ctMarkROSC() { ctLogEvent('ROSC', `ROSC @ ${ctFormatTime(ctState.elapsedMs)}`); ctShowCueBanner('ROSC logged', 'normal', 2500); ctPause(); }
+function ctMarkRhythm(rhythm) { ctLogEvent('Rhythm', `${rhythm} @ ${ctFormatTime(ctState.elapsedMs)}`); }
+
+function ctUpdateControlButtons() {
+  const start = document.getElementById('ct-start-btn');
+  if (!start) return;
+  if (ctState.running) { start.textContent = '⏸ Pause'; start.classList.remove('start'); start.classList.add('stop'); }
+  else if (ctState.elapsedMs > 0) { start.textContent = '▶ Resume'; start.classList.add('start'); start.classList.remove('stop'); }
+  else { start.textContent = '▶ Start CPR'; start.classList.add('start'); start.classList.remove('stop'); }
+}
+
+function renderCodeTimer() {
+  ctLoadSettings();
+  return `
+    <div class="header">
+      <img src="/gnfr-badge.jpg" alt="GNFR" class="header-badge" onclick="document.querySelector('.nav-item[data-page=home]').click()" title="Back to Command">
+      <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> CODE TIMER</div>
+      <h1 class="page-title">Code <span class="accent">Timer</span></h1>
+      <div class="page-meta">CPR cycle metronome // Voice + tone cues // Training & reference</div>
+    </div>
+    <div class="content ct-wrap">
+      <div class="ct-disclaimer">
+        <strong>⚠ Training & Reference Tool</strong>
+        For practice and study. CPR rate 100–120/min per AHA. Cycle cues fire at 1:45 (prepare to charge)
+        and 2:00 (rhythm check). Epi reminder is configurable. Always follow current protocols and direction
+        from medical control. Not a medical device.
+      </div>
+      <div class="ct-audio-hint" id="ct-audio-hint">🔊 Tap "Start CPR" to enable audio cues. Some phones require this gesture before sound will play.</div>
+      <div class="ct-cue-banner" id="ct-cue-banner"></div>
+      <div class="ct-display" id="ct-display">
+        <div class="ct-total-time">Total: <span class="v" id="ct-total-val">0:00</span></div>
+        <div class="ct-cycle-label">Cycle <span class="ct-cycle-num" id="ct-cycle-num">${ctState.cycleNum}</span> · CPR Time</div>
+        <div class="ct-time" id="ct-time">${ctFormatTime(ctState.elapsedMs % 120000)}</div>
+        <div class="ct-time-sub">of 2:00 — rhythm check</div>
+        <div class="ct-pulse-area">
+          <div class="ct-pulse-dot" id="ct-pulse-dot"></div>
+          <div class="ct-pulse-label"><span class="v">${ctState.bpm}</span> BPM</div>
+        </div>
+      </div>
+      <div class="ct-controls">
+        <button class="ct-btn start" id="ct-start-btn">▶ Start CPR</button>
+        <button class="ct-btn" id="ct-reset-btn">↻ Reset</button>
+      </div>
+      <div class="ct-events">
+        <button class="ct-event-btn" data-action="shock">⚡ Shock</button>
+        <button class="ct-event-btn" data-action="epi">💉 Epi Given</button>
+        <button class="ct-event-btn" data-action="vf">VF/pVT</button>
+        <button class="ct-event-btn" data-action="pea">PEA</button>
+        <button class="ct-event-btn" data-action="asystole">Asystole</button>
+        <button class="ct-event-btn" data-action="rosc">✓ ROSC</button>
+      </div>
+      <div class="ct-settings">
+        <div class="ct-settings-title">Audio & Cue Settings</div>
+        <div class="ct-toggle-row">
+          <div class="ct-toggle-label"><div class="main">Compression Metronome</div><div class="sub">${ctState.bpm} BPM clicks</div></div>
+          <div class="ct-toggle ${ctState.metronomeOn ? 'on' : ''}" data-setting="metronomeOn"></div>
+        </div>
+        <div class="ct-bpm-row">
+          <div class="ct-toggle-label" style="flex:1"><div class="main">Compression Rate</div><div class="sub">AHA: 100–120 BPM</div></div>
+          <input type="range" id="ct-bpm-slider" min="100" max="120" step="1" value="${ctState.bpm}">
+          <div class="ct-bpm-val" id="ct-bpm-val">${ctState.bpm} BPM</div>
+        </div>
+        <div class="ct-toggle-row">
+          <div class="ct-toggle-label"><div class="main">Advanced Airway</div><div class="sub">Enables 1 breath / 6s "breathe" cue</div></div>
+          <div class="ct-toggle ${ctState.advancedAirway ? 'on' : ''}" data-setting="advancedAirway"></div>
+        </div>
+        <div class="ct-toggle-row">
+          <div class="ct-toggle-label"><div class="main">Voice Cues</div><div class="sub">"Prepare to charge" · "Rhythm check"</div></div>
+          <div class="ct-toggle ${ctState.voiceOn ? 'on' : ''}" data-setting="voiceOn"></div>
+        </div>
+        <div class="ct-toggle-row">
+          <div class="ct-toggle-label"><div class="main">Tones</div><div class="sub">Beeps for cues & metronome</div></div>
+          <div class="ct-toggle ${ctState.toneOn ? 'on' : ''}" data-setting="toneOn"></div>
+        </div>
+        <div class="ct-toggle-row">
+          <div class="ct-toggle-label"><div class="main">Epinephrine Reminder</div><div class="sub">Cue every ${Math.round(ctState.epiIntervalMs / 60000 * 10) / 10} min</div></div>
+          <div class="ct-toggle ${ctState.epiReminderOn ? 'on' : ''}" data-setting="epiReminderOn"></div>
+        </div>
+        <div class="ct-bpm-row">
+          <div class="ct-toggle-label" style="flex:1"><div class="main">Epi Interval</div><div class="sub">AHA range: 3–5 min</div></div>
+          <input type="range" id="ct-epi-slider" min="3" max="5" step="0.5" value="${ctState.epiIntervalMs / 60000}">
+          <div class="ct-bpm-val" id="ct-epi-val">${ctState.epiIntervalMs / 60000} min</div>
+        </div>
+      </div>
+      <div class="ct-log">
+        <div class="ct-log-title">Event Log<button class="ct-log-clear" id="ct-log-clear">Clear</button></div>
+        <div id="ct-log-list"><div class="ct-log-empty">No events logged yet</div></div>
+      </div>
+    </div>
+  `;
+}
+
+function bindCodeTimerEvents() {
+  if (!ctState.audioUnlocked) {
+    const hint = document.getElementById('ct-audio-hint');
+    if (hint) hint.classList.add('show');
+  }
+  ctState.pulseDotEl = document.getElementById('ct-pulse-dot');
+  const startBtn = document.getElementById('ct-start-btn');
+  if (startBtn) startBtn.addEventListener('click', () => {
+    if (ctState.running) ctPause(); else ctStart();
+    const hint = document.getElementById('ct-audio-hint');
+    if (hint) hint.classList.remove('show');
+  });
+  const resetBtn = document.getElementById('ct-reset-btn');
+  if (resetBtn) resetBtn.addEventListener('click', () => {
+    if (ctState.elapsedMs > 0 && !confirm('Reset timer? Current cycle data will be lost.')) return;
+    ctReset();
+  });
+  document.querySelectorAll('.ct-event-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.action;
+      if (action === 'shock') ctMarkShock();
+      else if (action === 'epi') ctMarkEpiGiven();
+      else if (action === 'rosc') ctMarkROSC();
+      else if (action === 'vf') ctMarkRhythm('VF/pVT');
+      else if (action === 'pea') ctMarkRhythm('PEA');
+      else if (action === 'asystole') ctMarkRhythm('Asystole');
+    });
+  });
+  document.querySelectorAll('.ct-toggle').forEach(t => {
+    t.addEventListener('click', () => {
+      const setting = t.dataset.setting;
+      ctState[setting] = !ctState[setting];
+      t.classList.toggle('on', ctState[setting]);
+      ctSaveSettings();
+    });
+  });
+  const bpmSlider = document.getElementById('ct-bpm-slider');
+  const bpmVal = document.getElementById('ct-bpm-val');
+  const pulseLabel = document.querySelector('.ct-pulse-label .v');
+  if (bpmSlider) bpmSlider.addEventListener('input', (e) => {
+    ctState.bpm = parseInt(e.target.value);
+    if (bpmVal) bpmVal.textContent = ctState.bpm + ' BPM';
+    if (pulseLabel) pulseLabel.textContent = ctState.bpm;
+    const subText = document.querySelector('[data-setting="metronomeOn"]').closest('.ct-toggle-row').querySelector('.sub');
+    if (subText) subText.textContent = ctState.bpm + ' BPM clicks';
+    if (ctState.running) {
+      const cycleMs = performance.now() - ctState.cycleStartMs;
+      const beatInterval = 60000 / ctState.bpm;
+      ctState.metronomeBeats = Math.floor(cycleMs / beatInterval);
+    }
+    ctSaveSettings();
+  });
+  const epiSlider = document.getElementById('ct-epi-slider');
+  const epiVal = document.getElementById('ct-epi-val');
+  if (epiSlider) epiSlider.addEventListener('input', (e) => {
+    const min = parseFloat(e.target.value);
+    ctState.epiIntervalMs = min * 60 * 1000;
+    if (epiVal) epiVal.textContent = min + ' min';
+    const subText = document.querySelector('[data-setting="epiReminderOn"]').closest('.ct-toggle-row').querySelector('.sub');
+    if (subText) subText.textContent = 'Cue every ' + min + ' min';
+    ctSaveSettings();
+  });
+  const clearBtn = document.getElementById('ct-log-clear');
+  if (clearBtn) clearBtn.addEventListener('click', () => {
+    if (ctState.log.length === 0) return;
+    if (confirm('Clear all logged events?')) ctClearLog();
+  });
+  ctUpdateDisplay(ctState.elapsedMs % 120000, ctState.elapsedMs);
+  ctUpdateControlButtons();
+  ctRenderLog();
+}
 </script>
 </body>
 </html>
