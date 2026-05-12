@@ -2556,7 +2556,14 @@ function ctTick() {
   }
 
   if (ctState.ventCueOn && ctState.advancedAirway) {
-    const expectedVents = Math.floor(cycleElapsedMs / 6000);
+    // Breath interval based on patient size (derived from weight):
+    //   Adult (≥40 kg): every 6 seconds (10/min)
+    //   Pediatric (5–39 kg): every 4 seconds (15/min)
+    //   Neonatal (<5 kg): every 3 seconds (20/min)
+    const kg = parseFloat(ccState.weight) || 70;
+    const band = kg < 5 ? 'neonatal' : kg < 40 ? 'pediatric' : 'adult';
+    const ventIntervalMs = band === 'adult' ? 6000 : band === 'pediatric' ? 4000 : 3000;
+    const expectedVents = Math.floor(cycleElapsedMs / ventIntervalMs);
     while (ctState.ventCount < expectedVents) {
       ctState.ventCount++;
       if (ctState.ventCount > 0) {
@@ -2749,7 +2756,7 @@ function renderCodeTimer() {
           <div class="ct-bpm-val" id="ct-bpm-val">${ctState.bpm} BPM</div>
         </div>
         <div class="ct-toggle-row">
-          <div class="ct-toggle-label"><div class="main">Advanced Airway</div><div class="sub">Enables 1 breath / 6s "breathe" cue</div></div>
+          <div class="ct-toggle-label"><div class="main">Advanced Airway</div><div class="sub">Breath cue: adult 6s · peds 4s · neo 3s</div></div>
           <div class="ct-toggle ${ctState.advancedAirway ? 'on' : ''}" data-setting="advancedAirway"></div>
         </div>
         <div class="ct-toggle-row">
@@ -3460,7 +3467,7 @@ function renderRunCode() {
               <div class="ct-bpm-val" id="ct-bpm-val">${ctState.bpm} BPM</div>
             </div>
             <div class="ct-toggle-row">
-              <div class="ct-toggle-label"><div class="main">Advanced Airway</div><div class="sub">Enables 1 breath / 6s cue</div></div>
+              <div class="ct-toggle-label"><div class="main">Advanced Airway</div><div class="sub">Adult 6s · Peds 4s · Neo 3s</div></div>
               <div class="ct-toggle ${ctState.advancedAirway ? 'on' : ''}" data-setting="advancedAirway"></div>
             </div>
             <div class="ct-toggle-row">
