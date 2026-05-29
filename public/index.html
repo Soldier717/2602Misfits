@@ -1229,6 +1229,76 @@
   .rc-drug-row.dose .value { color: var(--accent-bright); }
   .rc-drug-row.package .value { color: var(--text); font-size: 13px; font-weight: 500; letter-spacing: 0.02em; }
   .rc-drug-row.delivery .value { color: var(--gold); font-size: 15px; }
+
+  /* Rhythm Check Decision Panel — appears at 2:00 */
+  .rc-decision {
+    background: linear-gradient(135deg, #2a0a0a, #1a0505);
+    border: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 16px;
+    animation: rc-decision-pulse 1.5s ease-in-out infinite;
+    display: none;
+  }
+  .rc-decision.show { display: block; }
+  @keyframes rc-decision-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(232,65,42,0.5); }
+    50% { box-shadow: 0 0 24px 4px rgba(232,65,42,0.4); }
+  }
+  .rc-decision-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-bright);
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .rc-decision-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .rc-decision-btn {
+    border: 2px solid;
+    border-radius: 6px;
+    padding: 18px 12px;
+    cursor: pointer;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    transition: transform 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .rc-decision-btn:active { transform: scale(0.97); }
+  .rc-decision-btn .big {
+    font-size: 22px;
+    line-height: 1;
+  }
+  .rc-decision-btn .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    opacity: 0.9;
+  }
+  .rc-decision-btn.shock {
+    background: var(--accent);
+    border-color: var(--accent-bright);
+    color: white;
+  }
+  .rc-decision-btn.shock:hover { background: var(--accent-bright); }
+  .rc-decision-btn.noshock {
+    background: var(--gold);
+    border-color: #f0b550;
+    color: #1a1208;
+  }
+  .rc-decision-btn.noshock:hover { background: #f0b550; }
 </style>
 </head>
 <body>
@@ -2581,10 +2651,12 @@ function ctFireCue(type) {
     ctSpeak('Precharge monitor');
     ctLogEvent('Cue', 'Precharge monitor (1:45)');
   } else if (type === 'rhythm-check') {
-    ctShowCueBanner('Rhythm Check', 'normal', 3500);
+    ctShowCueBanner('Rhythm Check — Shock or No Shock?', 'normal', 3500);
     ctCueTone();
-    ctSpeak('Rhythm check');
+    ctSpeak('Rhythm check. Shock or no shock?');
     ctLogEvent('Cycle End', `End cycle ${ctState.cycleNum} — rhythm check`);
+    // Show the Shock / No Shock decision panel
+    rcShowDecisionPanel();
     // If a shockable rhythm was logged this cycle, prompt to deliver the shock
     if (ctState.lastRhythm === 'shockable') {
       setTimeout(() => {
@@ -2785,6 +2857,7 @@ function ctReset() {
   ctUpdateDisplay(0, 0);
   const display = document.getElementById('ct-display');
   if (display) display.classList.remove('warning', 'critical');
+  if (typeof rcHideDecisionPanel === 'function') rcHideDecisionPanel();
   ctUpdateControlButtons();
 }
 
@@ -3628,6 +3701,21 @@ function renderRunCode() {
       </div>
 
       ${valid ? `
+        <div class="rc-decision" id="rc-decision">
+          <div class="rc-decision-title">⚠ Rhythm Check — Decide Now</div>
+          <div class="rc-decision-buttons">
+            <button class="rc-decision-btn shock" id="rc-decision-shock">
+              <span class="big">⚡ SHOCK</span>
+              <span class="sub" id="rc-decision-joules">${elec.defib.primary}</span>
+              <span class="sub">VF / pVT</span>
+            </button>
+            <button class="rc-decision-btn noshock" id="rc-decision-noshock">
+              <span class="big">▶ NO SHOCK</span>
+              <span class="sub">Resume CPR</span>
+              <span class="sub">PEA / Asystole / ROSC</span>
+            </button>
+          </div>
+        </div>
         <div id="rc-tab-content">${rcRenderTabContent(kg, elec, drugs, a, drugButtons)}</div>
 
         <details class="cc-section" style="margin-bottom:20px;">
@@ -3679,6 +3767,24 @@ function renderRunCode() {
     </div>
     ${valid ? rcRenderBottomBar() : ''}
   `;
+}
+
+// Show the Shock/No-Shock decision panel at rhythm check
+function rcShowDecisionPanel() {
+  const panel = document.getElementById('rc-decision');
+  if (!panel) return;
+  // Update joules to reflect current weight
+  const elec = ccGetElectrical();
+  const joulesEl = document.getElementById('rc-decision-joules');
+  if (joulesEl && elec) joulesEl.textContent = elec.defib.primary;
+  panel.classList.add('show');
+  // Scroll panel into view
+  setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+function rcHideDecisionPanel() {
+  const panel = document.getElementById('rc-decision');
+  if (panel) panel.classList.remove('show');
 }
 
 function rcRenderBottomBar() {
@@ -4064,6 +4170,28 @@ function bindRunCodeEvents() {
       ctState.activeTab = btn.dataset.rcTab;
       rcPartialRender();
     });
+  });
+
+  // Rhythm check decision panel (shows at 2:00) — SHOCK / NO SHOCK
+  const shockBtn = document.getElementById('rc-decision-shock');
+  if (shockBtn) shockBtn.addEventListener('click', () => {
+    const e = ccGetElectrical();
+    ctState.shockCount++;
+    ctState.lastRhythm = null;
+    ctLogEvent('Shock', `Defib #${ctState.shockCount} — ${e.defib.primary} (rhythm check decision)`);
+    ctShowCueBanner(`Shock #${ctState.shockCount} Delivered — Resume CPR`, 'normal', 2000);
+    ctSpeak('Shock delivered. Resume CPR.');
+    rcHideDecisionPanel();
+    rcPartialRender();
+  });
+  const noShockBtn = document.getElementById('rc-decision-noshock');
+  if (noShockBtn) noShockBtn.addEventListener('click', () => {
+    ctState.lastRhythm = null;
+    ctLogEvent('No Shock', `No shock — Resume CPR, consider epi`);
+    ctShowCueBanner('No Shock — Resume CPR · Check Epi', 'epi', 2000);
+    ctSpeak('No shock. Resume CPR, check epi.');
+    rcHideDecisionPanel();
+    rcPartialRender();
   });
 
   // Timer controls — reuse Code Timer state/functions
