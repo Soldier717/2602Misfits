@@ -3855,64 +3855,131 @@ function rcRenderTabMeds(kg, elec, drugButtons) {
 }
 
 function rcRenderTabDrip(kg) {
-  const isPedsNeo = kg < 40;
-  // Standard concentrations
-  // Norepi: 4 mg in 250 mL D5W = 16 mcg/mL
-  // Epi drip: 1 mg in 250 mL D5W = 4 mcg/mL
-  // Push-dose Epi: 0.01 mg/mL (10 mcg/mL) — dilute 1 mg in 100 mL or 1 mL 1:10,000 in 9 mL NS
-  const norepiLow = isPedsNeo ? 0.03 : 0.1;
-  const norepiHigh = isPedsNeo ? 0.05 : 0.5;
-  const epiInfLow = isPedsNeo ? 0.03 : 0.1;
-  const epiInfHigh = isPedsNeo ? 0.2 : 0.5;
-  // mL/hr = (mcg/kg/min × kg × 60) / (mcg/mL)
-  const norepiMlHrLow = (norepiLow * kg * 60 / 16);
-  const norepiMlHrHigh = (norepiHigh * kg * 60 / 16);
-  const epiInfMlHrLow = (epiInfLow * kg * 60 / 4);
-  const epiInfMlHrHigh = (epiInfHigh * kg * 60 / 4);
-  const pushDoseAdult = '2 mL (20 mcg) q2 min PRN';
-  const pushDosePeds = `${ccFmt(0.1 * Math.min(kg, 20), 1)} mL (${ccFmt(Math.min(kg, 20), 0)} mcg) q2 min PRN`;
-  const crystalloidMl = isPedsNeo ? `${ccFmt(20 * kg, 0)} mL (20 mL/kg)` : '500–1000 mL (1 L)';
+  // GNFR Infusion Chart — all drips use 100 mL D5W mixes
+  // Epi Perfusion: 1 mg in 100 mL D5W = 10 mcg/mL · 10 gtts/set (macrodrip)
+  //   gtts/min = mcg/kg/min × kg  (mathematically: mcg/min ÷ 10 mcg/mL × 10 gtts/mL = mcg/min)
+  // Epi Bradycardia: same mix · 60 gtts/set (microdrip)
+  //   gtts/min = mcg/min × 6
+  const epiPerf = [0.1, 0.2, 0.3, 0.4, 0.5].map(d => ({
+    dose: d,
+    gtts: Math.round(d * kg)
+  }));
+  const epiBrady = [2, 4, 6, 8, 10].map(mcg => ({
+    mcgmin: mcg,
+    gtts: mcg * 6
+  }));
+
+  // Diltiazem 0.25 mg/kg slow push over 2 min, max 20 mg (1 mg/mL concentration)
+  const diltMg = Math.min(0.25 * kg, 20);
+  const diltMl = diltMg; // 1 mg/mL so mg = mL
+
+  // Push-dose Epi (0.01 mg/mL = 10 mcg/mL) — 1 mL of 1:10,000 + 9 mL NS
+  const isPed = kg < 40;
+  const pushDose = isPed
+    ? `${ccFmt(0.1 * Math.min(kg, 20), 1)} mL (${ccFmt(Math.min(kg, 20), 0)} mcg) q2 min PRN`
+    : '2 mL (20 mcg) IV/IO q2 min PRN';
+
+  const crystalloid = isPed ? `${ccFmt(20 * kg, 0)} mL (20 mL/kg)` : '500–1000 mL';
 
   return `
     <div class="cc-section priority" style="margin-bottom:20px;">
       <div class="cc-section-head">
         <span class="cc-section-num">💧</span>
-        <span class="cc-section-title">Drips & Pressors — ${ccFmt(kg, 1)} kg</span>
-        <span class="cc-section-tag">Pseudo-PEA · Post-ROSC</span>
+        <span class="cc-section-title">Infusion Chart — ${ccFmt(kg, 1)} kg</span>
+        <span class="cc-section-tag">100 mL D5W mixes</span>
       </div>
       <div class="cc-disclaimer" style="font-size:11px;padding:10px 14px;margin-bottom:14px;">
         <strong>⚠ Pseudo-PEA Protocol (SWFL 2025)</strong>
         Organized rhythm + no pulse + 2 of: EtCO₂ >30, pulse-ox waveform, POCUS wall motion, palpable femoral/carotid → <strong>HOLD standard arrest Epi</strong>. Treat as profound shock.
       </div>
-      <div class="rc-drug-grid">
-        <div class="rc-drug-btn primary">
-          <div class="name">Crystalloid Bolus</div>
-          <div class="dose">${crystalloidMl}</div>
-          <div class="vol">NS or LR rapid IV/IO</div>
-          <div class="ind">Pseudo-PEA · Hypovolemia · Hypotension</div>
+
+      <!-- IMMEDIATE PRESSORS -->
+      <div class="rc-drug-grid" style="margin-bottom:14px;">
+        <div class="rc-drug-card primary">
+          <div class="rc-drug-card-head">
+            <div class="name">Crystalloid Bolus</div>
+            <div class="ind">Pseudo-PEA · Hypovolemia · Shock</div>
+          </div>
+          <div class="rc-drug-row dose"><span class="label">Drug & Dose</span><span class="value">${crystalloid}</span></div>
+          <div class="rc-drug-row package"><span class="label">Package</span><span class="value">NS or LR · 1000 mL bag</span></div>
+          <div class="rc-drug-row delivery"><span class="label">Delivery</span><span class="value">Rapid IV/IO push</span></div>
         </div>
-        <div class="rc-drug-btn primary">
-          <div class="name">Push-Dose Epi</div>
-          <div class="dose">${isPedsNeo ? pushDosePeds : pushDoseAdult}</div>
-          <div class="vol">0.01 mg/mL (10 mcg/mL)</div>
-          <div class="ind">Mix 1 mL of 1:10,000 in 9 mL NS · While drip preps</div>
-        </div>
-        <div class="rc-drug-btn">
-          <div class="name">Norepinephrine</div>
-          <div class="dose">${norepiLow}–${norepiHigh} mcg/kg/min</div>
-          <div class="vol">${ccFmt(norepiMlHrLow, 1)}–${ccFmt(norepiMlHrHigh, 1)} mL/hr (16 mcg/mL)</div>
-          <div class="ind">4 mg in 250 mL D5W · Option 1 pressor</div>
-        </div>
-        <div class="rc-drug-btn">
-          <div class="name">Epinephrine Drip</div>
-          <div class="dose">${epiInfLow}–${epiInfHigh} mcg/kg/min</div>
-          <div class="vol">${ccFmt(epiInfMlHrLow, 1)}–${ccFmt(epiInfMlHrHigh, 1)} mL/hr (4 mcg/mL)</div>
-          <div class="ind">1 mg in 250 mL D5W · Use if HR <50</div>
+        <div class="rc-drug-card primary">
+          <div class="rc-drug-card-head">
+            <div class="name">Push-Dose Epi</div>
+            <div class="ind">Bridge to drip · While infusion preps</div>
+          </div>
+          <div class="rc-drug-row dose"><span class="label">Drug & Dose</span><span class="value">${pushDose}</span></div>
+          <div class="rc-drug-row package"><span class="label">Package</span><span class="value">0.01 mg/mL (10 mcg/mL) · Mix 1 mL of 1:10,000 in 9 mL NS</span></div>
+          <div class="rc-drug-row delivery"><span class="label">Delivery</span><span class="value">IV/IO push q2 min PRN</span></div>
         </div>
       </div>
+
+      <!-- EPI PERFUSION DRIP (weight-based) -->
+      <div class="cc-elec-card" style="margin-bottom:14px;border-left-color:var(--accent);">
+        <div class="label" style="color:var(--gold);">Epinephrine Drip — Perfusion (Pseudo-PEA / Post-ROSC)</div>
+        <div class="primary" style="font-size:20px;">${ccFmt(kg, 1)} kg @ 0.1–0.5 mcg/kg/min</div>
+        <div class="secondary">1 mg of 1:1,000 in 100 mL D5W · 10 mcg/mL · 10 gtts/set</div>
+        <table style="width:100%;margin-top:10px;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:13px;">
+          <tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-size:10px;letter-spacing:0.15em;">Dose</th><th style="text-align:right;padding:6px 8px;color:var(--gold);font-size:10px;letter-spacing:0.15em;">Rate</th></tr>
+          ${epiPerf.map(r => `<tr style="border-bottom:1px solid rgba(255,255,255,0.04);"><td style="padding:6px 8px;color:var(--text);">${r.dose} mcg/kg/min</td><td style="padding:6px 8px;text-align:right;color:var(--accent-bright);font-weight:700;">${r.gtts} gtts/min</td></tr>`).join('')}
+        </table>
+      </div>
+
+      <!-- EPI BRADYCARDIA DRIP -->
+      <div class="cc-elec-card" style="margin-bottom:14px;border-left-color:var(--gold);">
+        <div class="label" style="color:var(--gold);">Epinephrine Drip — Bradycardia</div>
+        <div class="primary" style="font-size:20px;">2–10 mcg/min (not weight-based)</div>
+        <div class="secondary">1 mg of 1:1,000 in 100 mL D5W · 10 mcg/mL · 60 gtts/set (microdrip)</div>
+        <table style="width:100%;margin-top:10px;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:13px;">
+          <tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-size:10px;letter-spacing:0.15em;">Dose</th><th style="text-align:right;padding:6px 8px;color:var(--gold);font-size:10px;letter-spacing:0.15em;">Rate</th></tr>
+          ${epiBrady.map(r => `<tr style="border-bottom:1px solid rgba(255,255,255,0.04);"><td style="padding:6px 8px;color:var(--text);">${r.mcgmin} mcg/min</td><td style="padding:6px 8px;text-align:right;color:var(--accent-bright);font-weight:700;">${r.gtts} gtts/min</td></tr>`).join('')}
+        </table>
+      </div>
+
+      <!-- MAINTENANCE / OB / AV NODAL -->
+      <div class="rc-drug-grid">
+        <div class="rc-drug-card">
+          <div class="rc-drug-card-head">
+            <div class="name">Amiodarone Maintenance</div>
+            <div class="ind">Post-ROSC after VF/pVT arrest</div>
+          </div>
+          <div class="rc-drug-row dose"><span class="label">Drug & Dose</span><span class="value">150 mg</span></div>
+          <div class="rc-drug-row package"><span class="label">Package / Mix</span><span class="value">3 mL (150 mg) + 100 mL D5W · 10 gtts/set</span></div>
+          <div class="rc-drug-row delivery"><span class="label">Rate</span><span class="value">100 gtts/min over 10 min</span></div>
+        </div>
+        <div class="rc-drug-card">
+          <div class="rc-drug-card-head">
+            <div class="name">Mag Sulfate — Torsades</div>
+            <div class="ind">Refractory VT · Torsades de pointes</div>
+          </div>
+          <div class="rc-drug-row dose"><span class="label">Drug & Dose</span><span class="value">2 g</span></div>
+          <div class="rc-drug-row package"><span class="label">Package / Mix</span><span class="value">4 mL of 50% (2 g) + 100 mL D5W · 10 gtts/set</span></div>
+          <div class="rc-drug-row delivery"><span class="label">Rate</span><span class="value">100 gtts/min over 10 min</span></div>
+        </div>
+        <div class="rc-drug-card">
+          <div class="rc-drug-card-head">
+            <div class="name">Mag Sulfate — Eclampsia</div>
+            <div class="ind">Eclamptic seizures</div>
+          </div>
+          <div class="rc-drug-row dose"><span class="label">Drug & Dose</span><span class="value">4 g</span></div>
+          <div class="rc-drug-row package"><span class="label">Package / Mix</span><span class="value">8 mL of 50% (4 g) + 100 mL D5W · 10 gtts/set</span></div>
+          <div class="rc-drug-row delivery"><span class="label">Rate</span><span class="value">100 gtts/min over 10 min</span></div>
+        </div>
+        <div class="rc-drug-card">
+          <div class="rc-drug-card-head">
+            <div class="name">Diltiazem</div>
+            <div class="ind">Stable AFib / AFlutter RVR · NOT in WPW</div>
+          </div>
+          <div class="rc-drug-row dose"><span class="label">Drug & Dose</span><span class="value">${ccFmt(diltMg, 1)} mg ${diltMg >= 20 ? '(20 mg max)' : `(0.25 mg/kg)`}</span></div>
+          <div class="rc-drug-row package"><span class="label">Package</span><span class="value">100 mg / 100 mL (1 mg/mL)</span></div>
+          <div class="rc-drug-row delivery"><span class="label">Delivery</span><span class="value">${ccFmt(diltMl, 1)} mL slow push over 2 min</span></div>
+        </div>
+      </div>
+
       <div class="cc-disclaimer" style="font-size:11px;padding:10px 14px;margin-top:14px;background:linear-gradient(90deg,rgba(212,163,65,0.15),rgba(212,163,65,0.05));border-color:var(--gold);border-left-color:var(--gold);">
-        <strong style="color:var(--gold);">⚠ Concentrations</strong>
-        Arrest Epi = <strong>0.1 mg/mL (1:10,000)</strong>. Push-dose / drip Epi = <strong>0.01 mg/mL (10 mcg/mL)</strong> — DO NOT confuse.
+        <strong style="color:var(--gold);">⚠ Epi Concentrations</strong>
+        Arrest Epi = <strong>0.1 mg/mL (1:10,000)</strong>. Drip / Push-dose Epi = <strong>0.01 mg/mL (10 mcg/mL)</strong> — DO NOT confuse. All drips in this chart use <strong>100 mL D5W</strong>.
       </div>
     </div>
   `;
