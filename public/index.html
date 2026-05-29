@@ -3177,8 +3177,12 @@ function ccGetElectrical() {
   const kg = ccGetWeightKg();
   const band = ccState.ageBand;
   if (band === 'adult') {
+    // GNFR escalating protocol: 120 → 150 → 200 J
+    const shockSeq = [120, 150, 200];
+    const nextShockJ = shockSeq[Math.min(ctState.shockCount, shockSeq.length - 1)];
+    const shockLabel = ctState.shockCount === 0 ? '1st shock' : ctState.shockCount === 1 ? '2nd shock' : ctState.shockCount === 2 ? '3rd shock' : `${ctState.shockCount + 1}th shock`;
     return {
-      defib: { primary: '200 J', secondary: 'biphasic (or per device)', detail: 'Pad placement: Anterior/Posterior. Initial: 120–200 J biphasic. Subsequent: equal or higher. Monophasic: 360 J. LIFEPAK escalating: 200 → 300 → 360. After 3rd shock + anti-dysrhythmic → consider DSD for refractory VF.' },
+      defib: { primary: `${nextShockJ} J`, secondary: `${shockLabel} · biphasic`, detail: 'Pad placement: Anterior/Posterior. GNFR escalating: 120 J (1st) → 150 J (2nd) → 200 J (3rd+). Monophasic: 360 J. After 3rd shock + anti-dysrhythmic → consider DSD for refractory VF.' },
       cardiovert: { primary: '100 J', secondary: 'narrow regular', detail: 'Narrow regular: 50–100 J | Narrow irregular: 120–200 J | Wide regular: 100 J | Polymorphic VT: use defib doses (unsynchronized).' },
       pace: { primary: '60–80 BPM', secondary: 'increase mA until capture', detail: 'Start 60–80 BPM. Increase mA by 10 until electrical + mechanical capture. Typical 50–100 mA.' }
     };
