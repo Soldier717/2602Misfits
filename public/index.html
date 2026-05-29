@@ -2396,6 +2396,7 @@ const ctState = {
   ventCount: 0,
   cuesFired: {},
   pulseDotEl: null,
+  lastRhythm: null, // 'shockable' | 'nonshockable' | null — drives auto-shock cue at 2:00
 };
 
 const CT_STORAGE_KEY = 'gnfr-codetimer-settings-v1';
@@ -2523,6 +2524,21 @@ function ctFireCue(type) {
     ctCueTone();
     ctSpeak('Rhythm check');
     ctLogEvent('Cycle End', `End cycle ${ctState.cycleNum} — rhythm check`);
+    // If a shockable rhythm was logged this cycle, prompt to deliver the shock
+    if (ctState.lastRhythm === 'shockable') {
+      setTimeout(() => {
+        ctShowCueBanner('Shock Now — If Confirmed', 'normal', 4000);
+        ctCueTone();
+        ctSpeak('Shock now if confirmed');
+        ctLogEvent('Cue', 'Shock prompt (shockable rhythm)');
+      }, 1800);
+    } else if (ctState.lastRhythm === 'nonshockable') {
+      setTimeout(() => {
+        ctShowCueBanner('Resume CPR — Check Epi', 'epi', 4000);
+        ctSpeak('Resume CPR, check epi');
+        ctLogEvent('Cue', 'Resume CPR (non-shockable)');
+      }, 1800);
+    }
   }
 }
 
@@ -2694,7 +2710,18 @@ function ctClearLog() { ctState.log = []; ctRenderLog(); }
 function ctMarkEpiGiven() { ctLogEvent('Drug', `Epinephrine given @ ${ctFormatTime(ctState.elapsedMs)}`); ctState.lastEpiMs = ctState.elapsedMs; ctShowCueBanner('Epi logged', 'epi', 1800); }
 function ctMarkShock() { ctLogEvent('Shock', `Shock delivered @ ${ctFormatTime(ctState.elapsedMs)}`); ctShowCueBanner('Shock logged', 'normal', 1800); }
 function ctMarkROSC() { ctLogEvent('ROSC', `ROSC @ ${ctFormatTime(ctState.elapsedMs)}`); ctShowCueBanner('ROSC logged', 'normal', 2500); ctPause(); }
-function ctMarkRhythm(rhythm) { ctLogEvent('Rhythm', `${rhythm} @ ${ctFormatTime(ctState.elapsedMs)}`); }
+function ctMarkRhythm(rhythm) {
+  ctLogEvent('Rhythm', `${rhythm} @ ${ctFormatTime(ctState.elapsedMs)}`);
+  // Track for auto-shock cue at next rhythm check
+  const r = rhythm.toLowerCase();
+  if (r.includes('vf') || r.includes('vt') || r.includes('pvt')) {
+    ctState.lastRhythm = 'shockable';
+    ctShowCueBanner(`${rhythm} — Shockable`, 'normal', 1800);
+  } else if (r.includes('pea') || r.includes('asys')) {
+    ctState.lastRhythm = 'nonshockable';
+    ctShowCueBanner(`${rhythm} — Not shockable`, 'normal', 1800);
+  }
+}
 
 function ctUpdateControlButtons() {
   const start = document.getElementById('ct-start-btn');
@@ -3602,7 +3629,8 @@ function rcBindDynamicElements() {
   if (defibBtn) defibBtn.addEventListener('click', () => {
     const e = ccGetElectrical();
     ctLogEvent('Shock', `Defib ${e.defib.primary} (${e.defib.secondary})`);
-    ctShowCueBanner('Shock logged', 'normal', 1800);
+    ctShowCueBanner('Shock Delivered', 'normal', 1800);
+    ctState.lastRhythm = null; // reassess next cycle
   });
   const cvBtn = document.getElementById('rc-shock-cv');
   if (cvBtn) cvBtn.addEventListener('click', () => {
@@ -3670,7 +3698,8 @@ function bindRunCodeEvents() {
   if (defibBtn) defibBtn.addEventListener('click', () => {
     const e = ccGetElectrical();
     ctLogEvent('Shock', `Defib ${e.defib.primary} (${e.defib.secondary})`);
-    ctShowCueBanner('Shock logged', 'normal', 1800);
+    ctShowCueBanner('Shock Delivered', 'normal', 1800);
+    ctState.lastRhythm = null; // reassess next cycle
   });
   const cvBtn = document.getElementById('rc-shock-cv');
   if (cvBtn) cvBtn.addEventListener('click', () => {
