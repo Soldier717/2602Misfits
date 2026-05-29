@@ -2564,27 +2564,27 @@ function ctTick() {
   if (ctState.metronomeOn) {
     const beatIntervalMs = 60000 / ctState.bpm;
     const expectedBeats = Math.floor(cycleElapsedMs / beatIntervalMs);
+
+    // Calculate breath frequency in BEATS (locked to metronome, not wall clock).
+    // Adult: every 6s, Peds: every 4s, Neo: every 3s.
+    // At 110 BPM: adult = every 11 beats, peds = every 7, neo = every 6.
+    let breathBeatN = 0;
+    if (ctState.ventCueOn && ctState.advancedAirway) {
+      const kg = parseFloat(ccState.weight) || 70;
+      const band = kg < 5 ? 'neonatal' : kg < 40 ? 'pediatric' : 'adult';
+      const ventSec = band === 'adult' ? 6 : band === 'pediatric' ? 4 : 3;
+      breathBeatN = Math.max(1, Math.round((ventSec / 60) * ctState.bpm));
+    }
+
     while (ctState.metronomeBeats < expectedBeats) {
       ctState.metronomeBeats++;
-      ctClickTick();
       ctFlashPulse();
-    }
-  }
-
-  if (ctState.ventCueOn && ctState.advancedAirway) {
-    // Breath interval based on patient size (derived from weight):
-    //   Adult (≥40 kg): every 6 seconds (10/min)
-    //   Pediatric (5–39 kg): every 4 seconds (15/min)
-    //   Neonatal (<5 kg): every 3 seconds (20/min)
-    const kg = parseFloat(ccState.weight) || 70;
-    const band = kg < 5 ? 'neonatal' : kg < 40 ? 'pediatric' : 'adult';
-    const ventIntervalMs = band === 'adult' ? 6000 : band === 'pediatric' ? 4000 : 3000;
-    const expectedVents = Math.floor(cycleElapsedMs / ventIntervalMs);
-    while (ctState.ventCount < expectedVents) {
-      ctState.ventCount++;
-      if (ctState.ventCount > 0) {
+      // Every Nth beat → breath cue (replaces the click)
+      if (breathBeatN > 0 && ctState.metronomeBeats % breathBeatN === 0) {
         ctVentTone();
-        ctSpeak('breathe', { rate: 1.15, volume: 0.7 });
+        ctSpeak('breathe', { rate: 1.15, volume: 0.85 });
+      } else {
+        ctClickTick();
       }
     }
   }
