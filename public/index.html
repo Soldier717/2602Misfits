@@ -2397,6 +2397,10 @@ const ctState = {
   cuesFired: {},
   pulseDotEl: null,
   lastRhythm: null, // 'shockable' | 'nonshockable' | null — drives auto-shock cue at 2:00
+  cumulativeEpiMg: 0, // Track total Epi dose toward 3 mg max (SWFL 2025)
+  shockCount: 0, // Number of defibrillations delivered this code
+  antiDysrhythmicGiven: false, // Has any anti-dysrhythmic (Amio/Lido) been logged?
+  dsdCued: false, // Has DSD cue been fired this code?
 };
 
 const CT_STORAGE_KEY = 'gnfr-codetimer-settings-v1';
@@ -2592,12 +2596,28 @@ function ctTick() {
   if (cycleElapsedMs >= 105000 && cycleElapsedMs < 106000) ctFireCue('prepare-charge');
   if (cycleElapsedMs >= 120000) { ctFireCue('rhythm-check'); ctStartNewCycle(); }
 
+  // SWFL 2025: Stop epi reminder once cumulative dose reaches 3 mg
   if (ctState.epiReminderOn && ctState.elapsedMs - ctState.lastEpiMs >= ctState.epiIntervalMs) {
     ctState.lastEpiMs = ctState.elapsedMs;
-    ctShowCueBanner('Consider epinephrine', 'epi', 4000);
-    ctEpiTone();
-    ctSpeak('Consider epinephrine');
-    ctLogEvent('Epi Cue', `Consider epi @ ${ctFormatTime(ctState.elapsedMs)}`);
+    if (ctState.cumulativeEpiMg >= 3) {
+      ctShowCueBanner('Epi MAX reached (3 mg)', 'normal', 4000);
+      ctSpeak('Epi max dose reached');
+      ctLogEvent('Epi Cap', `3 mg cumulative max reached @ ${ctFormatTime(ctState.elapsedMs)}`);
+    } else {
+      ctShowCueBanner(`Consider epinephrine (${ctState.cumulativeEpiMg.toFixed(1)}/3 mg given)`, 'epi', 4000);
+      ctEpiTone();
+      ctSpeak('Consider epinephrine');
+      ctLogEvent('Epi Cue', `Consider epi @ ${ctFormatTime(ctState.elapsedMs)}`);
+    }
+  }
+
+  // SWFL 2025: After 3rd shock + anti-dysrhythmic, prompt DSD for refractory VF/pVT
+  if (!ctState.dsdCued && ctState.shockCount >= 3 && ctState.antiDysrhythmicGiven && ctState.lastRhythm === 'shockable') {
+    ctState.dsdCued = true;
+    ctShowCueBanner('Refractory VF — Consider DSD (set up 2nd AED)', 'normal', 5000);
+    ctCueTone();
+    ctSpeak('Refractory VF. Consider dual sequential defibrillation. Set up second AED.');
+    ctLogEvent('DSD Cue', `Refractory VF @ ${ctFormatTime(ctState.elapsedMs)} — ${ctState.shockCount} shocks delivered`);
   }
 
   const display = document.getElementById('ct-display');
@@ -2700,6 +2720,11 @@ function ctReset() {
   ctState.ventCount = 0;
   ctState.cuesFired = {};
   ctState.lastEpiMs = 0;
+  ctState.cumulativeEpiMg = 0;
+  ctState.shockCount = 0;
+  ctState.antiDysrhythmicGiven = false;
+  ctState.dsdCued = false;
+  ctState.lastRhythm = null;
   ctUpdateDisplay(0, 0);
   const display = document.getElementById('ct-display');
   if (display) display.classList.remove('warning', 'critical');
@@ -3005,7 +3030,7 @@ function ccGetElectrical() {
   const band = ccState.ageBand;
   if (band === 'adult') {
     return {
-      defib: { primary: '200 J', secondary: 'biphasic (or per device)', detail: 'Initial: 120–200 J biphasic. Subsequent: equal or higher. Monophasic: 360 J. LIFEPAK escalating: 200 → 300 → 360.' },
+      defib: { primary: '200 J', secondary: 'biphasic (or per device)', detail: 'Pad placement: Anterior/Posterior. Initial: 120–200 J biphasic. Subsequent: equal or higher. Monophasic: 360 J. LIFEPAK escalating: 200 → 300 → 360. After 3rd shock + anti-dysrhythmic → consider DSD for refractory VF.' },
       cardiovert: { primary: '100 J', secondary: 'narrow regular', detail: 'Narrow regular: 50–100 J | Narrow irregular: 120–200 J | Wide regular: 100 J | Polymorphic VT: use defib doses (unsynchronized).' },
       pace: { primary: '60–80 BPM', secondary: 'increase mA until capture', detail: 'Start 60–80 BPM. Increase mA by 10 until electrical + mechanical capture. Typical 50–100 mA.' }
     };
@@ -3015,7 +3040,7 @@ function ccGetElectrical() {
     const cv_first = Math.min(0.5 * kg, 50);
     const cv_subseq = Math.min(2 * kg, 100);
     return {
-      defib: { primary: `${ccFmt(first_j, 0)} J → ${ccFmt(subseq_j, 0)} J`, secondary: `2 J/kg → 4 J/kg`, detail: `2 J/kg first shock, 4 J/kg subsequent. Max 10 J/kg or adult dose. CPR before & after every shock.` },
+      defib: { primary: `${ccFmt(first_j, 0)} J → ${ccFmt(subseq_j, 0)} J`, secondary: `2 J/kg → 4 J/kg`, detail: `Pad placement: Anterior/Posterior. 2 J/kg first shock, 4 J/kg subsequent. Max 10 J/kg or adult dose. CPR before & after every shock.` },
       cardiovert: { primary: `${ccFmt(cv_first, 1)} J → ${ccFmt(cv_subseq, 0)} J`, secondary: '0.5–1 J/kg → 2 J/kg', detail: '0.5–1 J/kg first attempt, then 2 J/kg. Synchronized.' },
       pace: { primary: 'Age-based rate', secondary: 'increase mA until capture', detail: 'Infant: 100–120 BPM | Child: 80–100 BPM | Adolescent: 60–80 BPM.' }
     };
@@ -3034,13 +3059,12 @@ function ccGetDrugs() {
   const band = ccState.ageBand;
   if (band === 'adult') {
     return [
-      { primary: true, rhythm: 'all', name: 'Epinephrine', class: 'Vasopressor — 1st-line', indication: 'Cardiac arrest (all rhythms)', weightDose: '1 mg', readyVol: '10 mL of 0.1 mg/mL (1:10,000)', detail: '1 mg IV/IO push every 3–5 min. Follow with 20 mL flush + raise extremity. ET route: 2–2.5 mg of 1:1,000.', route: 'IV / IO', max: '1 mg / dose, q3–5 min' },
+      { primary: true, rhythm: 'all', name: 'Epinephrine', class: 'Vasopressor — 1st-line', indication: 'Cardiac arrest (all rhythms)', weightDose: '0.5–1 mg', readyVol: '5–10 mL of 0.1 mg/mL (1:10,000)', detail: '0.5–1 mg IV/IO push every 3–5 min. Follow with 20 mL flush + raise extremity. Max cumulative 3 mg. ET route: 2–2.5 mg of 1:1,000.', route: 'IV / IO', max: '3 mg cumulative' },
       { primary: true, rhythm: 'shockable', name: 'Amiodarone', class: 'Antiarrhythmic', indication: 'Refractory VF / pVT (after 3rd shock)', weightDose: '300 mg → 150 mg', readyVol: '300 mg in 20–30 mL D5W', detail: 'First dose: 300 mg IV/IO bolus. Second dose: 150 mg. Maintenance: 1 mg/min infusion if ROSC.', route: 'IV / IO', max: '2.2 g / 24 hr' },
-      { rhythm: 'shockable', name: 'Lidocaine', class: 'Antiarrhythmic (alt)', indication: 'Alternative to amiodarone for VF / pVT', weightDose: `${ccFmt(1*kg, 0)}–${ccFmt(1.5*kg, 0)} mg → ${ccFmt(0.5*kg, 0)}–${ccFmt(0.75*kg, 0)} mg`, readyVol: `≈ ${ccFmt(1*kg/20, 1)}–${ccFmt(1.5*kg/20, 1)} mL of 2% (20 mg/mL)`, detail: '1–1.5 mg/kg first dose. Repeat 0.5–0.75 mg/kg every 5–10 min. Max cumulative 3 mg/kg.', route: 'IV / IO', max: '3 mg/kg cumulative' },
-      { rhythm: 'shockable', name: 'Magnesium Sulfate', class: 'Electrolyte / Antiarrhythmic', indication: 'Torsades de pointes, hypomagnesemia', weightDose: '1–2 g', readyVol: '2–4 mL of 50% diluted in 10 mL D5W', detail: 'IV/IO push for arrest with torsades. Otherwise 1–2 g over 5–60 min.', route: 'IV / IO', max: 'Per protocol' },
-      { rhythm: 'nonshockable', name: 'Sodium Bicarbonate', class: 'Alkalinizer', indication: 'Hyperkalemia, TCA OD, severe acidosis', weightDose: `${ccFmt(1*kg, 0)} mEq`, readyVol: `${ccFmt(1*kg, 0)} mL of 8.4% (1 mEq/mL)`, detail: '1 mEq/kg IV/IO. Consider for known acidosis or hyperkalemia.', route: 'IV / IO', max: 'Per protocol' },
-      { rhythm: 'nonshockable', name: 'Calcium Chloride 10%', class: 'Electrolyte', indication: 'Hyperkalemia, CCB overdose, hypocalcemia', weightDose: '500–1000 mg', readyVol: '5–10 mL of 10%', detail: 'Slow IV/IO push. Caustic — large vessel preferred. Consider for reversible cause.', route: 'IV / IO (central preferred)', max: 'Per protocol' },
-      { rhythm: 'all', name: 'Naloxone', class: 'Opioid antagonist', indication: 'Suspected opioid overdose', weightDose: '0.4–2 mg', readyVol: '1–5 mL of 0.4 mg/mL', detail: 'IV/IO/IN/IM. May repeat every 2–3 min. IN: 2–4 mg per nostril.', route: 'IV / IO / IN / IM', max: 'Per protocol' }
+      { rhythm: 'shockable', name: 'Lidocaine', class: 'Antiarrhythmic (alt)', indication: 'Alternative to amiodarone for VF / pVT', weightDose: `${ccFmt(1.5*kg, 0)} mg → ${ccFmt(0.5*kg, 0)}–${ccFmt(0.75*kg, 0)} mg`, readyVol: `≈ ${ccFmt(1.5*kg/20, 1)} mL of 2% (20 mg/mL)`, detail: '1.5 mg/kg first dose. Repeat 0.5–0.75 mg/kg every 5–10 min. Max cumulative 3 mg/kg. PEARL: Preferred when arrest is toxicology-related (TCA, cocaine).', route: 'IV / IO', max: '3 mg/kg cumulative' },
+      { rhythm: 'shockable', name: 'Magnesium Sulfate', class: 'Electrolyte / Antiarrhythmic', indication: 'Torsades de pointes / refractory VT', weightDose: '2 g', readyVol: '4 mL of 50% diluted in 10 mL D5W', detail: '2 g IV/IO push for arrest with torsades or refractory VT.', route: 'IV / IO', max: 'Per protocol' },
+      { rhythm: 'nonshockable', name: 'Sodium Bicarbonate', class: 'Alkalinizer', indication: 'CONFIRMED hyperkalemia, TCA OD, severe acidosis', weightDose: `${ccFmt(1*kg, 0)} mEq`, readyVol: `${ccFmt(1*kg, 0)} mL of 8.4% (1 mEq/mL)`, detail: '1 mEq/kg IV/IO. PEARL: Blind administration NOT recommended — only for confirmed/suspected reversible cause.', route: 'IV / IO', max: 'Per protocol' },
+      { rhythm: 'nonshockable', name: 'Calcium Chloride 10%', class: 'Electrolyte', indication: 'SUSPECTED hyperkalemia, CCB OD, hypocalcemia', weightDose: '1 g', readyVol: '10 mL of 10%', detail: 'Slow IV/IO push. Caustic — large vessel preferred. PEARL: Blind administration NOT recommended — only for confirmed/suspected reversible cause.', route: 'IV / IO (central preferred)', max: 'Per protocol' }
     ];
   }
   if (band === 'pediatric') {
@@ -3056,11 +3080,11 @@ function ccGetDrugs() {
     return [
       { primary: true, rhythm: 'all', name: 'Epinephrine', class: 'Vasopressor — 1st-line', indication: 'Cardiac arrest (all rhythms)', weightDose: `${ccFmt(epi_mg, 2)} mg`, readyVol: `${ccFmt(epi_ml, 1)} mL of 0.1 mg/mL (1:10,000)`, detail: '0.01 mg/kg IV/IO every 3–5 min (max 1 mg). ET route: 0.1 mg/kg of 1:1,000.', route: 'IV / IO', max: '1 mg / dose' },
       { primary: true, rhythm: 'shockable', name: 'Amiodarone', class: 'Antiarrhythmic', indication: 'Refractory VF / pVT', weightDose: `${ccFmt(amio_mg, 0)} mg`, readyVol: `${ccFmt(amio_mg/50, 1)} mL of 50 mg/mL`, detail: '5 mg/kg IV/IO bolus during arrest (max 300 mg). May repeat up to 2× for refractory VF/pVT.', route: 'IV / IO', max: '300 mg / dose, 15 mg/kg / day' },
-      { rhythm: 'shockable', name: 'Lidocaine', class: 'Antiarrhythmic (alt)', indication: 'Alternative to amiodarone', weightDose: `${ccFmt(lido_mg, 0)} mg`, readyVol: `${ccFmt(lido_mg/20, 1)} mL of 2% (20 mg/mL)`, detail: '1 mg/kg IV/IO bolus (max 100 mg). Maintenance 20–50 mcg/kg/min if needed.', route: 'IV / IO', max: '100 mg / dose' },
+      { rhythm: 'shockable', name: 'Lidocaine', class: 'Antiarrhythmic (alt)', indication: 'Alternative to amiodarone', weightDose: `${ccFmt(lido_mg, 0)} mg`, readyVol: `${ccFmt(lido_mg/20, 1)} mL of 2% (20 mg/mL)`, detail: '1 mg/kg IV/IO bolus (max 100 mg). Maintenance 20–50 mcg/kg/min if needed. PEARL: Preferred when arrest is toxicology-related.', route: 'IV / IO', max: '100 mg / dose' },
+      { rhythm: 'shockable', name: 'Magnesium Sulfate', class: 'Electrolyte / Antiarrhythmic', indication: 'Torsades de pointes / refractory VT', weightDose: `${ccFmt(Math.min(50*kg, 2000), 0)} mg`, readyVol: `${ccFmt(Math.min(50*kg, 2000)/500, 1)} mL of 50% (500 mg/mL)`, detail: '50 mg/kg IV/IO (max 2 g). Push for torsades or refractory VT.', route: 'IV / IO', max: '2 g / dose' },
       { rhythm: 'nonshockable', name: 'Atropine', class: 'Anticholinergic', indication: 'Symptomatic bradycardia', weightDose: `${ccFmt(atropine_mg, 2)} mg`, readyVol: `${ccFmt(atropine_mg/0.1, 1)} mL of 0.1 mg/mL`, detail: '0.02 mg/kg IV/IO. Min dose 0.1 mg. Max single dose 0.5 mg child / 1 mg adolescent. May repeat once.', route: 'IV / IO', max: '0.5 mg (child) / 1 mg (adolescent)' },
-      { rhythm: 'nonshockable', name: 'Sodium Bicarbonate', class: 'Alkalinizer', indication: 'Hyperkalemia, TCA OD, known acidosis', weightDose: `${ccFmt(bicarb, 0)} mEq`, readyVol: `${ccFmt(bicarb, 0)} mL of 8.4% (dilute 1:1 for infants)`, detail: '1 mEq/kg IV/IO. For neonates and infants <2y use 4.2% (0.5 mEq/mL) or dilute.', route: 'IV / IO', max: 'Per protocol' },
-      { rhythm: 'nonshockable', name: 'Calcium Chloride 10%', class: 'Electrolyte', indication: 'Hyperkalemia, CCB toxicity, hypocalcemia', weightDose: `${ccFmt(ca_mg, 0)} mg`, readyVol: `${ccFmt(ca_mg/100, 1)} mL of 10%`, detail: '20 mg/kg slow IV/IO push. Caustic — large vessel preferred.', route: 'IV / IO', max: 'Per protocol' },
-      { rhythm: 'all', name: 'Naloxone', class: 'Opioid antagonist', indication: 'Opioid OD with respiratory depression', weightDose: kg < 20 ? `${ccFmt(Math.min(0.1*kg, 2), 2)} mg` : '2 mg', readyVol: kg < 20 ? `${ccFmt(Math.min(0.1*kg, 2)/0.4, 1)} mL of 0.4 mg/mL` : '5 mL of 0.4 mg/mL', detail: '<20 kg or <5y: 0.1 mg/kg. ≥20 kg or ≥5y: 2 mg. IV/IO/IM/IN. May repeat q2–3 min.', route: 'IV / IO / IN / IM', max: '2 mg / dose' },
+      { rhythm: 'nonshockable', name: 'Sodium Bicarbonate', class: 'Alkalinizer', indication: 'CONFIRMED hyperkalemia, TCA OD, known acidosis', weightDose: `${ccFmt(bicarb, 0)} mEq`, readyVol: `${ccFmt(bicarb, 0)} mL of 8.4% (dilute 1:1 for infants)`, detail: '1 mEq/kg IV/IO. PEARL: Blind administration NOT recommended. For neonates and infants <2y use 4.2% or dilute.', route: 'IV / IO', max: 'Per protocol' },
+      { rhythm: 'nonshockable', name: 'Calcium Chloride 10%', class: 'Electrolyte', indication: 'SUSPECTED hyperkalemia, CCB toxicity, hypocalcemia', weightDose: `${ccFmt(ca_mg, 0)} mg`, readyVol: `${ccFmt(ca_mg/100, 1)} mL of 10%`, detail: '20 mg/kg slow IV/IO push. Caustic — large vessel preferred. PEARL: Blind administration NOT recommended.', route: 'IV / IO', max: 'Per protocol' },
       { rhythm: 'all', name: 'Dextrose', class: 'Carbohydrate', indication: 'Documented hypoglycemia', weightDose: `${ccFmt(dext_g, 1)} g`, readyVol: `D25: ${ccFmt(dext_g * 4, 0)} mL  |  D10: ${ccFmt(dext_g * 10, 0)} mL`, detail: '0.5–1 g/kg IV/IO. D25 for children, D10 for infants. NEVER D50 in pediatrics.', route: 'IV / IO', max: 'Per protocol' },
       { rhythm: 'all', name: 'Normal Saline Bolus', class: 'Crystalloid', indication: 'Hypovolemia, shock, post-ROSC support', weightDose: `${ccFmt(fluid_ml, 0)} mL`, readyVol: 'NS or LR over 5–20 min', detail: '20 mL/kg IV/IO. May repeat. 10 mL/kg if cardiogenic or DKA.', route: 'IV / IO', max: 'Per protocol' }
     ];
@@ -3073,6 +3097,7 @@ function ccGetDrugs() {
     { primary: true, rhythm: 'all', name: 'Epinephrine', class: 'Vasopressor — 1st-line', indication: 'HR <60 despite adequate ventilation + compressions', weightDose: `${ccFmt(epi_low, 3)}–${ccFmt(epi_high, 3)} mg`, readyVol: `${ccFmt(vol_low, 2)}–${ccFmt(vol_high, 2)} mL of 0.1 mg/mL (1:10,000)`, detail: 'NRP: 0.01–0.03 mg/kg IV/IO (0.1–0.3 mL/kg of 1:10,000). ET: 0.05–0.1 mg/kg → IV/IO preferred. Repeat q3–5 min.', route: 'IV / IO (preferred) | ET', max: 'Per NRP' },
     { primary: true, rhythm: 'all', name: 'Volume Expander', class: 'Crystalloid / Blood', indication: 'Hypovolemia, suspected blood loss', weightDose: `${ccFmt(fluid_ml, 0)} mL`, readyVol: 'NS or LR over 5–10 min', detail: '10 mL/kg IV/IO. May repeat. Consider packed RBCs if anemia suspected.', route: 'IV / IO', max: 'Per NRP' },
     { rhythm: 'all', name: 'Dextrose 10%', class: 'Carbohydrate', indication: 'Documented hypoglycemia (<40 mg/dL)', weightDose: `${ccFmt(d10, 1)} mL D10W`, readyVol: `${ccFmt(d10, 1)} mL of D10 (0.1 g/mL)`, detail: '2 mL/kg of D10 IV/IO (= 0.2 g/kg). NEVER use D50 in neonates.', route: 'IV / IO', max: 'Per NRP' }
+    // Naloxone removed per SWFL 2025 — NOT indicated for cardiac arrest
   ];
 }
 
@@ -3438,6 +3463,10 @@ function renderRunCode() {
           <div class="ct-pulse-dot" id="ct-pulse-dot"></div>
           <div class="ct-pulse-label"><span class="v">${ctState.bpm}</span> BPM</div>
         </div>
+        <div style="display:flex;justify-content:center;gap:24px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;">
+          <span>Shocks: <span style="color:var(--accent-bright);font-weight:700;" id="ct-shock-count">${ctState.shockCount}</span></span>
+          <span>Epi: <span style="color:${ctState.cumulativeEpiMg >= 3 ? '#ff6b4a' : 'var(--gold)'};font-weight:700;" id="ct-epi-count">${ctState.cumulativeEpiMg.toFixed(1)}</span> / 3 mg</span>
+        </div>
       </div>
 
       ${valid ? `
@@ -3637,14 +3666,22 @@ function rcBindDynamicElements() {
       if (!d) return;
       ctLogEvent('Drug', `${d.name} ${d.weightDose} (${d.readyVol})`);
       ctShowCueBanner(`${d.name} logged`, d.primary ? 'epi' : 'normal', 1800);
-      if (d.name === 'Epinephrine') ctState.lastEpiMs = ctState.elapsedMs;
+      if (d.name === 'Epinephrine') {
+        ctState.lastEpiMs = ctState.elapsedMs;
+        // Track cumulative Epi (parse mg from dose string)
+        const m = (d.weightDose || '').match(/([\d.]+)\s*mg/);
+        if (m) ctState.cumulativeEpiMg += parseFloat(m[1]);
+      }
+      if (d.name === 'Amiodarone' || d.name === 'Lidocaine') ctState.antiDysrhythmicGiven = true;
     });
   });
   const defibBtn = document.getElementById('rc-shock-defib');
   if (defibBtn) defibBtn.addEventListener('click', () => {
     const e = ccGetElectrical();
-    ctLogEvent('Shock', `Defib ${e.defib.primary} (${e.defib.secondary})`);
-    ctShowCueBanner('Shock Delivered', 'normal', 1800);
+    ctState.shockCount++;
+    ctLogEvent('Shock', `Defib #${ctState.shockCount} — ${e.defib.primary} (${e.defib.secondary})`);
+    ctShowCueBanner(`Shock #${ctState.shockCount} Delivered — Resume CPR`, 'normal', 1800);
+    ctSpeak('Shock delivered. Resume CPR.');
     ctState.lastRhythm = null;
     rcPartialRender();
   });
@@ -3705,7 +3742,13 @@ function bindRunCodeEvents() {
       ctLogEvent('Drug', `${d.name} ${d.weightDose} (${d.readyVol})`);
       ctShowCueBanner(`${d.name} logged`, d.primary ? 'epi' : 'normal', 1800);
       // Update epi timer if epinephrine
-      if (d.name === 'Epinephrine') ctState.lastEpiMs = ctState.elapsedMs;
+      if (d.name === 'Epinephrine') {
+        ctState.lastEpiMs = ctState.elapsedMs;
+        // Track cumulative Epi (parse mg from dose string)
+        const m = (d.weightDose || '').match(/([\d.]+)\s*mg/);
+        if (m) ctState.cumulativeEpiMg += parseFloat(m[1]);
+      }
+      if (d.name === 'Amiodarone' || d.name === 'Lidocaine') ctState.antiDysrhythmicGiven = true;
     });
   });
 
@@ -3713,8 +3756,10 @@ function bindRunCodeEvents() {
   const defibBtn = document.getElementById('rc-shock-defib');
   if (defibBtn) defibBtn.addEventListener('click', () => {
     const e = ccGetElectrical();
-    ctLogEvent('Shock', `Defib ${e.defib.primary} (${e.defib.secondary})`);
-    ctShowCueBanner('Shock Delivered', 'normal', 1800);
+    ctState.shockCount++;
+    ctLogEvent('Shock', `Defib #${ctState.shockCount} — ${e.defib.primary} (${e.defib.secondary})`);
+    ctShowCueBanner(`Shock #${ctState.shockCount} Delivered — Resume CPR`, 'normal', 1800);
+    ctSpeak('Shock delivered. Resume CPR.');
     ctState.lastRhythm = null;
     rcPartialRender();
   });
