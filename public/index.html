@@ -1173,6 +1173,47 @@
   @media (max-width: 720px) {
     .rc-patient-bar, .rc-patient-bar.with-age { grid-template-columns: 1fr 1fr; }
   }
+
+  /* ====== RUN A CODE — Bottom Tab Bar ====== */
+  .rc-tabbar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--bg-elev);
+    border-top: 2px solid var(--accent);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    z-index: 80;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .rc-tab-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 4px 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-top: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  .rc-tab-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .rc-tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+  .rc-tab-btn.active {
+    color: var(--accent-bright);
+    border-top-color: var(--accent);
+    background: var(--bg-elev-2);
+  }
+  /* Pad bottom of Run a Code content so the fixed bar doesn't cover it */
+  .rc-tabbed .content.ct-wrap { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
 </style>
 </head>
 <body>
@@ -2401,6 +2442,7 @@ const ctState = {
   shockCount: 0, // Number of defibrillations delivered this code
   antiDysrhythmicGiven: false, // Has any anti-dysrhythmic (Amio/Lido) been logged?
   dsdCued: false, // Has DSD cue been fired this code?
+  activeTab: 'meds', // 'meds' | 'drip' | 'electricity' | 'equipment'
 };
 
 const CT_STORAGE_KEY = 'gnfr-codetimer-settings-v1';
@@ -3430,7 +3472,7 @@ function renderRunCode() {
       <h1 class="page-title">Run a <span class="accent">Code</span></h1>
       <div class="page-meta">CPR timer + weight-based ACLS dosing in one tool</div>
     </div>
-    <div class="content ct-wrap">
+    <div class="content ct-wrap rc-tabbed">
       <div class="cc-disclaimer">
         <strong>⚠ Training & Reference Tool</strong>
         Enter patient weight + age group, then Start. Drug doses calculate automatically. Tap a drug
@@ -3470,52 +3512,7 @@ function renderRunCode() {
       </div>
 
       ${valid ? `
-        <div class="cc-section priority" style="margin-bottom:20px;">
-          <div class="cc-section-head">
-            <span class="cc-section-num">⚡</span>
-            <span class="cc-section-title">Shock / Rhythm</span>
-            <span class="cc-section-tag">Tap to log</span>
-          </div>
-          <div class="rc-drug-grid">
-            <button class="rc-drug-btn rc-shock-btn" id="rc-shock-defib">
-              <div class="name">Defibrillation</div>
-              <div class="dose">${elec.defib.primary}</div>
-              <div class="vol">${elec.defib.secondary}</div>
-              <div class="ind">VF / pVT</div>
-            </button>
-            <button class="rc-drug-btn rc-shock-btn" id="rc-shock-cv">
-              <div class="name">Cardioversion</div>
-              <div class="dose">${elec.cardiovert.primary}</div>
-              <div class="vol">Synchronized</div>
-              <div class="ind">Unstable tachycardia</div>
-            </button>
-          </div>
-          <div class="rc-action-row" style="margin-top:10px;">
-            <button class="rc-rhythm-btn" data-rhythm="VF/pVT">VF / pVT</button>
-            <button class="rc-rhythm-btn" data-rhythm="PEA">PEA</button>
-            <button class="rc-rhythm-btn" data-rhythm="Asystole">Asystole</button>
-            <button class="rc-rhythm-btn rosc" data-rhythm="ROSC" id="rc-rosc-btn">✓ ROSC</button>
-          </div>
-        </div>
-
-        <div class="cc-section priority" style="margin-bottom:20px;">
-          <div class="cc-section-head">
-            <span class="cc-section-num">💉</span>
-            <span class="cc-section-title">Drugs — ${ccFmt(kg, 1)} kg</span>
-            <span class="cc-section-tag">${ctState.lastRhythm === 'shockable' ? 'VF / pVT pathway' : ctState.lastRhythm === 'nonshockable' ? 'PEA / Asystole pathway' : 'All drugs · select rhythm to filter'}</span>
-          </div>
-          <div class="rc-drug-grid">${drugButtons}</div>
-        </div>
-
-        <details class="cc-section" style="margin-bottom:20px;">
-          <summary style="cursor:pointer;font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:10px 0;border-bottom:1px solid var(--border);">Airway Reference</summary>
-          <div class="cc-info-grid" style="margin-top:14px;">
-            <div class="cc-info-card"><div class="label">ET Tube</div><div class="value">${a.ettCuffed}</div><div class="detail">Depth: ${a.ettDepth}</div></div>
-            <div class="cc-info-card"><div class="label">IO Needle</div><div class="value" style="font-size:16px;">${a.io}</div></div>
-            <div class="cc-info-card"><div class="label">Supraglottic</div><div class="value" style="font-size:16px;">${a.lma}</div></div>
-            <div class="cc-info-card"><div class="label">BVM</div><div class="value" style="font-size:14px;">${a.bvm}</div></div>
-          </div>
-        </details>
+        <div id="rc-tab-content">${rcRenderTabContent(kg, elec, drugs, a, drugButtons)}</div>
 
         <details class="cc-section" style="margin-bottom:20px;">
           <summary style="cursor:pointer;font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:10px 0;border-bottom:1px solid var(--border);">H's & T's — Reversible Causes</summary>
@@ -3564,11 +3561,209 @@ function renderRunCode() {
         </div>
       ` : '<div class="cc-empty">Enter patient weight to load doses</div>'}
     </div>
+    ${valid ? rcRenderBottomBar() : ''}
+  `;
+}
+
+function rcRenderBottomBar() {
+  const t = ctState.activeTab;
+  const tab = (id, label, svgPath) => `
+    <button class="rc-tab-btn ${t === id ? 'active' : ''}" data-rc-tab="${id}">
+      <svg viewBox="0 0 24 24"><path d="${svgPath}"/></svg>
+      <span>${label}</span>
+    </button>
+  `;
+  return `
+    <div class="rc-tabbar" id="rc-tabbar">
+      ${tab('meds', 'Meds', 'M12 2v20M2 12h20')}
+      ${tab('drip', 'Drip', 'M12 2C8 8 6 11 6 14a6 6 0 0 0 12 0c0-3-2-6-6-12z')}
+      ${tab('electricity', 'Electric', 'M13 2L3 14h7l-1 8 10-12h-7l1-8z')}
+      ${tab('equipment', 'Equip', 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z')}
+    </div>
+  `;
+}
+
+function rcRenderTabContent(kg, elec, drugs, a, drugButtons) {
+  const t = ctState.activeTab;
+  if (t === 'meds') return rcRenderTabMeds(kg, elec, drugButtons);
+  if (t === 'drip') return rcRenderTabDrip(kg);
+  if (t === 'electricity') return rcRenderTabElectricity(kg, elec);
+  if (t === 'equipment') return rcRenderTabEquipment(a);
+  return '';
+}
+
+function rcRenderTabMeds(kg, elec, drugButtons) {
+  return `
+    <div class="cc-section priority" style="margin-bottom:20px;">
+      <div class="cc-section-head">
+        <span class="cc-section-num">⚡</span>
+        <span class="cc-section-title">Shock / Rhythm</span>
+        <span class="cc-section-tag">Tap to log</span>
+      </div>
+      <div class="rc-drug-grid">
+        <button class="rc-drug-btn rc-shock-btn" id="rc-shock-defib">
+          <div class="name">Defibrillation</div>
+          <div class="dose">${elec.defib.primary}</div>
+          <div class="vol">${elec.defib.secondary}</div>
+          <div class="ind">VF / pVT · A/P pads</div>
+        </button>
+        <button class="rc-drug-btn rc-shock-btn" id="rc-shock-cv">
+          <div class="name">Cardioversion</div>
+          <div class="dose">${elec.cardiovert.primary}</div>
+          <div class="vol">Synchronized</div>
+          <div class="ind">Unstable tachycardia</div>
+        </button>
+      </div>
+      <div class="rc-action-row" style="margin-top:10px;">
+        <button class="rc-rhythm-btn" data-rhythm="VF/pVT">VF / pVT</button>
+        <button class="rc-rhythm-btn" data-rhythm="PEA">PEA</button>
+        <button class="rc-rhythm-btn" data-rhythm="Asystole">Asystole</button>
+        <button class="rc-rhythm-btn rosc" data-rhythm="ROSC" id="rc-rosc-btn">✓ ROSC</button>
+      </div>
+    </div>
+    <div class="cc-section priority" style="margin-bottom:20px;">
+      <div class="cc-section-head">
+        <span class="cc-section-num">💉</span>
+        <span class="cc-section-title">Drugs — ${ccFmt(kg, 1)} kg</span>
+        <span class="cc-section-tag">${ctState.lastRhythm === 'shockable' ? 'VF / pVT pathway' : ctState.lastRhythm === 'nonshockable' ? 'PEA / Asystole pathway' : 'All drugs · select rhythm to filter'}</span>
+      </div>
+      <div class="rc-drug-grid">${drugButtons}</div>
+    </div>
+  `;
+}
+
+function rcRenderTabDrip(kg) {
+  const isPedsNeo = kg < 40;
+  // Standard concentrations
+  // Norepi: 4 mg in 250 mL D5W = 16 mcg/mL
+  // Epi drip: 1 mg in 250 mL D5W = 4 mcg/mL
+  // Push-dose Epi: 0.01 mg/mL (10 mcg/mL) — dilute 1 mg in 100 mL or 1 mL 1:10,000 in 9 mL NS
+  const norepiLow = isPedsNeo ? 0.03 : 0.1;
+  const norepiHigh = isPedsNeo ? 0.05 : 0.5;
+  const epiInfLow = isPedsNeo ? 0.03 : 0.1;
+  const epiInfHigh = isPedsNeo ? 0.2 : 0.5;
+  // mL/hr = (mcg/kg/min × kg × 60) / (mcg/mL)
+  const norepiMlHrLow = (norepiLow * kg * 60 / 16);
+  const norepiMlHrHigh = (norepiHigh * kg * 60 / 16);
+  const epiInfMlHrLow = (epiInfLow * kg * 60 / 4);
+  const epiInfMlHrHigh = (epiInfHigh * kg * 60 / 4);
+  const pushDoseAdult = '2 mL (20 mcg) q2 min PRN';
+  const pushDosePeds = `${ccFmt(0.1 * Math.min(kg, 20), 1)} mL (${ccFmt(Math.min(kg, 20), 0)} mcg) q2 min PRN`;
+  const crystalloidMl = isPedsNeo ? `${ccFmt(20 * kg, 0)} mL (20 mL/kg)` : '500–1000 mL (1 L)';
+
+  return `
+    <div class="cc-section priority" style="margin-bottom:20px;">
+      <div class="cc-section-head">
+        <span class="cc-section-num">💧</span>
+        <span class="cc-section-title">Drips & Pressors — ${ccFmt(kg, 1)} kg</span>
+        <span class="cc-section-tag">Pseudo-PEA · Post-ROSC</span>
+      </div>
+      <div class="cc-disclaimer" style="font-size:11px;padding:10px 14px;margin-bottom:14px;">
+        <strong>⚠ Pseudo-PEA Protocol (SWFL 2025)</strong>
+        Organized rhythm + no pulse + 2 of: EtCO₂ >30, pulse-ox waveform, POCUS wall motion, palpable femoral/carotid → <strong>HOLD standard arrest Epi</strong>. Treat as profound shock.
+      </div>
+      <div class="rc-drug-grid">
+        <div class="rc-drug-btn primary">
+          <div class="name">Crystalloid Bolus</div>
+          <div class="dose">${crystalloidMl}</div>
+          <div class="vol">NS or LR rapid IV/IO</div>
+          <div class="ind">Pseudo-PEA · Hypovolemia · Hypotension</div>
+        </div>
+        <div class="rc-drug-btn primary">
+          <div class="name">Push-Dose Epi</div>
+          <div class="dose">${isPedsNeo ? pushDosePeds : pushDoseAdult}</div>
+          <div class="vol">0.01 mg/mL (10 mcg/mL)</div>
+          <div class="ind">Mix 1 mL of 1:10,000 in 9 mL NS · While drip preps</div>
+        </div>
+        <div class="rc-drug-btn">
+          <div class="name">Norepinephrine</div>
+          <div class="dose">${norepiLow}–${norepiHigh} mcg/kg/min</div>
+          <div class="vol">${ccFmt(norepiMlHrLow, 1)}–${ccFmt(norepiMlHrHigh, 1)} mL/hr (16 mcg/mL)</div>
+          <div class="ind">4 mg in 250 mL D5W · Option 1 pressor</div>
+        </div>
+        <div class="rc-drug-btn">
+          <div class="name">Epinephrine Drip</div>
+          <div class="dose">${epiInfLow}–${epiInfHigh} mcg/kg/min</div>
+          <div class="vol">${ccFmt(epiInfMlHrLow, 1)}–${ccFmt(epiInfMlHrHigh, 1)} mL/hr (4 mcg/mL)</div>
+          <div class="ind">1 mg in 250 mL D5W · Use if HR <50</div>
+        </div>
+      </div>
+      <div class="cc-disclaimer" style="font-size:11px;padding:10px 14px;margin-top:14px;background:linear-gradient(90deg,rgba(212,163,65,0.15),rgba(212,163,65,0.05));border-color:var(--gold);border-left-color:var(--gold);">
+        <strong style="color:var(--gold);">⚠ Concentrations</strong>
+        Arrest Epi = <strong>0.1 mg/mL (1:10,000)</strong>. Push-dose / drip Epi = <strong>0.01 mg/mL (10 mcg/mL)</strong> — DO NOT confuse.
+      </div>
+    </div>
+  `;
+}
+
+function rcRenderTabElectricity(kg, elec) {
+  return `
+    <div class="cc-section priority" style="margin-bottom:20px;">
+      <div class="cc-section-head">
+        <span class="cc-section-num">⚡</span>
+        <span class="cc-section-title">Electrical Therapy — ${ccFmt(kg, 1)} kg</span>
+        <span class="cc-section-tag">Shocks: ${ctState.shockCount}</span>
+      </div>
+      <div class="cc-electrical-grid">
+        <div class="cc-elec-card">
+          <div class="label">Defibrillation (VF / pVT)</div>
+          <div class="primary">${elec.defib.primary}</div>
+          <div class="secondary">${elec.defib.secondary}</div>
+          <div class="detail">${elec.defib.detail}</div>
+        </div>
+        <div class="cc-elec-card">
+          <div class="label">Synchronized Cardioversion</div>
+          <div class="primary">${elec.cardiovert.primary}</div>
+          <div class="secondary">${elec.cardiovert.secondary}</div>
+          <div class="detail">${elec.cardiovert.detail}</div>
+        </div>
+        <div class="cc-elec-card">
+          <div class="label">Transcutaneous Pacing</div>
+          <div class="primary">${elec.pace.primary}</div>
+          <div class="secondary">${elec.pace.secondary}</div>
+          <div class="detail">${elec.pace.detail}</div>
+        </div>
+      </div>
+      <div class="rc-action-row" style="margin-top:14px;">
+        <button class="rc-drug-btn rc-shock-btn" id="rc-shock-defib" style="text-align:center;">
+          <div class="name">Deliver Defib</div>
+          <div class="dose">${elec.defib.primary}</div>
+        </button>
+        <button class="rc-drug-btn rc-shock-btn" id="rc-shock-cv" style="text-align:center;">
+          <div class="name">Cardiovert</div>
+          <div class="dose">${elec.cardiovert.primary}</div>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function rcRenderTabEquipment(a) {
+  return `
+    <div class="cc-section priority" style="margin-bottom:20px;">
+      <div class="cc-section-head">
+        <span class="cc-section-num">🛠</span>
+        <span class="cc-section-title">Equipment & Airway</span>
+        <span class="cc-section-tag">Weight-based sizing</span>
+      </div>
+      <div class="cc-info-grid">
+        <div class="cc-info-card"><div class="label">ET Tube — Cuffed</div><div class="value">${a.ettCuffed}</div>${a.ettDetail ? `<div class="detail">${a.ettDetail}</div>` : ''}</div>
+        ${a.ettUncuffed ? `<div class="cc-info-card"><div class="label">ET Tube — Uncuffed</div><div class="value">${a.ettUncuffed}</div></div>` : ''}
+        <div class="cc-info-card"><div class="label">ETT Insertion Depth</div><div class="value">${a.ettDepth}</div></div>
+        <div class="cc-info-card"><div class="label">Laryngoscope Blade</div><div class="value">${a.bladeSize}</div></div>
+        <div class="cc-info-card"><div class="label">Supraglottic (LMA / iGel)</div><div class="value">${a.lma}</div></div>
+        <div class="cc-info-card"><div class="label">OPA</div><div class="value">${a.opa}</div></div>
+        <div class="cc-info-card"><div class="label">NPA</div><div class="value">${a.npa}</div></div>
+        <div class="cc-info-card"><div class="label">BVM</div><div class="value">${a.bvm}</div></div>
+        <div class="cc-info-card"><div class="label">Suction Catheter</div><div class="value">${a.suction}</div></div>
+        <div class="cc-info-card"><div class="label">IO Needle</div><div class="value">${a.io}</div><div class="detail">${a.ioDetail}</div></div>
+      </div>
+    </div>
   `;
 }
 
 function rcPartialRender() {
-  // Re-render only the calculated sections — don't touch the patient bar input
+  // Update only the tab content + bottom bar — keep patient bar input intact
   const content = document.querySelector('.content.ct-wrap');
   if (!content) return;
   const patientBar = content.querySelector('.rc-patient-bar');
@@ -3585,17 +3780,21 @@ function rcPartialRender() {
   if (fieldLabel) {
     fieldLabel.innerHTML = `Patient Weight (kg) ${valid ? `— <span style="color:var(--gold);">${bandLabel}</span>` : ''}`;
   }
-  // Update Start button disabled state
   const startBtn = document.getElementById('ct-start-btn');
   if (startBtn) startBtn.disabled = !valid;
 
-  // Remove old calculated sections, keep patient bar + audio hint + cue banner + display
-  const display = content.querySelector('.ct-display');
-  if (!display) return;
-  while (display.nextSibling) display.parentNode.removeChild(display.nextSibling);
+  // Update the shock/epi counters in the timer display
+  const shockEl = document.getElementById('ct-shock-count');
+  if (shockEl) shockEl.textContent = ctState.shockCount;
+  const epiEl = document.getElementById('ct-epi-count');
+  if (epiEl) {
+    epiEl.textContent = ctState.cumulativeEpiMg.toFixed(1);
+    epiEl.style.color = ctState.cumulativeEpiMg >= 3 ? '#ff6b4a' : 'var(--gold)';
+  }
 
-  // Re-append the calculated sections
-  if (valid) {
+  // Re-render the tab content block in place
+  const tabContent = document.getElementById('rc-tab-content');
+  if (valid && tabContent) {
     const elec = ccGetElectrical();
     const drugs = ccFilterDrugsByRhythm(ccGetDrugs());
     const a = ccGetAirway();
@@ -3607,6 +3806,18 @@ function rcPartialRender() {
         <div class="ind">${d.indication}</div>
       </button>
     `).join('');
+    tabContent.innerHTML = rcRenderTabContent(kg, elec, drugs, a, drugButtons);
+    rcBindDynamicElements();
+  }
+
+  // Update bottom bar active state
+  document.querySelectorAll('[data-rc-tab]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.rcTab === ctState.activeTab);
+  });
+  return;
+
+  // Legacy fallback (unreachable) — kept for reference
+  if (false) {
     const html = `
       <div class="cc-section priority" style="margin-bottom:20px;">
         <div class="cc-section-head"><span class="cc-section-num">⚡</span><span class="cc-section-title">Shock / Rhythm</span><span class="cc-section-tag">Tap to log</span></div>
@@ -3718,6 +3929,14 @@ function bindRunCodeEvents() {
     w.addEventListener('focus', (e) => e.target.select());
     w.addEventListener('click', (e) => e.target.select());
   }
+
+  // Bottom tab bar — switch the tab content area
+  document.querySelectorAll('[data-rc-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      ctState.activeTab = btn.dataset.rcTab;
+      rcPartialRender();
+    });
+  });
 
   // Timer controls — reuse Code Timer state/functions
   ctState.pulseDotEl = document.getElementById('ct-pulse-dot');
