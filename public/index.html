@@ -1214,6 +1214,21 @@
   }
   /* Pad bottom of Run a Code content so the fixed bar doesn't cover it */
   .rc-tabbed .content.ct-wrap { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+
+  /* Drug card 3-row layout */
+  .rc-drug-card { background: var(--bg-elev); border: 1px solid var(--border); border-left: 3px solid var(--accent-dim); border-radius: 4px; padding: 0; overflow: hidden; cursor: pointer; transition: all 0.15s; color: var(--text); font-family: inherit; text-align: left; display: flex; flex-direction: column; }
+  .rc-drug-card:hover { border-left-color: var(--accent); transform: translateY(-1px); }
+  .rc-drug-card.primary { border-left-color: var(--accent); }
+  .rc-drug-card-head { padding: 12px 16px 10px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); }
+  .rc-drug-card-head .name { font-family: 'Oswald', sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 4px; }
+  .rc-drug-card-head .ind { font-size: 11px; color: var(--text-dim); line-height: 1.4; }
+  .rc-drug-row { padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 3px; }
+  .rc-drug-row:last-child { border-bottom: none; }
+  .rc-drug-row .label { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-muted); letter-spacing: 0.18em; text-transform: uppercase; }
+  .rc-drug-row .value { font-family: 'Oswald', sans-serif; font-size: 18px; font-weight: 700; line-height: 1.15; }
+  .rc-drug-row.dose .value { color: var(--accent-bright); }
+  .rc-drug-row.package .value { color: var(--text); font-size: 13px; font-weight: 500; letter-spacing: 0.02em; }
+  .rc-drug-row.delivery .value { color: var(--gold); font-size: 15px; }
 </style>
 </head>
 <body>
@@ -3101,12 +3116,42 @@ function ccGetDrugs() {
   const band = ccState.ageBand;
   if (band === 'adult') {
     return [
-      { primary: true, rhythm: 'all', name: 'Epinephrine', class: 'Vasopressor — 1st-line', indication: 'Cardiac arrest (all rhythms)', weightDose: '0.5–1 mg', readyVol: '5–10 mL of 0.1 mg/mL (1:10,000)', detail: '0.5–1 mg IV/IO push every 3–5 min. Follow with 20 mL flush + raise extremity. Max cumulative 3 mg. ET route: 2–2.5 mg of 1:1,000.', route: 'IV / IO', max: '3 mg cumulative' },
-      { primary: true, rhythm: 'shockable', name: 'Amiodarone', class: 'Antiarrhythmic', indication: 'Refractory VF / pVT (after 3rd shock)', weightDose: '300 mg → 150 mg', readyVol: '300 mg in 20–30 mL D5W', detail: 'First dose: 300 mg IV/IO bolus. Second dose: 150 mg. Maintenance: 1 mg/min infusion if ROSC.', route: 'IV / IO', max: '2.2 g / 24 hr' },
-      { rhythm: 'shockable', name: 'Lidocaine', class: 'Antiarrhythmic (alt)', indication: 'Alternative to amiodarone for VF / pVT', weightDose: `${ccFmt(1.5*kg, 0)} mg → ${ccFmt(0.5*kg, 0)}–${ccFmt(0.75*kg, 0)} mg`, readyVol: `≈ ${ccFmt(1.5*kg/20, 1)} mL of 2% (20 mg/mL)`, detail: '1.5 mg/kg first dose. Repeat 0.5–0.75 mg/kg every 5–10 min. Max cumulative 3 mg/kg. PEARL: Preferred when arrest is toxicology-related (TCA, cocaine).', route: 'IV / IO', max: '3 mg/kg cumulative' },
-      { rhythm: 'shockable', name: 'Magnesium Sulfate', class: 'Electrolyte / Antiarrhythmic', indication: 'Torsades de pointes / refractory VT', weightDose: '2 g', readyVol: '4 mL of 50% diluted in 10 mL D5W', detail: '2 g IV/IO push for arrest with torsades or refractory VT.', route: 'IV / IO', max: 'Per protocol' },
-      { rhythm: 'nonshockable', name: 'Sodium Bicarbonate', class: 'Alkalinizer', indication: 'CONFIRMED hyperkalemia, TCA OD, severe acidosis', weightDose: `${ccFmt(1*kg, 0)} mEq`, readyVol: `${ccFmt(1*kg, 0)} mL of 8.4% (1 mEq/mL)`, detail: '1 mEq/kg IV/IO. PEARL: Blind administration NOT recommended — only for confirmed/suspected reversible cause.', route: 'IV / IO', max: 'Per protocol' },
-      { rhythm: 'nonshockable', name: 'Calcium Chloride 10%', class: 'Electrolyte', indication: 'SUSPECTED hyperkalemia, CCB OD, hypocalcemia', weightDose: '1 g', readyVol: '10 mL of 10%', detail: 'Slow IV/IO push. Caustic — large vessel preferred. PEARL: Blind administration NOT recommended — only for confirmed/suspected reversible cause.', route: 'IV / IO (central preferred)', max: 'Per protocol' }
+      { primary: true, rhythm: 'all', name: 'Epinephrine', class: 'Vasopressor — 1st-line', indication: 'Cardiac arrest (all rhythms)',
+        weightDose: '0.5–1 mg',
+        packageSpec: '0.1 mg/mL (1:10,000) · 10 mL prefilled syringe',
+        deliveryDose: 'Push 5–10 mL IV/IO + 20 mL flush',
+        readyVol: '5–10 mL of 0.1 mg/mL (1:10,000)',
+        detail: 'Every 3–5 min. Max cumulative 3 mg. ET route: 2–2.5 mg of 1:1,000.', route: 'IV / IO', max: '3 mg cumulative' },
+      { primary: true, rhythm: 'shockable', name: 'Amiodarone', class: 'Antiarrhythmic', indication: 'Refractory VF / pVT (after 3rd shock)',
+        weightDose: '300 mg → 150 mg',
+        packageSpec: '50 mg/mL · 3 mL vial (150 mg)',
+        deliveryDose: 'Push 6 mL (1st dose) → 3 mL (2nd) diluted in 20 mL D5W',
+        readyVol: '300 mg in 20–30 mL D5W',
+        detail: '1st: 300 mg IV/IO. 2nd: 150 mg. Maintenance: 1 mg/min if ROSC.', route: 'IV / IO', max: '2.2 g / 24 hr' },
+      { rhythm: 'shockable', name: 'Lidocaine', class: 'Antiarrhythmic (alt)', indication: 'Alternative to amiodarone for VF / pVT',
+        weightDose: `${ccFmt(1.5*kg, 0)} mg → ${ccFmt(0.5*kg, 0)}–${ccFmt(0.75*kg, 0)} mg`,
+        packageSpec: '2% (20 mg/mL) · 5 mL prefilled (100 mg)',
+        deliveryDose: `Push ${ccFmt(1.5*kg/20, 1)} mL → ${ccFmt(0.5*kg/20, 1)}–${ccFmt(0.75*kg/20, 1)} mL`,
+        readyVol: `≈ ${ccFmt(1.5*kg/20, 1)} mL of 2% (20 mg/mL)`,
+        detail: '1.5 mg/kg first dose. Repeat 0.5–0.75 mg/kg q5–10 min. Max 3 mg/kg. PEARL: Preferred for toxicology-related arrest.', route: 'IV / IO', max: '3 mg/kg cumulative' },
+      { rhythm: 'shockable', name: 'Magnesium Sulfate', class: 'Electrolyte / Antiarrhythmic', indication: 'Torsades de pointes / refractory VT',
+        weightDose: '2 g',
+        packageSpec: '50% (500 mg/mL) · 10 mL vial',
+        deliveryDose: 'Dilute 4 mL in 10 mL D5W, push',
+        readyVol: '4 mL of 50% diluted in 10 mL D5W',
+        detail: '2 g IV/IO push for arrest with torsades or refractory VT.', route: 'IV / IO', max: 'Per protocol' },
+      { rhythm: 'nonshockable', name: 'Sodium Bicarbonate', class: 'Alkalinizer', indication: 'CONFIRMED hyperkalemia, TCA OD, severe acidosis',
+        weightDose: `${ccFmt(1*kg, 0)} mEq`,
+        packageSpec: '8.4% (1 mEq/mL) · 50 mL prefilled syringe',
+        deliveryDose: `Push ${ccFmt(1*kg, 0)} mL IV/IO`,
+        readyVol: `${ccFmt(1*kg, 0)} mL of 8.4% (1 mEq/mL)`,
+        detail: '1 mEq/kg IV/IO. PEARL: Blind administration NOT recommended.', route: 'IV / IO', max: 'Per protocol' },
+      { rhythm: 'nonshockable', name: 'Calcium Chloride 10%', class: 'Electrolyte', indication: 'SUSPECTED hyperkalemia, CCB OD, hypocalcemia',
+        weightDose: '1 g',
+        packageSpec: '10% (100 mg/mL) · 10 mL prefilled syringe',
+        deliveryDose: 'Push 10 mL slow (large vessel)',
+        readyVol: '10 mL of 10%',
+        detail: 'Slow IV/IO push. Caustic — large vessel preferred. PEARL: Blind administration NOT recommended.', route: 'IV / IO (central preferred)', max: 'Per protocol' }
     ];
   }
   if (band === 'pediatric') {
@@ -3120,15 +3165,60 @@ function ccGetDrugs() {
     const dext_g = 0.5 * kg;
     const fluid_ml = 20 * kg;
     return [
-      { primary: true, rhythm: 'all', name: 'Epinephrine', class: 'Vasopressor — 1st-line', indication: 'Cardiac arrest (all rhythms)', weightDose: `${ccFmt(epi_mg, 2)} mg`, readyVol: `${ccFmt(epi_ml, 1)} mL of 0.1 mg/mL (1:10,000)`, detail: '0.01 mg/kg IV/IO every 3–5 min (max 1 mg). ET route: 0.1 mg/kg of 1:1,000.', route: 'IV / IO', max: '1 mg / dose' },
-      { primary: true, rhythm: 'shockable', name: 'Amiodarone', class: 'Antiarrhythmic', indication: 'Refractory VF / pVT', weightDose: `${ccFmt(amio_mg, 0)} mg`, readyVol: `${ccFmt(amio_mg/50, 1)} mL of 50 mg/mL`, detail: '5 mg/kg IV/IO bolus during arrest (max 300 mg). May repeat up to 2× for refractory VF/pVT.', route: 'IV / IO', max: '300 mg / dose, 15 mg/kg / day' },
-      { rhythm: 'shockable', name: 'Lidocaine', class: 'Antiarrhythmic (alt)', indication: 'Alternative to amiodarone', weightDose: `${ccFmt(lido_mg, 0)} mg`, readyVol: `${ccFmt(lido_mg/20, 1)} mL of 2% (20 mg/mL)`, detail: '1 mg/kg IV/IO bolus (max 100 mg). Maintenance 20–50 mcg/kg/min if needed. PEARL: Preferred when arrest is toxicology-related.', route: 'IV / IO', max: '100 mg / dose' },
-      { rhythm: 'shockable', name: 'Magnesium Sulfate', class: 'Electrolyte / Antiarrhythmic', indication: 'Torsades de pointes / refractory VT', weightDose: `${ccFmt(Math.min(50*kg, 2000), 0)} mg`, readyVol: `${ccFmt(Math.min(50*kg, 2000)/500, 1)} mL of 50% (500 mg/mL)`, detail: '50 mg/kg IV/IO (max 2 g). Push for torsades or refractory VT.', route: 'IV / IO', max: '2 g / dose' },
-      { rhythm: 'nonshockable', name: 'Atropine', class: 'Anticholinergic', indication: 'Symptomatic bradycardia', weightDose: `${ccFmt(atropine_mg, 2)} mg`, readyVol: `${ccFmt(atropine_mg/0.1, 1)} mL of 0.1 mg/mL`, detail: '0.02 mg/kg IV/IO. Min dose 0.1 mg. Max single dose 0.5 mg child / 1 mg adolescent. May repeat once.', route: 'IV / IO', max: '0.5 mg (child) / 1 mg (adolescent)' },
-      { rhythm: 'nonshockable', name: 'Sodium Bicarbonate', class: 'Alkalinizer', indication: 'CONFIRMED hyperkalemia, TCA OD, known acidosis', weightDose: `${ccFmt(bicarb, 0)} mEq`, readyVol: `${ccFmt(bicarb, 0)} mL of 8.4% (dilute 1:1 for infants)`, detail: '1 mEq/kg IV/IO. PEARL: Blind administration NOT recommended. For neonates and infants <2y use 4.2% or dilute.', route: 'IV / IO', max: 'Per protocol' },
-      { rhythm: 'nonshockable', name: 'Calcium Chloride 10%', class: 'Electrolyte', indication: 'SUSPECTED hyperkalemia, CCB toxicity, hypocalcemia', weightDose: `${ccFmt(ca_mg, 0)} mg`, readyVol: `${ccFmt(ca_mg/100, 1)} mL of 10%`, detail: '20 mg/kg slow IV/IO push. Caustic — large vessel preferred. PEARL: Blind administration NOT recommended.', route: 'IV / IO', max: 'Per protocol' },
-      { rhythm: 'all', name: 'Dextrose', class: 'Carbohydrate', indication: 'Documented hypoglycemia', weightDose: `${ccFmt(dext_g, 1)} g`, readyVol: `D25: ${ccFmt(dext_g * 4, 0)} mL  |  D10: ${ccFmt(dext_g * 10, 0)} mL`, detail: '0.5–1 g/kg IV/IO. D25 for children, D10 for infants. NEVER D50 in pediatrics.', route: 'IV / IO', max: 'Per protocol' },
-      { rhythm: 'all', name: 'Normal Saline Bolus', class: 'Crystalloid', indication: 'Hypovolemia, shock, post-ROSC support', weightDose: `${ccFmt(fluid_ml, 0)} mL`, readyVol: 'NS or LR over 5–20 min', detail: '20 mL/kg IV/IO. May repeat. 10 mL/kg if cardiogenic or DKA.', route: 'IV / IO', max: 'Per protocol' }
+      { primary: true, rhythm: 'all', name: 'Epinephrine', class: 'Vasopressor — 1st-line', indication: 'Cardiac arrest (all rhythms)',
+        weightDose: `${ccFmt(epi_mg, 2)} mg`,
+        packageSpec: '0.1 mg/mL (1:10,000) · 10 mL prefilled syringe',
+        deliveryDose: `Push ${ccFmt(epi_ml, 1)} mL IV/IO`,
+        readyVol: `${ccFmt(epi_ml, 1)} mL of 0.1 mg/mL (1:10,000)`,
+        detail: '0.01 mg/kg IV/IO every 3–5 min (max 1 mg/dose). ET route: 0.1 mg/kg of 1:1,000.', route: 'IV / IO', max: '1 mg / dose' },
+      { primary: true, rhythm: 'shockable', name: 'Amiodarone', class: 'Antiarrhythmic', indication: 'Refractory VF / pVT',
+        weightDose: `${ccFmt(amio_mg, 0)} mg`,
+        packageSpec: '50 mg/mL · 3 mL vial (150 mg)',
+        deliveryDose: `Push ${ccFmt(amio_mg/50, 1)} mL IV/IO`,
+        readyVol: `${ccFmt(amio_mg/50, 1)} mL of 50 mg/mL`,
+        detail: '5 mg/kg IV/IO bolus (max 300 mg). May repeat up to 2× for refractory VF/pVT.', route: 'IV / IO', max: '300 mg / dose' },
+      { rhythm: 'shockable', name: 'Lidocaine', class: 'Antiarrhythmic (alt)', indication: 'Alternative to amiodarone',
+        weightDose: `${ccFmt(lido_mg, 0)} mg`,
+        packageSpec: '2% (20 mg/mL) · 5 mL prefilled (100 mg)',
+        deliveryDose: `Push ${ccFmt(lido_mg/20, 1)} mL IV/IO`,
+        readyVol: `${ccFmt(lido_mg/20, 1)} mL of 2% (20 mg/mL)`,
+        detail: '1 mg/kg IV/IO bolus (max 100 mg). PEARL: Preferred for tox-related arrest.', route: 'IV / IO', max: '100 mg / dose' },
+      { rhythm: 'shockable', name: 'Magnesium Sulfate', class: 'Electrolyte / Antiarrhythmic', indication: 'Torsades / refractory VT',
+        weightDose: `${ccFmt(Math.min(50*kg, 2000), 0)} mg`,
+        packageSpec: '50% (500 mg/mL) · 10 mL vial',
+        deliveryDose: `Dilute ${ccFmt(Math.min(50*kg, 2000)/500, 1)} mL in 10 mL D5W, push`,
+        readyVol: `${ccFmt(Math.min(50*kg, 2000)/500, 1)} mL of 50%`,
+        detail: '50 mg/kg IV/IO (max 2 g). Push for torsades or refractory VT.', route: 'IV / IO', max: '2 g / dose' },
+      { rhythm: 'nonshockable', name: 'Atropine', class: 'Anticholinergic', indication: 'Symptomatic bradycardia',
+        weightDose: `${ccFmt(atropine_mg, 2)} mg`,
+        packageSpec: '0.1 mg/mL · 10 mL prefilled syringe',
+        deliveryDose: `Push ${ccFmt(atropine_mg/0.1, 1)} mL IV/IO`,
+        readyVol: `${ccFmt(atropine_mg/0.1, 1)} mL of 0.1 mg/mL`,
+        detail: '0.02 mg/kg IV/IO. Min 0.1 mg. Max 0.5 mg child / 1 mg adolescent. May repeat once.', route: 'IV / IO', max: '0.5 mg (child) / 1 mg (adolescent)' },
+      { rhythm: 'nonshockable', name: 'Sodium Bicarbonate', class: 'Alkalinizer', indication: 'CONFIRMED hyperkalemia, TCA OD, known acidosis',
+        weightDose: `${ccFmt(bicarb, 0)} mEq`,
+        packageSpec: '8.4% (1 mEq/mL) · 50 mL prefilled · DILUTE 1:1 for infants',
+        deliveryDose: `Push ${ccFmt(bicarb, 0)} mL IV/IO (dilute for infants)`,
+        readyVol: `${ccFmt(bicarb, 0)} mL of 8.4%`,
+        detail: '1 mEq/kg IV/IO. PEARL: Blind admin NOT recommended. Infants <2y: use 4.2% or dilute.', route: 'IV / IO', max: 'Per protocol' },
+      { rhythm: 'nonshockable', name: 'Calcium Chloride 10%', class: 'Electrolyte', indication: 'SUSPECTED hyperkalemia, CCB toxicity, hypocalcemia',
+        weightDose: `${ccFmt(ca_mg, 0)} mg`,
+        packageSpec: '10% (100 mg/mL) · 10 mL prefilled syringe',
+        deliveryDose: `Push ${ccFmt(ca_mg/100, 1)} mL slow (large vessel)`,
+        readyVol: `${ccFmt(ca_mg/100, 1)} mL of 10%`,
+        detail: '20 mg/kg slow IV/IO push. Caustic — large vessel preferred. PEARL: Blind admin NOT recommended.', route: 'IV / IO', max: 'Per protocol' },
+      { rhythm: 'all', name: 'Dextrose', class: 'Carbohydrate', indication: 'Documented hypoglycemia',
+        weightDose: `${ccFmt(dext_g, 1)} g`,
+        packageSpec: 'D25: 0.25 g/mL · D10: 0.1 g/mL · NEVER D50 in peds',
+        deliveryDose: `D25: ${ccFmt(dext_g * 4, 0)} mL | D10: ${ccFmt(dext_g * 10, 0)} mL`,
+        readyVol: `D25: ${ccFmt(dext_g * 4, 0)} mL  |  D10: ${ccFmt(dext_g * 10, 0)} mL`,
+        detail: '0.5–1 g/kg IV/IO. D25 for children, D10 for infants. NEVER D50 in pediatrics.', route: 'IV / IO', max: 'Per protocol' },
+      { rhythm: 'all', name: 'Normal Saline Bolus', class: 'Crystalloid', indication: 'Hypovolemia, shock, post-ROSC support',
+        weightDose: `${ccFmt(fluid_ml, 0)} mL`,
+        packageSpec: '0.9% NaCl · 1000 mL or 500 mL bag',
+        deliveryDose: `Infuse ${ccFmt(fluid_ml, 0)} mL over 5–20 min`,
+        readyVol: 'NS or LR over 5–20 min',
+        detail: '20 mL/kg IV/IO. May repeat. 10 mL/kg if cardiogenic or DKA.', route: 'IV / IO', max: 'Per protocol' }
     ];
   }
   const epi_low = 0.01 * kg, epi_high = 0.03 * kg;
@@ -3136,10 +3226,24 @@ function ccGetDrugs() {
   const fluid_ml = 10 * kg;
   const d10 = 2 * kg;
   return [
-    { primary: true, rhythm: 'all', name: 'Epinephrine', class: 'Vasopressor — 1st-line', indication: 'HR <60 despite adequate ventilation + compressions', weightDose: `${ccFmt(epi_low, 3)}–${ccFmt(epi_high, 3)} mg`, readyVol: `${ccFmt(vol_low, 2)}–${ccFmt(vol_high, 2)} mL of 0.1 mg/mL (1:10,000)`, detail: 'NRP: 0.01–0.03 mg/kg IV/IO (0.1–0.3 mL/kg of 1:10,000). ET: 0.05–0.1 mg/kg → IV/IO preferred. Repeat q3–5 min.', route: 'IV / IO (preferred) | ET', max: 'Per NRP' },
-    { primary: true, rhythm: 'all', name: 'Volume Expander', class: 'Crystalloid / Blood', indication: 'Hypovolemia, suspected blood loss', weightDose: `${ccFmt(fluid_ml, 0)} mL`, readyVol: 'NS or LR over 5–10 min', detail: '10 mL/kg IV/IO. May repeat. Consider packed RBCs if anemia suspected.', route: 'IV / IO', max: 'Per NRP' },
-    { rhythm: 'all', name: 'Dextrose 10%', class: 'Carbohydrate', indication: 'Documented hypoglycemia (<40 mg/dL)', weightDose: `${ccFmt(d10, 1)} mL D10W`, readyVol: `${ccFmt(d10, 1)} mL of D10 (0.1 g/mL)`, detail: '2 mL/kg of D10 IV/IO (= 0.2 g/kg). NEVER use D50 in neonates.', route: 'IV / IO', max: 'Per NRP' }
-    // Naloxone removed per SWFL 2025 — NOT indicated for cardiac arrest
+    { primary: true, rhythm: 'all', name: 'Epinephrine', class: 'Vasopressor — 1st-line', indication: 'HR <60 despite adequate ventilation + compressions',
+      weightDose: `${ccFmt(epi_low, 3)}–${ccFmt(epi_high, 3)} mg`,
+      packageSpec: '0.1 mg/mL (1:10,000) · 10 mL prefilled syringe',
+      deliveryDose: `Push ${ccFmt(vol_low, 2)}–${ccFmt(vol_high, 2)} mL IV/IO`,
+      readyVol: `${ccFmt(vol_low, 2)}–${ccFmt(vol_high, 2)} mL of 0.1 mg/mL (1:10,000)`,
+      detail: 'NRP: 0.01–0.03 mg/kg IV/IO. ET: 0.05–0.1 mg/kg → IV/IO preferred. Repeat q3–5 min.', route: 'IV / IO (preferred) | ET', max: 'Per NRP' },
+    { primary: true, rhythm: 'all', name: 'Volume Expander', class: 'Crystalloid / Blood', indication: 'Hypovolemia, suspected blood loss',
+      weightDose: `${ccFmt(fluid_ml, 0)} mL`,
+      packageSpec: 'NS, LR, or packed RBCs',
+      deliveryDose: `Infuse ${ccFmt(fluid_ml, 0)} mL over 5–10 min`,
+      readyVol: 'NS or LR over 5–10 min',
+      detail: '10 mL/kg IV/IO. May repeat. Consider packed RBCs if anemia suspected.', route: 'IV / IO', max: 'Per NRP' },
+    { rhythm: 'all', name: 'Dextrose 10%', class: 'Carbohydrate', indication: 'Documented hypoglycemia (<40 mg/dL)',
+      weightDose: `${ccFmt(d10, 1)} mL D10W`,
+      packageSpec: 'D10 (0.1 g/mL) · NEVER D50 in neonates',
+      deliveryDose: `Push ${ccFmt(d10, 1)} mL IV/IO`,
+      readyVol: `${ccFmt(d10, 1)} mL of D10 (0.1 g/mL)`,
+      detail: '2 mL/kg of D10 IV/IO (= 0.2 g/kg). NEVER use D50 in neonates.', route: 'IV / IO', max: 'Per NRP' }
   ];
 }
 
@@ -3457,11 +3561,23 @@ function renderRunCode() {
   const bandLabel = valid ? (ccState.ageBand === 'adult' ? 'Adult' : ccState.ageBand === 'pediatric' ? 'Pediatric' : 'Neonatal') : '';
 
   const drugButtons = valid ? drugs.map((d, i) => `
-    <button class="rc-drug-btn ${d.primary ? 'primary' : ''}" data-drug-idx="${i}">
-      <div class="name">${d.name}</div>
-      <div class="dose">${d.weightDose}</div>
-      <div class="vol">${d.readyVol}</div>
-      <div class="ind">${d.indication}</div>
+    <button class="rc-drug-card ${d.primary ? 'primary' : ''}" data-drug-idx="${i}">
+      <div class="rc-drug-card-head">
+        <div class="name">${d.name}</div>
+        <div class="ind">${d.indication}</div>
+      </div>
+      <div class="rc-drug-row dose">
+        <span class="label">Drug & Dose</span>
+        <span class="value">${d.weightDose}</span>
+      </div>
+      <div class="rc-drug-row package">
+        <span class="label">Package</span>
+        <span class="value">${d.packageSpec || d.readyVol || '—'}</span>
+      </div>
+      <div class="rc-drug-row delivery">
+        <span class="label">Delivery</span>
+        <span class="value">${d.deliveryDose || d.readyVol || '—'}</span>
+      </div>
     </button>
   `).join('') : '';
 
@@ -3799,11 +3915,23 @@ function rcPartialRender() {
     const drugs = ccFilterDrugsByRhythm(ccGetDrugs());
     const a = ccGetAirway();
     const drugButtons = drugs.map((d, i) => `
-      <button class="rc-drug-btn ${d.primary ? 'primary' : ''}" data-drug-idx="${i}">
-        <div class="name">${d.name}</div>
-        <div class="dose">${d.weightDose}</div>
-        <div class="vol">${d.readyVol}</div>
-        <div class="ind">${d.indication}</div>
+      <button class="rc-drug-card ${d.primary ? 'primary' : ''}" data-drug-idx="${i}">
+        <div class="rc-drug-card-head">
+          <div class="name">${d.name}</div>
+          <div class="ind">${d.indication}</div>
+        </div>
+        <div class="rc-drug-row dose">
+          <span class="label">Drug & Dose</span>
+          <span class="value">${d.weightDose}</span>
+        </div>
+        <div class="rc-drug-row package">
+          <span class="label">Package</span>
+          <span class="value">${d.packageSpec || d.readyVol || '—'}</span>
+        </div>
+        <div class="rc-drug-row delivery">
+          <span class="label">Delivery</span>
+          <span class="value">${d.deliveryDose || d.readyVol || '—'}</span>
+        </div>
       </button>
     `).join('');
     tabContent.innerHTML = rcRenderTabContent(kg, elec, drugs, a, drugButtons);
