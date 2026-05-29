@@ -2388,7 +2388,7 @@ const ctState = {
   voiceOn: true,
   toneOn: true,
   epiReminderOn: true,
-  advancedAirway: false,
+  advancedAirway: true,
   audioCtx: null,
   audioUnlocked: false,
   rafId: null,
@@ -2411,7 +2411,7 @@ function ctLoadSettings() {
       ctState.voiceOn = s.voiceOn ?? true;
       ctState.toneOn = s.toneOn ?? true;
       ctState.epiReminderOn = s.epiReminderOn ?? true;
-      ctState.advancedAirway = s.advancedAirway ?? false;
+      ctState.advancedAirway = s.advancedAirway ?? true;
       ctState.epiIntervalMs = s.epiIntervalMs ?? 3 * 60 * 1000;
     }
   } catch (e) {}
@@ -2783,7 +2783,7 @@ function renderCodeTimer() {
           <div class="ct-bpm-val" id="ct-bpm-val">${ctState.bpm} BPM</div>
         </div>
         <div class="ct-toggle-row">
-          <div class="ct-toggle-label"><div class="main">Advanced Airway</div><div class="sub">Breath cue: adult 6s · peds 4s · neo 3s</div></div>
+          <div class="ct-toggle-label"><div class="main">Breath Cues</div><div class="sub">Adult 6s · Peds 4s · Neo 3s</div></div>
           <div class="ct-toggle ${ctState.advancedAirway ? 'on' : ''}" data-setting="advancedAirway"></div>
         </div>
         <div class="ct-toggle-row">
@@ -3494,7 +3494,7 @@ function renderRunCode() {
               <div class="ct-bpm-val" id="ct-bpm-val">${ctState.bpm} BPM</div>
             </div>
             <div class="ct-toggle-row">
-              <div class="ct-toggle-label"><div class="main">Advanced Airway</div><div class="sub">Adult 6s · Peds 4s · Neo 3s</div></div>
+              <div class="ct-toggle-label"><div class="main">Breath Cues</div><div class="sub">Adult 6s · Peds 4s · Neo 3s</div></div>
               <div class="ct-toggle ${ctState.advancedAirway ? 'on' : ''}" data-setting="advancedAirway"></div>
             </div>
             <div class="ct-toggle-row">
