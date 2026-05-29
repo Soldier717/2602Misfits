@@ -3189,12 +3189,12 @@ function ccGetDrugs() {
   const band = ccState.ageBand;
   if (band === 'adult') {
     return [
-      { primary: true, rhythm: 'all', name: 'Epinephrine', class: 'Vasopressor — 1st-line', indication: 'Cardiac arrest (all rhythms)',
-        weightDose: '0.5–1 mg',
+      { primary: true, rhythm: 'all', name: 'Epinephrine 1:10,000', class: 'Vasopressor — CARDIAC ARREST', indication: 'Cardiac arrest (all rhythms) — IV/IO ONLY',
+        weightDose: '1 mg',
         packageSpec: '0.1 mg/mL (1:10,000) · 10 mL prefilled syringe',
-        deliveryDose: 'Push 5–10 mL IV/IO + 20 mL flush',
-        readyVol: '5–10 mL of 0.1 mg/mL (1:10,000)',
-        detail: 'Every 3–5 min. Max cumulative 3 mg. ET route: 2–2.5 mg of 1:1,000.', route: 'IV / IO', max: '3 mg cumulative' },
+        deliveryDose: 'Push 10 mL IV/IO + 20 mL flush',
+        readyVol: '10 mL of 0.1 mg/mL (1:10,000)',
+        detail: '1 mg IV/IO every 3–5 min. Max cumulative 3 mg. ET: 2–2.5 mg of 1:1,000. NOT for IM use.', route: 'IV / IO', max: '3 mg cumulative' },
       { primary: true, rhythm: 'shockable', name: 'Amiodarone', class: 'Antiarrhythmic', indication: 'Refractory VF / pVT (after 3rd shock)',
         weightDose: '300 mg → 150 mg',
         packageSpec: '50 mg/mL · 3 mL vial (150 mg)',
@@ -3257,12 +3257,12 @@ function ccGetDrugs() {
         deliveryDose: `${ccFmt(Math.min(kg, 50)/50, 1)} mL IV/IO/IM`,
         readyVol: '1 mL of 50 mg/mL',
         detail: '1–2 mg/kg IV/IO/IM. Max 50 mg.', route: 'IV / IO / IM', max: '50 mg' },
-      { rhythm: 'non-arrest', name: 'Epinephrine 1:1,000', class: 'Vasopressor — IM', indication: 'Anaphylaxis / severe asthma',
-        weightDose: '0.3–0.5 mg IM',
-        packageSpec: '1 mg/mL ampule or vial',
-        deliveryDose: '0.3–0.5 mL IM lateral thigh · May repeat q5 min',
-        readyVol: '0.3–0.5 mL of 1:1,000',
-        detail: 'ANAPHYLAXIS first-line. NOT for cardiac arrest — use 1:10,000.', route: 'IM', max: 'Per protocol' },
+      { rhythm: 'non-arrest', name: 'Epinephrine 1:1,000', class: 'Vasopressor — AIRWAY / ANAPHYLAXIS', indication: 'Anaphylaxis · severe asthma / bronchospasm — IM',
+        weightDose: '0.5 mg IM',
+        packageSpec: '1 mg/mL (1:1,000) · 1 mL ampule or vial',
+        deliveryDose: '0.5 mL IM lateral thigh · May repeat q5 min × 2',
+        readyVol: '0.5 mL of 1:1,000',
+        detail: 'ANAPHYLAXIS / AIRWAY first-line. 0.5 mg IM. NOT for cardiac arrest — use 1:10,000 IV/IO instead.', route: 'IM', max: 'Per protocol' },
       { rhythm: 'non-arrest', name: 'Epi Pen (Adult)', class: 'Vasopressor — IM', indication: 'Anaphylaxis (auto-injector)',
         weightDose: '0.3 mg IM',
         packageSpec: '0.3 mg auto-injector',
@@ -4093,11 +4093,34 @@ function rcRenderTabDrip(kg) {
         </div>
       </div>
 
+      <!-- EPI USE-CASE QUICK REFERENCE -->
+      <div class="cc-elec-card" style="margin-bottom:14px;border-left-color:var(--gold);background:linear-gradient(135deg, rgba(212,163,65,0.08), transparent);">
+        <div class="label" style="color:var(--gold);font-size:11px;">Epinephrine — 4 Use Cases</div>
+        <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px;font-size:13px;font-family:'Inter',sans-serif;">
+          <div style="padding:8px 12px;background:rgba(0,0,0,0.3);border-left:3px solid var(--accent);border-radius:2px;">
+            <div style="font-family:'Oswald',sans-serif;font-weight:700;color:var(--accent-bright);font-size:14px;letter-spacing:0.05em;">CARDIAC ARREST</div>
+            <div style="color:var(--text);">Epi <strong>1:10,000</strong> · <strong>1 mg IV/IO</strong> · q3–5 min · max 3 mg</div>
+          </div>
+          <div style="padding:8px 12px;background:rgba(0,0,0,0.3);border-left:3px solid var(--gold);border-radius:2px;">
+            <div style="font-family:'Oswald',sans-serif;font-weight:700;color:var(--gold);font-size:14px;letter-spacing:0.05em;">ANAPHYLAXIS / AIRWAY</div>
+            <div style="color:var(--text);">Epi <strong>1:1,000</strong> · <strong>0.5 mg IM</strong> · lateral thigh · q5 min × 2</div>
+          </div>
+          <div style="padding:8px 12px;background:rgba(0,0,0,0.3);border-left:3px solid var(--text-dim);border-radius:2px;">
+            <div style="font-family:'Oswald',sans-serif;font-weight:700;color:var(--text);font-size:14px;letter-spacing:0.05em;">BRADYCARDIA DRIP</div>
+            <div style="color:var(--text);">Epi <strong>1:1,000</strong> in <strong>100 mL D5W</strong> · 2–10 mcg/min · 60 gtts/set</div>
+          </div>
+          <div style="padding:8px 12px;background:rgba(0,0,0,0.3);border-left:3px solid var(--text-dim);border-radius:2px;">
+            <div style="font-family:'Oswald',sans-serif;font-weight:700;color:var(--text);font-size:14px;letter-spacing:0.05em;">PRESSOR DRIP</div>
+            <div style="color:var(--text);">Epi <strong>1:1,000</strong> in <strong>100 mL D5W</strong> · 0.1–0.5 mcg/kg/min · 10 gtts/set</div>
+          </div>
+        </div>
+      </div>
+
       <!-- EPI PERFUSION DRIP (weight-based) -->
       <div class="cc-elec-card" style="margin-bottom:14px;border-left-color:var(--accent);">
-        <div class="label" style="color:var(--gold);">Epinephrine Drip — Perfusion (Pseudo-PEA / Post-ROSC)</div>
+        <div class="label" style="color:var(--gold);">Epi Pressor Drip — Perfusion (Pseudo-PEA / Post-ROSC)</div>
         <div class="primary" style="font-size:20px;">${ccFmt(kg, 1)} kg @ 0.1–0.5 mcg/kg/min</div>
-        <div class="secondary">1 mg of 1:1,000 in 100 mL D5W · 10 mcg/mL · 10 gtts/set</div>
+        <div class="secondary">1 mg of 1:1,000 in 100 mL D5W bag · = 10 mcg/mL · 10 gtts/set</div>
         <table style="width:100%;margin-top:10px;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:13px;">
           <tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-size:10px;letter-spacing:0.15em;">Dose</th><th style="text-align:right;padding:6px 8px;color:var(--gold);font-size:10px;letter-spacing:0.15em;">Rate</th></tr>
           ${epiPerf.map(r => `<tr style="border-bottom:1px solid rgba(255,255,255,0.04);"><td style="padding:6px 8px;color:var(--text);">${r.dose} mcg/kg/min</td><td style="padding:6px 8px;text-align:right;color:var(--accent-bright);font-weight:700;">${r.gtts} gtts/min</td></tr>`).join('')}
@@ -4106,9 +4129,9 @@ function rcRenderTabDrip(kg) {
 
       <!-- EPI BRADYCARDIA DRIP -->
       <div class="cc-elec-card" style="margin-bottom:14px;border-left-color:var(--gold);">
-        <div class="label" style="color:var(--gold);">Epinephrine Drip — Bradycardia</div>
-        <div class="primary" style="font-size:20px;">2–10 mcg/min (not weight-based)</div>
-        <div class="secondary">1 mg of 1:1,000 in 100 mL D5W · 10 mcg/mL · 60 gtts/set (microdrip)</div>
+        <div class="label" style="color:var(--gold);">Epi Bradycardia Drip — Symptomatic Bradycardia</div>
+        <div class="primary" style="font-size:20px;">2–10 mcg/min (NOT weight-based)</div>
+        <div class="secondary">1 mg of 1:1,000 in 100 mL D5W bag · = 10 mcg/mL · 60 gtts/set (microdrip)</div>
         <table style="width:100%;margin-top:10px;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:13px;">
           <tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-size:10px;letter-spacing:0.15em;">Dose</th><th style="text-align:right;padding:6px 8px;color:var(--gold);font-size:10px;letter-spacing:0.15em;">Rate</th></tr>
           ${epiBrady.map(r => `<tr style="border-bottom:1px solid rgba(255,255,255,0.04);"><td style="padding:6px 8px;color:var(--text);">${r.mcgmin} mcg/min</td><td style="padding:6px 8px;text-align:right;color:var(--accent-bright);font-weight:700;">${r.gtts} gtts/min</td></tr>`).join('')}
