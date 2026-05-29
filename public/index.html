@@ -1181,11 +1181,29 @@
     background: var(--bg-elev);
     border-top: 2px solid var(--accent);
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     z-index: 80;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
     padding-bottom: env(safe-area-inset-bottom);
   }
+  .rc-quick-weight { display: flex; gap: 6px; margin-top: 8px; }
+  .rc-quick-btn {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    color: var(--text-dim);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 8px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .rc-quick-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .rc-quick-btn.active { background: var(--gold); color: #1a1208; border-color: var(--gold); }
   .rc-tab-btn {
     display: flex;
     flex-direction: column;
@@ -1357,8 +1375,8 @@
         <span class="nav-text">Quick Links</span>
       </div>
       <div class="nav-item" data-page="coderun">
-        <span class="nav-num">CR</span>
-        <span class="nav-text">Run a Code</span>
+        <span class="nav-num">GT</span>
+        <span class="nav-text">GrandTevy</span>
       </div>
     </div>
 
@@ -2527,7 +2545,7 @@ const ctState = {
   shockCount: 0, // Number of defibrillations delivered this code
   antiDysrhythmicGiven: false, // Has any anti-dysrhythmic (Amio/Lido) been logged?
   dsdCued: false, // Has DSD cue been fired this code?
-  activeTab: 'meds', // 'meds' | 'drip' | 'electricity' | 'equipment'
+  activeTab: 'code', // 'code' | 'meds' | 'drip' | 'electricity' | 'equipment'
 };
 
 const CT_STORAGE_KEY = 'gnfr-codetimer-settings-v1';
@@ -3511,6 +3529,14 @@ function ccFilterDrugsByRhythm(drugs) {
   return drugs.filter(d => d.rhythm === 'all' || d.rhythm === r);
 }
 
+// Code tab: arrest meds only (excludes non-arrest drug box meds)
+function ccFilterArrestDrugs(drugs) {
+  const arrestOnly = drugs.filter(d => d.rhythm !== 'non-arrest');
+  const r = ctState.lastRhythm;
+  if (!r) return arrestOnly;
+  return arrestOnly.filter(d => d.rhythm === 'all' || d.rhythm === r);
+}
+
 const CC_HS_TS = [
   { label: 'Hypovolemia', detail: 'Volume challenge (20 mL/kg peds, 1L adult). Trauma, GI bleed, sepsis.' },
   { label: 'Hypoxia', detail: 'Confirm tube placement, ventilation, oxygenation. Capnography.' },
@@ -3841,8 +3867,8 @@ function renderRunCode() {
   return `
     <div class="header">
       <img src="/gnfr-badge.jpg" alt="GNFR" class="header-badge" onclick="document.querySelector('.nav-item[data-page=home]').click()" title="Back to Command">
-      <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> RUN A CODE</div>
-      <h1 class="page-title">Run a <span class="accent">Code</span></h1>
+      <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> GRANDTEVY</div>
+      <h1 class="page-title">Grand<span class="accent">Tevy</span></h1>
       <div class="page-meta">CPR timer + weight-based ACLS dosing in one tool</div>
     </div>
     <div class="content ct-wrap rc-tabbed">
@@ -3852,37 +3878,21 @@ function renderRunCode() {
         to log it. Always confirm against current GNFR protocols and medical control.
       </div>
 
-      <div class="rc-patient-bar ${ctState.running ? 'active' : ''}" style="grid-template-columns: 1fr; gap: 14px;">
+      <div class="rc-patient-bar ${ctState.running ? 'active' : ''}" style="grid-template-columns: 1fr; gap: 12px;">
         <div class="cc-field">
-          <div class="cc-field-label" style="font-size:12px;letter-spacing:0.2em;margin-bottom:10px;">Patient Weight (kg) ${valid ? `— <span style="color:var(--gold);">${bandLabel}</span>` : ''}</div>
+          <div class="cc-field-label" style="font-size:12px;letter-spacing:0.2em;margin-bottom:8px;">Patient Weight (kg) ${valid ? `— <span style="color:var(--gold);">${bandLabel}</span>` : ''}</div>
           <input type="number" id="rc-weight" value="${ccState.weight}" min="0" max="300" step="1" inputmode="numeric" pattern="[0-9]*" placeholder="0" autocomplete="off"
-            style="background:#000;border:2px solid var(--border-bright);color:var(--accent-bright);font-family:'Oswald',sans-serif;font-size:64px;font-weight:700;padding:16px 20px;border-radius:6px;outline:none;text-align:center;width:100%;box-sizing:border-box;letter-spacing:0.05em;line-height:1;">
-        </div>
-        <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;">
-          <button class="ct-btn ${ctState.running ? 'stop' : 'start'}" id="ct-start-btn" ${valid ? '' : 'disabled'} style="font-size:18px;padding:18px;">
-            ${ctState.running ? '⏸ Pause' : (ctState.elapsedMs > 0 ? '▶ Resume' : '▶ Start Code')}
-          </button>
-          <button class="ct-btn" id="ct-reset-btn" style="padding:18px;">↻ Reset</button>
+            style="background:#000;border:2px solid var(--border-bright);color:var(--accent-bright);font-family:'Oswald',sans-serif;font-size:54px;font-weight:700;padding:12px 16px;border-radius:6px;outline:none;text-align:center;width:100%;box-sizing:border-box;letter-spacing:0.05em;line-height:1;">
+          <div class="rc-quick-weight">
+            <button class="rc-quick-btn ${parseFloat(ccState.weight) === 25 ? 'active' : ''}" data-quick-weight="25">25 kg (Peds)</button>
+            <button class="rc-quick-btn ${parseFloat(ccState.weight) === 70 ? 'active' : ''}" data-quick-weight="70">70 kg (IBW)</button>
+            <button class="rc-quick-btn ${parseFloat(ccState.weight) === 100 ? 'active' : ''}" data-quick-weight="100">100 kg</button>
+          </div>
         </div>
       </div>
 
       <div class="ct-audio-hint" id="ct-audio-hint">🔊 Tap <strong>Start Code</strong> to enable audio cues. <strong style="color:var(--gold);">iPhone:</strong> turn OFF the silent/mute switch on the side of the phone, or audio will not play.</div>
       <div class="ct-cue-banner" id="ct-cue-banner"></div>
-
-      <div class="ct-display" id="ct-display">
-        <div class="ct-total-time">Total: <span class="v" id="ct-total-val">${ctFormatTime(ctState.elapsedMs)}</span></div>
-        <div class="ct-cycle-label">Cycle <span class="ct-cycle-num" id="ct-cycle-num">${ctState.cycleNum}</span> · CPR Time</div>
-        <div class="ct-time" id="ct-time">${ctFormatTime(ctState.elapsedMs % 120000)}</div>
-        <div class="ct-time-sub">of 2:00 — rhythm check</div>
-        <div class="ct-pulse-area">
-          <div class="ct-pulse-dot" id="ct-pulse-dot"></div>
-          <div class="ct-pulse-label"><span class="v">${ctState.bpm}</span> BPM</div>
-        </div>
-        <div style="display:flex;justify-content:center;gap:24px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;">
-          <span>Shocks: <span style="color:var(--accent-bright);font-weight:700;" id="ct-shock-count">${ctState.shockCount}</span></span>
-          <span>Epi: <span style="color:${ctState.cumulativeEpiMg >= 3 ? '#ff6b4a' : 'var(--gold)'};font-weight:700;" id="ct-epi-count">${ctState.cumulativeEpiMg.toFixed(1)}</span> / 3 mg</span>
-        </div>
-      </div>
 
       ${valid ? `
         <div class="rc-decision" id="rc-decision">
@@ -3901,13 +3911,6 @@ function renderRunCode() {
           </div>
         </div>
         <div id="rc-tab-content">${rcRenderTabContent(kg, elec, drugs, a, drugButtons)}</div>
-
-        <details class="cc-section" style="margin-bottom:20px;">
-          <summary style="cursor:pointer;font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:10px 0;border-bottom:1px solid var(--border);">H's & T's — Reversible Causes</summary>
-          <div class="cc-hts-grid" style="margin-top:14px;">
-            ${CC_HS_TS.map(item => `<div class="cc-ht-card"><div class="label">${item.label}</div><div class="detail">${item.detail}</div></div>`).join('')}
-          </div>
-        </details>
 
         <details class="ct-settings" style="margin-bottom:20px;">
           <summary style="cursor:pointer;font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);">Timer & Audio Settings</summary>
@@ -3939,14 +3942,6 @@ function renderRunCode() {
             </div>
           </div>
         </details>
-
-        <div class="ct-log">
-          <div class="ct-log-title">
-            Code Log
-            <button class="ct-log-clear" id="ct-log-clear">Clear</button>
-          </div>
-          <div id="ct-log-list"><div class="ct-log-empty">No events logged yet</div></div>
-        </div>
       ` : '<div class="cc-empty">Enter patient weight to load doses</div>'}
     </div>
     ${valid ? rcRenderBottomBar() : ''}
@@ -3981,6 +3976,7 @@ function rcRenderBottomBar() {
   `;
   return `
     <div class="rc-tabbar" id="rc-tabbar">
+      ${tab('code', 'Code', 'M12 8a4 4 0 100 8 4 4 0 000-8zm0-6v2m0 16v2m10-10h-2M4 12H2m15.5-7.5l-1.5 1.5M7.5 16.5l-1.5 1.5m13 0l-1.5-1.5M7.5 7.5L6 6')}
       ${tab('meds', 'Meds', 'M12 2v20M2 12h20')}
       ${tab('drip', 'Drip', 'M12 2C8 8 6 11 6 14a6 6 0 0 0 12 0c0-3-2-6-6-12z')}
       ${tab('electricity', 'Electric', 'M13 2L3 14h7l-1 8 10-12h-7l1-8z')}
@@ -3991,15 +3987,62 @@ function rcRenderBottomBar() {
 
 function rcRenderTabContent(kg, elec, drugs, a, drugButtons) {
   const t = ctState.activeTab;
-  if (t === 'meds') return rcRenderTabMeds(kg, elec, drugButtons);
+  if (t === 'code') return rcRenderTabCode(kg, elec);
+  if (t === 'meds') return rcRenderTabMeds(kg, elec);
   if (t === 'drip') return rcRenderTabDrip(kg);
   if (t === 'electricity') return rcRenderTabElectricity(kg, elec);
   if (t === 'equipment') return rcRenderTabEquipment(a);
   return '';
 }
 
-function rcRenderTabMeds(kg, elec, drugButtons) {
+function rcBuildDrugButtons(drugs) {
+  return drugs.map((d, i) => `
+    <button class="rc-drug-card ${d.primary ? 'primary' : ''}" data-drug-idx="${i}">
+      <div class="rc-drug-card-head">
+        <div class="name">${d.name}</div>
+        <div class="ind">${d.indication}</div>
+      </div>
+      <div class="rc-drug-row dose"><span class="label">Drug & Dose</span><span class="value">${d.weightDose}</span></div>
+      <div class="rc-drug-row package"><span class="label">Package</span><span class="value">${d.packageSpec || d.readyVol || '—'}</span></div>
+      <div class="rc-drug-row delivery"><span class="label">Delivery</span><span class="value">${d.deliveryDose || d.readyVol || '—'}</span></div>
+    </button>
+  `).join('');
+}
+
+function rcRenderTabCode(kg, elec) {
+  // Code tab: ARREST drugs only, filtered by rhythm
+  const arrestDrugs = ccFilterArrestDrugs(ccGetDrugs());
+  const drugButtons = rcBuildDrugButtons(arrestDrugs);
+  const rhythmTag = ctState.lastRhythm === 'shockable' ? 'VF / pVT pathway'
+    : ctState.lastRhythm === 'nonshockable' ? 'PEA / Asystole pathway'
+    : 'All arrest meds · select rhythm to filter';
+
   return `
+    <!-- Timer Display -->
+    <div class="ct-display" id="ct-display" style="margin-bottom:16px;">
+      <div class="ct-total-time">Total: <span class="v" id="ct-total-val">${ctFormatTime(ctState.elapsedMs)}</span></div>
+      <div class="ct-cycle-label">Cycle <span class="ct-cycle-num" id="ct-cycle-num">${ctState.cycleNum}</span> · CPR Time</div>
+      <div class="ct-time" id="ct-time">${ctFormatTime(ctState.elapsedMs % 120000)}</div>
+      <div class="ct-time-sub">of 2:00 — rhythm check</div>
+      <div class="ct-pulse-area">
+        <div class="ct-pulse-dot" id="ct-pulse-dot"></div>
+        <div class="ct-pulse-label"><span class="v">${ctState.bpm}</span> BPM</div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:24px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;">
+        <span>Shocks: <span style="color:var(--accent-bright);font-weight:700;" id="ct-shock-count">${ctState.shockCount}</span></span>
+        <span>Epi: <span style="color:${ctState.cumulativeEpiMg >= 3 ? '#ff6b4a' : 'var(--gold)'};font-weight:700;" id="ct-epi-count">${ctState.cumulativeEpiMg.toFixed(1)}</span> / 3 mg</span>
+      </div>
+    </div>
+
+    <!-- Start / Reset Controls -->
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:20px;">
+      <button class="ct-btn ${ctState.running ? 'stop' : 'start'}" id="ct-start-btn" style="font-size:18px;padding:18px;">
+        ${ctState.running ? '⏸ Pause' : (ctState.elapsedMs > 0 ? '▶ Resume' : '▶ Start Code')}
+      </button>
+      <button class="ct-btn" id="ct-reset-btn" style="padding:18px;">↻ Reset</button>
+    </div>
+
+    <!-- Shock / Rhythm -->
     <div class="cc-section priority" style="margin-bottom:20px;">
       <div class="cc-section-head">
         <span class="cc-section-num">⚡</span>
@@ -4027,13 +4070,54 @@ function rcRenderTabMeds(kg, elec, drugButtons) {
         <button class="rc-rhythm-btn rosc" data-rhythm="ROSC" id="rc-rosc-btn">✓ ROSC</button>
       </div>
     </div>
+
+    <!-- Arrest Drugs (filtered) -->
     <div class="cc-section priority" style="margin-bottom:20px;">
       <div class="cc-section-head">
         <span class="cc-section-num">💉</span>
-        <span class="cc-section-title">Drugs — ${ccFmt(kg, 1)} kg</span>
-        <span class="cc-section-tag">${ctState.lastRhythm === 'shockable' ? 'VF / pVT pathway' : ctState.lastRhythm === 'nonshockable' ? 'PEA / Asystole pathway' : 'All drugs · select rhythm to filter'}</span>
+        <span class="cc-section-title">Arrest Drugs — ${ccFmt(kg, 1)} kg</span>
+        <span class="cc-section-tag">${rhythmTag}</span>
       </div>
       <div class="rc-drug-grid">${drugButtons}</div>
+    </div>
+
+    <!-- H's & T's -->
+    <details class="cc-section" style="margin-bottom:20px;">
+      <summary style="cursor:pointer;font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:10px 0;border-bottom:1px solid var(--border);">H's & T's — Reversible Causes</summary>
+      <div class="cc-hts-grid" style="margin-top:14px;">
+        ${CC_HS_TS.map(item => `<div class="cc-ht-card"><div class="label">${item.label}</div><div class="detail">${item.detail}</div></div>`).join('')}
+      </div>
+    </details>
+
+    <!-- Code Log -->
+    <div class="ct-log">
+      <div class="ct-log-title">Code Log<button class="ct-log-clear" id="ct-log-clear">Clear</button></div>
+      <div id="ct-log-list"><div class="ct-log-empty">No events logged yet</div></div>
+    </div>
+  `;
+}
+
+function rcRenderTabMeds(kg, elec) {
+  // Meds tab: ALL drugs, no rhythm filter (full drug box reference)
+  const allDrugs = ccGetDrugs();
+  // Group by category
+  const arrestDrugs = allDrugs.filter(d => d.rhythm === 'all' || d.rhythm === 'shockable' || d.rhythm === 'nonshockable');
+  const nonArrestDrugs = allDrugs.filter(d => d.rhythm === 'non-arrest');
+
+  return `
+    <div class="cc-section priority" style="margin-bottom:20px;">
+      <div class="cc-section-head">
+        <span class="cc-section-num">💊</span>
+        <span class="cc-section-title">GNFR Drug Box — ${ccFmt(kg, 1)} kg</span>
+        <span class="cc-section-tag">Reference · All meds</span>
+      </div>
+      <div class="cc-disclaimer" style="font-size:11px;padding:10px 14px;margin-bottom:14px;">
+        Weight-based dosing reference. To run an active code, use the <strong>Code</strong> tab.
+      </div>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin:0 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px;">Cardiac Arrest</p>
+      <div class="rc-drug-grid" style="margin-bottom:20px;">${rcBuildDrugButtons(arrestDrugs)}</div>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin:0 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px;">Non-Arrest Drug Box</p>
+      <div class="rc-drug-grid">${rcBuildDrugButtons(nonArrestDrugs)}</div>
     </div>
   `;
 }
@@ -4443,6 +4527,17 @@ function bindRunCodeEvents() {
   document.querySelectorAll('[data-rc-tab]').forEach(btn => {
     btn.addEventListener('click', () => {
       ctState.activeTab = btn.dataset.rcTab;
+      rcPartialRender();
+    });
+  });
+
+  // Quick-tap weight buttons (25 / 70 / 100 kg)
+  document.querySelectorAll('[data-quick-weight]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      ccState.weight = btn.dataset.quickWeight;
+      ccState.unit = 'kg';
+      const input = document.getElementById('rc-weight');
+      if (input) input.value = btn.dataset.quickWeight;
       rcPartialRender();
     });
   });
