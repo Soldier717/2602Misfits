@@ -2712,14 +2712,22 @@ function ctMarkShock() { ctLogEvent('Shock', `Shock delivered @ ${ctFormatTime(c
 function ctMarkROSC() { ctLogEvent('ROSC', `ROSC @ ${ctFormatTime(ctState.elapsedMs)}`); ctShowCueBanner('ROSC logged', 'normal', 2500); ctPause(); }
 function ctMarkRhythm(rhythm) {
   ctLogEvent('Rhythm', `${rhythm} @ ${ctFormatTime(ctState.elapsedMs)}`);
-  // Track for auto-shock cue at next rhythm check
   const r = rhythm.toLowerCase();
   if (r.includes('vf') || r.includes('vt') || r.includes('pvt')) {
     ctState.lastRhythm = 'shockable';
-    ctShowCueBanner(`${rhythm} — Shockable`, 'normal', 1800);
+    // Get weight-based defib joules
+    const elec = ccGetElectrical();
+    const joules = elec ? elec.defib.primary : 'Defibrillate';
+    ctShowCueBanner(`${rhythm} — Defibrillate ${joules}`, 'normal', 4000);
+    ctCueTone();
+    ctSpeak(`Defibrillate at ${joules.replace('J', 'joules').replace('→', 'then')}`);
+    ctLogEvent('Cue', `Shockable rhythm — defib ${joules}`);
   } else if (r.includes('pea') || r.includes('asys')) {
     ctState.lastRhythm = 'nonshockable';
-    ctShowCueBanner(`${rhythm} — Not shockable`, 'normal', 1800);
+    ctShowCueBanner(`${rhythm} — No Shock Advised`, 'epi', 4000);
+    ctEpiTone();
+    ctSpeak('No shock advised. Resume CPR, consider epi');
+    ctLogEvent('Cue', `Non-shockable rhythm — no shock`);
   }
 }
 
