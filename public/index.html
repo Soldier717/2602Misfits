@@ -4000,8 +4000,8 @@ function rcRenderTabContent(kg, elec, drugs, a, drugButtons) {
 }
 
 function rcBuildDrugButtons(drugs) {
-  return drugs.map((d, i) => `
-    <button class="rc-drug-card ${d.primary ? 'primary' : ''}" data-drug-idx="${i}">
+  return drugs.map((d) => `
+    <button class="rc-drug-card ${d.primary ? 'primary' : ''}" data-drug-name="${escapeAttr(d.name)}">
       <div class="rc-drug-card-head">
         <div class="name">${d.name}</div>
         <div class="ind">${d.indication}</div>
@@ -4466,23 +4466,44 @@ function rcPartialRender() {
 }
 
 function rcBindDynamicElements() {
-  // Use the same filter as the render so indices line up
-  const drugs = ccFilterDrugsByRhythm(ccGetDrugs());
-  document.querySelectorAll('[data-drug-idx]').forEach(btn => {
+  // Refresh pulse dot reference (Code tab re-creates this element)
+  ctState.pulseDotEl = document.getElementById('ct-pulse-dot');
+
+  // Start / Pause / Resume button (Code tab)
+  const startBtn = document.getElementById('ct-start-btn');
+  if (startBtn) startBtn.addEventListener('click', () => {
+    if (ctState.running) ctPause(); else ctStart();
+    const hint = document.getElementById('ct-audio-hint');
+    if (hint) hint.classList.remove('show');
+  });
+
+  // Reset button (Code tab)
+  const resetBtn = document.getElementById('ct-reset-btn');
+  if (resetBtn) resetBtn.addEventListener('click', () => {
+    if (ctState.elapsedMs > 0 && !confirm('Reset timer? Code log will be kept.')) return;
+    ctReset();
+  });
+
+  // Drug buttons — look up by name (works regardless of which tab/grid)
+  const allDrugs = ccGetDrugs();
+  document.querySelectorAll('[data-drug-name]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const d = drugs[parseInt(btn.dataset.drugIdx)];
+      const d = allDrugs.find(x => x.name === btn.dataset.drugName);
       if (!d) return;
-      ctLogEvent('Drug', `${d.name} ${d.weightDose} (${d.readyVol})`);
+      ctLogEvent('Drug', `${d.name} ${d.weightDose} (${d.deliveryDose || d.readyVol || ''})`);
       ctShowCueBanner(`${d.name} logged`, d.primary ? 'epi' : 'normal', 1800);
-      if (d.name === 'Epinephrine') {
+      // Track cumulative Epi ONLY for arrest Epi (1:10,000 / 'all' tag)
+      const isArrestEpi = (d.name === 'Epinephrine' || d.name === 'Epinephrine 1:10,000') && d.rhythm === 'all';
+      if (isArrestEpi) {
         ctState.lastEpiMs = ctState.elapsedMs;
-        // Track cumulative Epi (parse mg from dose string)
         const m = (d.weightDose || '').match(/([\d.]+)\s*mg/);
         if (m) ctState.cumulativeEpiMg += parseFloat(m[1]);
       }
       if (d.name === 'Amiodarone' || d.name === 'Lidocaine') ctState.antiDysrhythmicGiven = true;
     });
   });
+
+  // Defib button
   const defibBtn = document.getElementById('rc-shock-defib');
   if (defibBtn) defibBtn.addEventListener('click', () => {
     const e = ccGetElectrical();
@@ -4493,12 +4514,16 @@ function rcBindDynamicElements() {
     ctState.lastRhythm = null;
     rcPartialRender();
   });
+
+  // Cardioversion button
   const cvBtn = document.getElementById('rc-shock-cv');
   if (cvBtn) cvBtn.addEventListener('click', () => {
     const e = ccGetElectrical();
     ctLogEvent('Cardiovert', `${e.cardiovert.primary} sync`);
     ctShowCueBanner('Cardioversion logged', 'normal', 1800);
   });
+
+  // Rhythm buttons (VF/pVT, PEA, Asystole, ROSC)
   document.querySelectorAll('.rc-rhythm-btn').forEach(b => {
     b.addEventListener('click', () => {
       const r = b.dataset.rhythm;
@@ -4506,12 +4531,21 @@ function rcBindDynamicElements() {
       else { ctMarkRhythm(r); rcPartialRender(); }
     });
   });
+
+  // Code log clear
   const clearBtn = document.getElementById('ct-log-clear');
   if (clearBtn) clearBtn.addEventListener('click', () => {
     if (ctState.log.length === 0) return;
     if (confirm('Clear all logged events?')) ctClearLog();
   });
+
+  // Re-render log into new container
   ctRenderLog();
+
+  // If timer is running and Code tab is now active, ensure display updates resume
+  if (ctState.running && ctState.activeTab === 'code') {
+    ctUpdateDisplay(ctState.elapsedMs % 120000, ctState.elapsedMs);
+  }
 }
 
 function bindRunCodeEvents() {
@@ -4568,67 +4602,7 @@ function bindRunCodeEvents() {
     rcPartialRender();
   });
 
-  // Timer controls — reuse Code Timer state/functions
-  ctState.pulseDotEl = document.getElementById('ct-pulse-dot');
-  const startBtn = document.getElementById('ct-start-btn');
-  if (startBtn) startBtn.addEventListener('click', () => {
-    if (ctState.running) ctPause(); else ctStart();
-    const hint = document.getElementById('ct-audio-hint');
-    if (hint) hint.classList.remove('show');
-  });
-  const resetBtn = document.getElementById('ct-reset-btn');
-  if (resetBtn) resetBtn.addEventListener('click', () => {
-    if (ctState.elapsedMs > 0 && !confirm('Reset timer? Code log will be kept.')) return;
-    ctReset();
-  });
-
-  // Drug buttons — log with calculated dose (filtered by rhythm)
-  const drugs = ccFilterDrugsByRhythm(ccGetDrugs());
-  document.querySelectorAll('[data-drug-idx]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const d = drugs[parseInt(btn.dataset.drugIdx)];
-      if (!d) return;
-      ctLogEvent('Drug', `${d.name} ${d.weightDose} (${d.readyVol})`);
-      ctShowCueBanner(`${d.name} logged`, d.primary ? 'epi' : 'normal', 1800);
-      // Update epi timer if epinephrine
-      if (d.name === 'Epinephrine') {
-        ctState.lastEpiMs = ctState.elapsedMs;
-        // Track cumulative Epi (parse mg from dose string)
-        const m = (d.weightDose || '').match(/([\d.]+)\s*mg/);
-        if (m) ctState.cumulativeEpiMg += parseFloat(m[1]);
-      }
-      if (d.name === 'Amiodarone' || d.name === 'Lidocaine') ctState.antiDysrhythmicGiven = true;
-    });
-  });
-
-  // Shock buttons
-  const defibBtn = document.getElementById('rc-shock-defib');
-  if (defibBtn) defibBtn.addEventListener('click', () => {
-    const e = ccGetElectrical();
-    ctState.shockCount++;
-    ctLogEvent('Shock', `Defib #${ctState.shockCount} — ${e.defib.primary} (${e.defib.secondary})`);
-    ctShowCueBanner(`Shock #${ctState.shockCount} Delivered — Resume CPR`, 'normal', 1800);
-    ctSpeak('Shock delivered. Resume CPR.');
-    ctState.lastRhythm = null;
-    rcPartialRender();
-  });
-  const cvBtn = document.getElementById('rc-shock-cv');
-  if (cvBtn) cvBtn.addEventListener('click', () => {
-    const e = ccGetElectrical();
-    ctLogEvent('Cardiovert', `${e.cardiovert.primary} sync`);
-    ctShowCueBanner('Cardioversion logged', 'normal', 1800);
-  });
-
-  // Rhythm buttons
-  document.querySelectorAll('.rc-rhythm-btn').forEach(b => {
-    b.addEventListener('click', () => {
-      const r = b.dataset.rhythm;
-      if (r === 'ROSC') { ctMarkROSC(); }
-      else { ctMarkRhythm(r); }
-    });
-  });
-
-  // Settings toggles
+  // Settings toggles (only on full render — settings panel is below tabs)
   document.querySelectorAll('.ct-toggle').forEach(t => {
     t.addEventListener('click', () => {
       const setting = t.dataset.setting;
@@ -4640,8 +4614,10 @@ function bindRunCodeEvents() {
   const bpmSlider = document.getElementById('ct-bpm-slider');
   if (bpmSlider) bpmSlider.addEventListener('input', (e) => {
     ctState.bpm = parseInt(e.target.value);
-    document.getElementById('ct-bpm-val').textContent = ctState.bpm + ' BPM';
-    document.querySelector('.ct-pulse-label .v').textContent = ctState.bpm;
+    const bpmVal = document.getElementById('ct-bpm-val');
+    if (bpmVal) bpmVal.textContent = ctState.bpm + ' BPM';
+    const pulseLabel = document.querySelector('.ct-pulse-label .v');
+    if (pulseLabel) pulseLabel.textContent = ctState.bpm;
     if (ctState.running) {
       const cycleMs = performance.now() - ctState.cycleStartMs;
       ctState.metronomeBeats = Math.floor(cycleMs / (60000 / ctState.bpm));
@@ -4649,20 +4625,14 @@ function bindRunCodeEvents() {
     ctSaveSettings();
   });
 
-  // Log clear
-  const clearBtn = document.getElementById('ct-log-clear');
-  if (clearBtn) clearBtn.addEventListener('click', () => {
-    if (ctState.log.length === 0) return;
-    if (confirm('Clear all logged events?')) ctClearLog();
-  });
-
   // Show audio hint if not yet unlocked
   if (!ctState.audioUnlocked) {
     const hint = document.getElementById('ct-audio-hint');
     if (hint) hint.classList.add('show');
   }
-  ctUpdateDisplay(ctState.elapsedMs % 120000, ctState.elapsedMs);
-  ctRenderLog();
+
+  // Bind the tab content elements (Start/Reset/drugs/shock/rhythm/log)
+  rcBindDynamicElements();
 }
 </script>
 </body>
