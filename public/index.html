@@ -4057,11 +4057,12 @@ function rcRenderTabDrip(kg) {
   const diltMg = Math.min(0.25 * kg, 20);
   const diltMl = diltMg; // 1 mg/mL so mg = mL
 
-  // Push-dose Epi (0.01 mg/mL = 10 mcg/mL) — 1 mL of 1:10,000 + 9 mL NS
+  // Push-dose Epi (GNFR): 1 mL Epi 1:1,000 in 100 mL D5W bag = 10 mcg/mL
+  // Draw 10 mL from bag, push 10 mL IVP
   const isPed = kg < 40;
   const pushDose = isPed
-    ? `${ccFmt(0.1 * Math.min(kg, 20), 1)} mL (${ccFmt(Math.min(kg, 20), 0)} mcg) q2 min PRN`
-    : '2 mL (20 mcg) IV/IO q2 min PRN';
+    ? `${ccFmt(0.1 * Math.min(kg, 20), 1)} mL IVP (${ccFmt(Math.min(kg, 20), 0)} mcg) q2 min PRN`
+    : '10 mL IVP (~ 100 mcg) titrate to BP';
 
   const crystalloid = isPed ? `${ccFmt(20 * kg, 0)} mL (20 mL/kg)` : '500–1000 mL';
 
@@ -4094,8 +4095,8 @@ function rcRenderTabDrip(kg) {
             <div class="ind">Bridge to drip · While infusion preps</div>
           </div>
           <div class="rc-drug-row dose"><span class="label">Drug & Dose</span><span class="value">${pushDose}</span></div>
-          <div class="rc-drug-row package"><span class="label">Package</span><span class="value">0.01 mg/mL (10 mcg/mL) · Mix 1 mL of 1:10,000 in 9 mL NS</span></div>
-          <div class="rc-drug-row delivery"><span class="label">Delivery</span><span class="value">IV/IO push q2 min PRN</span></div>
+          <div class="rc-drug-row package"><span class="label">Mix (GNFR)</span><span class="value">1 mL Epi 1:1,000 + 100 mL D5W bag = 10 mcg/mL</span></div>
+          <div class="rc-drug-row delivery"><span class="label">Delivery</span><span class="value">Draw 10 mL off bag · Push 10 mL IVP · titrate q2 min PRN</span></div>
         </div>
       </div>
 
