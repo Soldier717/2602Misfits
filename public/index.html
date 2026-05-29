@@ -2514,10 +2514,10 @@ function ctFireCue(type) {
   if (ctState.cuesFired[type]) return;
   ctState.cuesFired[type] = true;
   if (type === 'prepare-charge') {
-    ctShowCueBanner('Prepare to charge', 'normal', 3500);
+    ctShowCueBanner('Precharge Monitor', 'normal', 3500);
     ctCueTone();
-    ctSpeak('Prepare to charge');
-    ctLogEvent('Cue', 'Prepare to charge (1:45)');
+    ctSpeak('Precharge monitor');
+    ctLogEvent('Cue', 'Precharge monitor (1:45)');
   } else if (type === 'rhythm-check') {
     ctShowCueBanner('Rhythm Check', 'normal', 3500);
     ctCueTone();
@@ -2760,7 +2760,7 @@ function renderCodeTimer() {
           <div class="ct-toggle ${ctState.advancedAirway ? 'on' : ''}" data-setting="advancedAirway"></div>
         </div>
         <div class="ct-toggle-row">
-          <div class="ct-toggle-label"><div class="main">Voice Cues</div><div class="sub">"Prepare to charge" · "Rhythm check"</div></div>
+          <div class="ct-toggle-label"><div class="main">Voice Cues</div><div class="sub">"Precharge monitor" · "Rhythm check"</div></div>
           <div class="ct-toggle ${ctState.voiceOn ? 'on' : ''}" data-setting="voiceOn"></div>
         </div>
         <div class="ct-toggle-row">
@@ -3471,7 +3471,7 @@ function renderRunCode() {
               <div class="ct-toggle ${ctState.advancedAirway ? 'on' : ''}" data-setting="advancedAirway"></div>
             </div>
             <div class="ct-toggle-row">
-              <div class="ct-toggle-label"><div class="main">Voice Cues</div><div class="sub">"Prepare to charge" · "Rhythm check"</div></div>
+              <div class="ct-toggle-label"><div class="main">Voice Cues</div><div class="sub">"Precharge monitor" · "Rhythm check"</div></div>
               <div class="ct-toggle ${ctState.voiceOn ? 'on' : ''}" data-setting="voiceOn"></div>
             </div>
             <div class="ct-toggle-row">
