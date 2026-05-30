@@ -1573,6 +1573,373 @@
     .cr-zone { grid-template-columns: 100px 1fr auto; }
     .cr-ibw-tile { grid-template-columns: 70px 1fr 70px; }
   }
+
+  /* ============================================================
+     V2 LIGHT CLINICAL THEME — scoped to body.on-coderun only
+     Academy / dashboard pages keep the dark theme.
+  ============================================================ */
+  :root {
+    --clin-bg: #f4f7fb;
+    --clin-surface: #ffffff;
+    --clin-surface-alt: #eef2f7;
+    --clin-border: #d8e0ea;
+    --clin-text: #1a2230;
+    --clin-text-dim: #5a6878;
+    --clin-text-muted: #94a0b0;
+    --clin-blue: #1d3a6b;
+    --clin-blue-light: #d6e6f5;
+    --clin-pink: #fbe0e6;
+    --clin-red: #c8341a;
+    --clin-yellow: #f4c542;
+    --clin-green: #2fa84f;
+    --clin-shadow: 0 2px 8px rgba(20,40,80,0.08);
+  }
+
+  body.on-coderun .main {
+    background: var(--clin-bg);
+  }
+  body.on-coderun .main .header {
+    background: var(--clin-blue);
+    color: white;
+    border-bottom: none;
+  }
+  body.on-coderun .main .header .breadcrumb,
+  body.on-coderun .main .header .page-meta {
+    color: rgba(255,255,255,0.7);
+  }
+  body.on-coderun .main .header .page-title {
+    color: white;
+  }
+  body.on-coderun .main .header .page-title .accent {
+    color: var(--clin-yellow);
+  }
+  body.on-coderun .main .content {
+    background: var(--clin-bg);
+    color: var(--clin-text);
+  }
+  body.on-coderun .main .cc-disclaimer {
+    background: var(--clin-surface);
+    border-color: var(--clin-border);
+    color: var(--clin-text-dim);
+    border-left: 3px solid var(--clin-yellow);
+  }
+  body.on-coderun .main .cc-disclaimer strong {
+    color: var(--clin-red);
+  }
+  body.on-coderun .main .cr-entry-title { color: var(--clin-blue); }
+  body.on-coderun .main .cr-entry-sub { color: var(--clin-text-dim); }
+  body.on-coderun .main .cr-entry-card {
+    background: var(--clin-surface);
+    border-color: var(--clin-border);
+    color: var(--clin-text);
+    box-shadow: var(--clin-shadow);
+  }
+  body.on-coderun .main .cr-entry-card.peds { border-color: var(--clin-green); }
+  body.on-coderun .main .cr-entry-card.peds .plus { background: var(--clin-green); color: white; }
+  body.on-coderun .main .cr-entry-card.peds:hover { background: linear-gradient(180deg, #e8f5ec 0%, var(--clin-surface) 100%); }
+  body.on-coderun .main .cr-entry-card.adult { border-color: var(--clin-blue); }
+  body.on-coderun .main .cr-entry-card.adult .plus { background: var(--clin-blue); color: white; }
+  body.on-coderun .main .cr-entry-card.adult:hover { background: linear-gradient(180deg, var(--clin-blue-light) 0%, var(--clin-surface) 100%); }
+  body.on-coderun .main .cr-back {
+    color: var(--clin-blue);
+    border-color: var(--clin-border);
+    background: var(--clin-surface);
+  }
+  body.on-coderun .main .cr-back:hover { color: var(--clin-blue); border-color: var(--clin-blue); background: var(--clin-blue-light); }
+  body.on-coderun .main .cr-zone {
+    background: var(--clin-surface);
+    border-color: var(--clin-border);
+    color: var(--clin-text);
+  }
+  body.on-coderun .main .cr-zone:hover { border-color: var(--clin-blue); box-shadow: var(--clin-shadow); }
+  body.on-coderun .main .cr-zone-weight { color: var(--clin-text); }
+  body.on-coderun .main .cr-zone-age { color: var(--clin-text-dim); }
+  body.on-coderun .main .cr-zone-arrow { color: var(--clin-text-muted); }
+  body.on-coderun .main .cr-ibw-tile {
+    background: var(--clin-blue-light);
+    border-color: var(--clin-border);
+    color: var(--clin-text);
+  }
+  body.on-coderun .main .cr-ibw-tile:hover { border-color: var(--clin-blue); background: #c5dbf0; }
+  body.on-coderun .main .cr-ibw-lbs { color: var(--clin-text); }
+  body.on-coderun .main .cr-ibw-kg { color: var(--clin-text); }
+  body.on-coderun .main .cr-ibw-ht { color: var(--clin-text-dim); }
+  body.on-coderun .main .cr-manual {
+    background: var(--clin-surface);
+    border-color: var(--clin-border);
+  }
+  body.on-coderun .main .cr-manual-label { color: var(--clin-text-dim); }
+  body.on-coderun .main .cr-manual-row input {
+    background: var(--clin-surface);
+    border-color: var(--clin-border);
+    color: var(--clin-text);
+  }
+  body.on-coderun .main .cr-manual-row input:focus { border-color: var(--clin-blue); }
+  body.on-coderun .main .cr-manual-btn {
+    background: var(--clin-blue);
+    color: white;
+  }
+  body.on-coderun .main .cr-manual-btn:hover { background: #15294d; }
+
+  /* Patient bar — V2 clinical look */
+  body.on-coderun .main .cr-patient-bar-v2 {
+    background: var(--clin-blue-light);
+    border: none;
+    border-left: 4px solid var(--clin-blue);
+    color: var(--clin-text);
+    border-radius: 0;
+    padding: 14px 18px;
+    margin-bottom: 0;
+    box-shadow: 0 1px 2px rgba(20,40,80,0.05);
+  }
+  body.on-coderun .main .cr-patient-bar-v2.peds {
+    background: var(--clin-pink);
+    border-left-color: #ec4899;
+  }
+  body.on-coderun .main .cr-pat-summary { color: var(--clin-text); }
+  body.on-coderun .main .cr-pat-summary .lt { color: var(--clin-text-dim); }
+  /* Start CPR button (right side of patient bar) */
+  .cr-cpr-toggle-btn {
+    background: var(--clin-surface);
+    border: 2px solid var(--clin-blue);
+    color: var(--clin-blue);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 9px 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .cr-cpr-toggle-btn:hover { background: var(--clin-blue); color: white; }
+  .cr-cpr-toggle-btn.active {
+    background: var(--clin-red);
+    border-color: var(--clin-red);
+    color: white;
+  }
+  .cr-cpr-toggle-btn.active:hover { background: #a82d17; border-color: #a82d17; }
+
+  /* New Patient: subtler button in clinical theme */
+  body.on-coderun .main .cr-new-pat-btn {
+    background: transparent;
+    border: 1px solid var(--clin-text-dim);
+    color: var(--clin-text-dim);
+    padding: 7px 12px;
+    font-size: 11px;
+  }
+  body.on-coderun .main .cr-new-pat-btn:hover { background: var(--clin-text-dim); color: white; }
+
+  /* ============================================================
+     COMPACT CPR CONTROL BAR — shows when CPR active
+  ============================================================ */
+  .cr-cpr-control {
+    background: var(--clin-surface);
+    border: 1px solid var(--clin-border);
+    border-radius: 10px;
+    padding: 14px;
+    margin: 12px 0;
+    box-shadow: var(--clin-shadow);
+    display: none;
+  }
+  .cr-cpr-control.show { display: block; }
+  .cpr-row-top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .cpr-ratio-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .cpr-ratio-btn {
+    background: var(--clin-surface);
+    border: 2px solid var(--clin-border);
+    color: var(--clin-text-dim);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+  }
+  .cpr-ratio-btn.active {
+    background: var(--clin-green);
+    border-color: var(--clin-green);
+    color: white;
+  }
+  .cpr-ratio-btn:hover:not(.active) { border-color: var(--clin-blue); color: var(--clin-blue); }
+  .cpr-action-btn {
+    background: var(--clin-surface);
+    border: 2px solid var(--clin-border);
+    color: var(--clin-text);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 12px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .cpr-action-btn:hover { border-color: var(--clin-blue); color: var(--clin-blue); }
+  .cpr-action-btn.defib { border-color: var(--clin-red); color: var(--clin-red); }
+  .cpr-action-btn.defib:hover { background: var(--clin-red); color: white; }
+  .cpr-row-mid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 4px;
+    border-top: 1px solid var(--clin-surface-alt);
+    border-bottom: 1px solid var(--clin-surface-alt);
+  }
+  .cpr-bpm-cell {
+    text-align: left;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .cpr-bpm-cell .ico { font-size: 18px; line-height: 1; }
+  .cpr-bpm-cell .val {
+    font-family: 'Oswald', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--clin-red);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .cpr-bpm-cell .lbl {
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--clin-text-muted);
+    letter-spacing: 0.04em;
+  }
+  .cpr-reset-btn {
+    background: var(--clin-blue);
+    color: white;
+    border: none;
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(29,58,107,0.35);
+    text-transform: uppercase;
+  }
+  .cpr-reset-btn:hover { background: #15294d; transform: scale(1.03); }
+  .cpr-time-cell {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .cpr-time-cell .val {
+    font-family: 'Oswald', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--clin-blue);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .cpr-time-cell .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--clin-text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .cpr-row-bot {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .cpr-footer {
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--clin-text-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--clin-surface-alt);
+  }
+  .cr-pulse-mini {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--clin-red);
+    opacity: 0.25;
+    transition: all 0.06s;
+    display: inline-block;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+  .cr-pulse-mini.beat { opacity: 1; transform: scale(1.5); box-shadow: 0 0 10px rgba(200,52,26,0.6); }
+
+  /* Bottom tab bar — clinical look */
+  body.on-coderun .main .rc-tabbar {
+    background: var(--clin-blue);
+    color: white;
+    border-top: none;
+    box-shadow: 0 -2px 8px rgba(20,40,80,0.15);
+  }
+  body.on-coderun .main .rc-tab-btn {
+    background: none;
+    color: rgba(255,255,255,0.65);
+    border-top: 3px solid transparent;
+    border-bottom: none;
+  }
+  body.on-coderun .main .rc-tab-btn.active {
+    color: white;
+    background: rgba(255,255,255,0.06);
+    border-top-color: var(--clin-yellow);
+    border-bottom: none;
+  }
+  body.on-coderun .main .rc-tab-btn svg path { stroke: currentColor; }
+
+  /* Settings collapsible — light theme */
+  body.on-coderun .main .ct-settings {
+    background: var(--clin-surface);
+    border: 1px solid var(--clin-border);
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+  body.on-coderun .main .ct-settings summary {
+    color: var(--clin-text-dim) !important;
+  }
+  body.on-coderun .main .ct-toggle-row,
+  body.on-coderun .main .ct-bpm-row {
+    border-top: 1px solid var(--clin-surface-alt);
+  }
+  body.on-coderun .main .ct-toggle-label .main { color: var(--clin-text); }
+  body.on-coderun .main .ct-toggle-label .sub { color: var(--clin-text-dim); }
+
+  /* Decision panel — light theme */
+  body.on-coderun .main .rc-decision {
+    background: var(--clin-surface);
+    border-color: var(--clin-border);
+  }
+  body.on-coderun .main .rc-decision.show { border-color: var(--clin-red); }
+  body.on-coderun .main .rc-decision-title { color: var(--clin-red); }
+
+  @media (max-width: 720px) {
+    .cpr-row-top, .cpr-row-bot { grid-template-columns: 1fr; }
+    .cpr-ratio-group { grid-template-columns: 1fr 1fr; }
+    .cpr-row-mid { gap: 8px; }
+    .cpr-reset-btn { width: 64px; height: 64px; font-size: 12px; }
+  }
 </style>
 </head>
 <body>
@@ -1906,6 +2273,8 @@ document.querySelectorAll('.nav-item').forEach(item => {
 // ---------- RENDER ----------
 function render() {
   const main = document.getElementById('main');
+  // Toggle clinical-theme body class for GrandTevy / Code Run only
+  document.body.classList.toggle('on-coderun', currentPage === 'coderun');
   if (currentPage === 'home') {
     main.innerHTML = renderHome();
     bindHomeEvents();
@@ -2801,7 +3170,8 @@ const ctState = {
   shockCount: 0, // Number of defibrillations delivered this code
   antiDysrhythmicGiven: false, // Has any anti-dysrhythmic (Amio/Lido) been logged?
   dsdCued: false, // Has DSD cue been fired this code?
-  activeTab: 'code', // 'code' | 'meds' | 'drip' | 'electricity' | 'equipment'
+  activeTab: 'meds', // 'meds' | 'drip' | 'electricity' | 'equipment' | 'more'
+  cprRatio: '30:2', // '15:2' | '30:2' | 'continuous'
 };
 
 const CT_STORAGE_KEY = 'gnfr-codetimer-settings-v1';
@@ -3049,12 +3419,22 @@ function ctFlashPulse() {
 }
 
 function ctUpdateDisplay(cycleMs, totalMs) {
+  // Legacy big display (kept for Code tab fallback)
   const timeEl = document.getElementById('ct-time');
   const cycleEl = document.getElementById('ct-cycle-num');
   const totalEl = document.getElementById('ct-total-val');
   if (timeEl) timeEl.textContent = ctFormatTime(cycleMs);
   if (cycleEl) cycleEl.textContent = ctState.cycleNum;
   if (totalEl) totalEl.textContent = ctFormatTime(totalMs);
+  // New compact CPR control bar
+  const cprCycleTimeEl = document.getElementById('cpr-cycle-time');
+  const cprCycleNumEl = document.getElementById('cpr-cycle-num');
+  const cprTotalMinEl = document.getElementById('cpr-total-min');
+  const cprBpmValEl = document.getElementById('cpr-bpm-val');
+  if (cprCycleTimeEl) cprCycleTimeEl.textContent = ctFormatTime(cycleMs);
+  if (cprCycleNumEl) cprCycleNumEl.textContent = ctState.cycleNum;
+  if (cprTotalMinEl) cprTotalMinEl.textContent = Math.floor(totalMs / 60000);
+  if (cprBpmValEl) cprBpmValEl.textContent = ctState.bpm;
 }
 
 function ctFormatTime(ms) {
@@ -3068,6 +3448,22 @@ function ctLogEvent(type, note) {
   const entry = { time: ctFormatTime(ctState.elapsedMs), type, note, ts: Date.now() };
   ctState.log.unshift(entry);
   ctRenderLog();
+  // If user is on the More tab, refresh inline log there too
+  if (currentPage === 'coderun' && ctState.activeTab === 'more') {
+    const tabContent = document.getElementById('rc-tab-content');
+    if (tabContent) {
+      tabContent.innerHTML = rcRenderTabMore();
+      // re-bind log clear
+      const clearBtn = document.getElementById('ct-log-clear');
+      if (clearBtn) clearBtn.addEventListener('click', () => {
+        if (ctState.log.length === 0) return;
+        if (confirm('Clear all logged events?')) {
+          ctClearLog();
+          tabContent.innerHTML = rcRenderTabMore();
+        }
+      });
+    }
+  }
 }
 
 function ctRenderLog() {
@@ -3135,7 +3531,14 @@ function ctReset() {
   ctUpdateControlButtons();
 }
 
-function ctClearLog() { ctState.log = []; ctRenderLog(); }
+function ctClearLog() {
+  ctState.log = [];
+  ctRenderLog();
+  if (currentPage === 'coderun' && ctState.activeTab === 'more') {
+    const tabContent = document.getElementById('rc-tab-content');
+    if (tabContent) tabContent.innerHTML = rcRenderTabMore();
+  }
+}
 function ctMarkEpiGiven() { ctLogEvent('Drug', `Epinephrine given @ ${ctFormatTime(ctState.elapsedMs)}`); ctState.lastEpiMs = ctState.elapsedMs; ctShowCueBanner('Epi logged', 'epi', 1800); }
 function ctMarkShock() { ctLogEvent('Shock', `Shock delivered @ ${ctFormatTime(ctState.elapsedMs)}`); ctShowCueBanner('Shock logged', 'normal', 1800); }
 function ctMarkROSC() { ctLogEvent('ROSC', `ROSC @ ${ctFormatTime(ctState.elapsedMs)}`); ctShowCueBanner('ROSC logged', 'normal', 2500); ctPause(); }
@@ -4252,8 +4655,9 @@ function renderRunCode() {
   return renderRunCodeHeader() + `
     <div class="content ct-wrap rc-tabbed">
       ${renderCRPatientBar()}
+      ${renderCPRControlBar()}
 
-      <div class="ct-audio-hint" id="ct-audio-hint">🔊 Tap <strong>Start Code</strong> to enable audio cues. <strong style="color:var(--gold);">iPhone:</strong> turn OFF the silent/mute switch on the side of the phone, or audio will not play.</div>
+      <div class="ct-audio-hint" id="ct-audio-hint">🔊 Tap <strong>Start CPR</strong> to enable audio cues. <strong>iPhone:</strong> turn OFF the silent/mute switch on the side of the phone, or audio will not play.</div>
       <div class="ct-cue-banner" id="ct-cue-banner"></div>
 
       <div class="rc-decision" id="rc-decision">
@@ -4410,11 +4814,51 @@ function renderCRPatientBar() {
     : '';
   const summary = isPeds
     ? `${pill} ${p.weight} kg <span class="lt">· ${p.ageRange || (p.ageYears ? p.ageYears + ' yr' : 'Custom')}</span>`
-    : `${p.lbs} lb / <span style="color:var(--gold)">${p.weight} kg</span> <span class="lt">· ${p.height}${p.height === '—' ? ' Custom' : ' IBW'}</span>`;
+    : `${p.lbs} lb / ${p.weight} kg <span class="lt">· ${p.height}${p.height === '—' ? ' Custom' : ' Ideal Weight'}</span>`;
+  const cprRunning = ctState.running;
   return `
     <div class="cr-patient-bar-v2 ${isPeds ? 'peds' : ''}">
       <div class="cr-pat-summary">${summary}</div>
-      <button class="cr-new-pat-btn" id="cr-new-patient">⟲ New Patient</button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="cr-new-pat-btn" id="cr-new-patient">⟲ New</button>
+        <button class="cr-cpr-toggle-btn ${cprRunning ? 'active' : ''}" id="cr-cpr-toggle">${cprRunning ? 'Stop CPR' : 'Start CPR'}</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderCPRControlBar() {
+  if (!ctState.running) return '<div class="cr-cpr-control" id="cr-cpr-control"></div>';
+  const r = ctState.cprRatio;
+  const cycleMs = performance.now() - ctState.cycleStartMs;
+  const totalMin = Math.floor(ctState.elapsedMs / 60000);
+  return `
+    <div class="cr-cpr-control show" id="cr-cpr-control">
+      <div class="cpr-row-top">
+        <div class="cpr-ratio-group">
+          <button class="cpr-ratio-btn ${r==='15:2'?'active':''}" data-cpr-ratio="15:2">15:2</button>
+          <button class="cpr-ratio-btn ${r==='30:2'?'active':''}" data-cpr-ratio="30:2">30:2</button>
+        </div>
+        <button class="cpr-action-btn defib" id="cpr-defib-btn">⚡ Defibrillation</button>
+      </div>
+      <div class="cpr-row-mid">
+        <div class="cpr-bpm-cell">
+          <span class="ico">🔊</span>
+          <span class="cr-pulse-mini" id="cr-pulse-mini"></span>
+          <span class="val" id="cpr-bpm-val">${ctState.bpm}</span>
+          <span class="lbl">Cycle <span id="cpr-cycle-num">${ctState.cycleNum}</span></span>
+        </div>
+        <button class="cpr-reset-btn" id="cpr-reset-btn">Reset</button>
+        <div class="cpr-time-cell">
+          <span class="val" id="cpr-cycle-time">${ctFormatTime(cycleMs)}</span>
+          <span class="lbl">Total <span id="cpr-total-min">${totalMin}</span> min</span>
+        </div>
+      </div>
+      <div class="cpr-row-bot">
+        <button class="cpr-ratio-btn ${r==='continuous'?'active':''}" data-cpr-ratio="continuous">Continuous</button>
+        <button class="cpr-action-btn epi" id="cpr-epi-btn">💉 Epinephrine</button>
+      </div>
+      <div class="cpr-footer">Powered by GrandTevy · 2602 Misfits</div>
     </div>
   `;
 }
@@ -4447,23 +4891,53 @@ function rcRenderBottomBar() {
   `;
   return `
     <div class="rc-tabbar" id="rc-tabbar">
-      ${tab('code', 'Code', 'M12 8a4 4 0 100 8 4 4 0 000-8zm0-6v2m0 16v2m10-10h-2M4 12H2m15.5-7.5l-1.5 1.5M7.5 16.5l-1.5 1.5m13 0l-1.5-1.5M7.5 7.5L6 6')}
       ${tab('meds', 'Meds', 'M12 2v20M2 12h20')}
-      ${tab('drip', 'Drip', 'M12 2C8 8 6 11 6 14a6 6 0 0 0 12 0c0-3-2-6-6-12z')}
-      ${tab('electricity', 'Electric', 'M13 2L3 14h7l-1 8 10-12h-7l1-8z')}
+      ${tab('drip', 'Drips', 'M12 2C8 8 6 11 6 14a6 6 0 0 0 12 0c0-3-2-6-6-12z')}
       ${tab('equipment', 'Equip', 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z')}
+      ${tab('electricity', 'Electric', 'M13 2L3 14h7l-1 8 10-12h-7l1-8z')}
+      ${tab('more', 'More', 'M6 12a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0z')}
     </div>
   `;
 }
 
 function rcRenderTabContent(kg, elec, drugs, a, drugButtons) {
-  const t = ctState.activeTab;
-  if (t === 'code') return rcRenderTabCode(kg, elec);
+  let t = ctState.activeTab;
+  // Code tab was removed in Phase 2A — CPR controls moved to global bar.
+  // Old saved tab state may still reference 'code'; redirect to More.
+  if (t === 'code') { t = 'more'; ctState.activeTab = 'more'; }
   if (t === 'meds') return rcRenderTabMeds(kg, elec);
   if (t === 'drip') return rcRenderTabDrip(kg);
   if (t === 'electricity') return rcRenderTabElectricity(kg, elec);
   if (t === 'equipment') return rcRenderTabEquipment(a);
+  if (t === 'more') return rcRenderTabMore();
   return '';
+}
+
+function rcRenderTabMore() {
+  // Event log + cumulative counters + settings shortcut
+  const recent = ctState.log.slice(0, 30);
+  return `
+    <div style="background:var(--clin-surface);border:1px solid var(--clin-border);border-radius:8px;padding:14px;margin-bottom:12px;box-shadow:var(--clin-shadow);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:0.06em;color:var(--clin-blue);font-size:15px;">⏱ Event Log</div>
+        <button id="ct-log-clear" style="background:none;border:1px solid var(--clin-border);color:var(--clin-text-dim);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;padding:5px 10px;border-radius:3px;cursor:pointer;">Clear</button>
+      </div>
+      <div style="display:flex;gap:18px;padding:10px 0;border-top:1px solid var(--clin-surface-alt);border-bottom:1px solid var(--clin-surface-alt);font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--clin-text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">
+        <span>Shocks: <span style="color:var(--clin-red);font-weight:700;font-size:14px;">${ctState.shockCount}</span></span>
+        <span>Epi Total: <span style="color:${ctState.cumulativeEpiMg >= 3 ? 'var(--clin-red)' : 'var(--clin-yellow)'};font-weight:700;font-size:14px;">${ctState.cumulativeEpiMg.toFixed(1)} mg</span></span>
+        <span>Cycle: <span style="color:var(--clin-blue);font-weight:700;font-size:14px;">${ctState.cycleNum}</span></span>
+      </div>
+      ${recent.length === 0
+        ? `<div style="color:var(--clin-text-muted);font-size:13px;text-align:center;padding:20px 0;">No events yet — Start CPR to begin logging</div>`
+        : recent.map(e => `
+          <div style="display:grid;grid-template-columns:70px 90px 1fr;gap:12px;padding:7px 0;border-bottom:1px solid var(--clin-surface-alt);font-size:12px;align-items:baseline;">
+            <div style="font-family:'JetBrains Mono',monospace;color:var(--clin-blue);font-weight:700;">${escapeHtml(e.time || '')}</div>
+            <div style="font-family:'JetBrains Mono',monospace;color:var(--clin-text-muted);text-transform:uppercase;letter-spacing:0.08em;font-size:11px;">${escapeHtml(e.type || '')}</div>
+            <div style="color:var(--clin-text);">${escapeHtml(e.note || '')}</div>
+          </div>`).join('')
+      }
+    </div>
+  `;
 }
 
 function rcBuildDrugButtons(drugs) {
@@ -5053,6 +5527,52 @@ function bindRunCodeEvents() {
   // DOSE VIEW — New Patient button (clears everything, returns to entry)
   const newPat = document.getElementById('cr-new-patient');
   if (newPat) newPat.addEventListener('click', crNewPatient);
+
+  // DOSE VIEW — Start/Stop CPR button (patient bar, right side)
+  const cprToggle = document.getElementById('cr-cpr-toggle');
+  if (cprToggle) cprToggle.addEventListener('click', () => {
+    if (ctState.running) ctPause(); else ctStart();
+    render();  // re-render to swap button + show/hide CPR control bar
+  });
+
+  // CPR CONTROL BAR — compact controls (only present when CPR running)
+  document.querySelectorAll('[data-cpr-ratio]').forEach(b => {
+    b.addEventListener('click', () => {
+      ctState.cprRatio = b.dataset.cprRatio;
+      // Continuous = advanced airway (no vent cues); 15:2 / 30:2 = cycled
+      ctState.advancedAirway = (ctState.cprRatio === 'continuous');
+      ctSaveSettings();
+      ctLogEvent('Ratio', `Compression ratio set to ${ctState.cprRatio}`);
+      rcPartialRender();
+    });
+  });
+  const cprResetBtn = document.getElementById('cpr-reset-btn');
+  if (cprResetBtn) cprResetBtn.addEventListener('click', () => {
+    if (ctState.elapsedMs > 0 && !confirm('Reset cycle and time? Code log will be kept.')) return;
+    ctReset();
+    render();
+  });
+  const cprDefibBtn = document.getElementById('cpr-defib-btn');
+  if (cprDefibBtn) cprDefibBtn.addEventListener('click', () => {
+    // Phase 2C will open a full defib energy ladder modal; for now, log + reuse decision panel
+    const e = ccGetElectrical();
+    ctState.shockCount++;
+    ctLogEvent('Shock', `Defib #${ctState.shockCount} — ${e.defib.primary}`);
+    ctShowCueBanner(`Shock #${ctState.shockCount} Delivered — Resume CPR`, 'normal', 2000);
+    ctSpeak('Shock delivered. Resume CPR.');
+    rcPartialRender();
+  });
+  const cprEpiBtn = document.getElementById('cpr-epi-btn');
+  if (cprEpiBtn) cprEpiBtn.addEventListener('click', () => {
+    ctState.lastEpiMs = ctState.elapsedMs;
+    ctState.cumulativeEpiMg += 1; // adult arrest standard dose
+    ctLogEvent('Drug', `Epinephrine 1 mg IV/IO (quick log from CPR bar)`);
+    ctShowCueBanner('Epinephrine 1 mg logged', 'epi', 1800);
+    rcPartialRender();
+  });
+
+  // Refresh pulse mini-dot ref for metronome flashing
+  ctState.pulseDotEl = document.getElementById('cr-pulse-mini') || document.getElementById('ct-pulse-dot');
 
   // Bottom tab bar — switch the tab content area
   document.querySelectorAll('[data-rc-tab]').forEach(btn => {
