@@ -1317,6 +1317,262 @@
     color: #1a1208;
   }
   .rc-decision-btn.noshock:hover { background: #f0b550; }
+
+  /* ============================================================
+     V2 ENTRY FLOW — Adult/Peds picker, Broselow zones, IBW tiles
+  ============================================================ */
+  .cr-entry {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 8px 4px 24px;
+  }
+  .cr-entry-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  .cr-entry-sub {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 22px;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+  .cr-entry-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 30px;
+  }
+  .cr-entry-card {
+    background: var(--bg-elev);
+    border: 2px solid var(--border-bright);
+    border-radius: 8px;
+    padding: 28px 16px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+    color: var(--text);
+    font-family: inherit;
+  }
+  .cr-entry-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .cr-entry-card.peds { border-color: var(--success); }
+  .cr-entry-card.peds:hover { background: rgba(74,157,95,0.08); }
+  .cr-entry-card.adult { border-color: var(--gold); }
+  .cr-entry-card.adult:hover { background: rgba(212,163,65,0.08); }
+  .cr-entry-card .plus {
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-size: 18px; font-weight: 700;
+  }
+  .cr-entry-card.peds .plus { background: var(--success); }
+  .cr-entry-card.adult .plus { background: var(--gold); color: #1a1208; }
+  .cr-entry-card .icon { font-size: 44px; line-height: 1; margin-bottom: 10px; }
+  .cr-entry-card .label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .cr-back {
+    background: none;
+    border: 1px solid var(--border-bright);
+    color: var(--text-dim);
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-bottom: 16px;
+    padding: 8px 14px;
+    border-radius: 4px;
+  }
+  .cr-back:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* Broselow zone tiles */
+  .cr-broselow-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .cr-zone {
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
+    align-items: center;
+    background: var(--bg-elev);
+    border: 1.5px solid var(--border-bright);
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    color: var(--text);
+    font-family: inherit;
+    padding: 0;
+    transition: transform 0.1s, border-color 0.15s;
+  }
+  .cr-zone:hover { transform: translateX(2px); border-color: var(--accent); }
+  .cr-zone-color {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    padding: 16px 8px;
+    text-align: center;
+  }
+  .cr-zone-info { padding: 10px 14px; text-align: left; }
+  .cr-zone-weight { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 16px; color: var(--text); }
+  .cr-zone-age { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); margin-top: 2px; letter-spacing: 0.05em; }
+  .cr-zone-arrow { color: var(--text-muted); padding-right: 14px; font-size: 20px; font-family: 'JetBrains Mono', monospace; }
+
+  /* Adult IBW tiles */
+  .cr-ibw-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .cr-ibw-tile {
+    background: var(--bg-elev);
+    border: 1.5px solid var(--border-bright);
+    border-radius: 30px;
+    padding: 14px 22px;
+    display: grid;
+    grid-template-columns: 90px 1fr 80px;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    color: var(--text);
+    font-family: inherit;
+    transition: all 0.12s;
+  }
+  .cr-ibw-tile:hover { transform: translateX(2px); border-color: var(--gold); background: rgba(212,163,65,0.06); }
+  .cr-ibw-lbs { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 18px; color: var(--gold); text-align: left; }
+  .cr-ibw-kg { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 16px; color: var(--text); text-align: left; }
+  .cr-ibw-ht { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 13px; color: var(--text-dim); text-align: right; }
+
+  /* Manual / custom weight entry */
+  .cr-manual {
+    background: var(--bg-elev);
+    border: 1px dashed var(--border-bright);
+    border-radius: 6px;
+    padding: 16px;
+    margin-top: 8px;
+  }
+  .cr-manual-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .cr-manual-row { display: flex; gap: 8px; align-items: stretch; }
+  .cr-manual-row input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    color: var(--text);
+    outline: none;
+  }
+  .cr-manual-row input:focus { border-color: var(--accent); }
+  .cr-manual-btn {
+    width: 100%;
+    margin-top: 10px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 4px;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .cr-manual-btn:hover { background: var(--accent-bright); }
+
+  /* Patient bar (sticky during dose view) */
+  .cr-patient-bar-v2 {
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border-bright);
+    border-left: 4px solid var(--gold);
+    border-radius: 6px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .cr-patient-bar-v2.peds { border-left-color: var(--success); }
+  .cr-pat-summary {
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .cr-pat-summary .zone-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    border: 1px solid rgba(0,0,0,0.3);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+  }
+  .cr-pat-summary .lt { font-weight: 400; color: var(--text-dim); font-size: 13px; }
+  .cr-new-pat-btn {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .cr-new-pat-btn:hover { background: var(--accent); color: white; }
+
+  @media (max-width: 720px) {
+    .cr-entry-cards { grid-template-columns: 1fr; }
+    .cr-zone { grid-template-columns: 100px 1fr auto; }
+    .cr-ibw-tile { grid-template-columns: 70px 1fr 70px; }
+  }
 </style>
 </head>
 <body>
@@ -3840,87 +4096,182 @@ function rcDeriveBand(kg) {
   return 'adult';
 }
 
+/* ============================================================
+   V2 ENTRY FLOW — Broselow zones, Adult IBW tiles, Patient state
+============================================================ */
+const BROSELOW = [
+  { code: '3kg',    label: '3 kg',    color: '#9aa0a8', textColor: '#fff',     weight: 3,    ageRange: '< 3 months', weightRange: '3 kg' },
+  { code: '4kg',    label: '4 kg',    color: '#9aa0a8', textColor: '#fff',     weight: 4,    ageRange: '< 3 months', weightRange: '4 kg' },
+  { code: '5kg',    label: '5 kg',    color: '#9aa0a8', textColor: '#fff',     weight: 5,    ageRange: '< 3 months', weightRange: '5 kg' },
+  { code: 'pink',   label: 'Pink',    color: '#ec4899', textColor: '#fff',     weight: 6.5,  ageRange: '3-5 mo',     weightRange: '6-7 kg' },
+  { code: 'red',    label: 'Red',     color: '#dc2626', textColor: '#fff',     weight: 8.5,  ageRange: '6-11 mo',    weightRange: '8-9 kg' },
+  { code: 'purple', label: 'Purple',  color: '#7c3aed', textColor: '#fff',     weight: 10.5, ageRange: '12-24 mo',   weightRange: '10-11 kg' },
+  { code: 'yellow', label: 'Yellow',  color: '#facc15', textColor: '#1a1208', weight: 13,   ageRange: '2 yr',       weightRange: '12-14 kg' },
+  { code: 'white',  label: 'White',   color: '#f1f5f9', textColor: '#1a1208', weight: 16.5, ageRange: '3-4 yr',     weightRange: '15-18 kg' },
+  { code: 'blue',   label: 'Blue',    color: '#2563eb', textColor: '#fff',     weight: 21,   ageRange: '5-6 yr',     weightRange: '19-23 kg' },
+  { code: 'orange', label: 'Orange',  color: '#f97316', textColor: '#fff',     weight: 26.5, ageRange: '7-9 yr',     weightRange: '24-29 kg' },
+  { code: 'green',  label: 'Green',   color: '#16a34a', textColor: '#fff',     weight: 33,   ageRange: '10-11 yr',   weightRange: '30-36 kg' },
+  { code: 'teal',   label: 'Teal',    color: '#14b8a6', textColor: '#fff',     weight: 45,   ageRange: '12-13 yr',   weightRange: '42-48 kg' }
+];
+
+const ADULT_IBW = [
+  { lbs: 110, kg: 50,  height: "5'0\""  },
+  { lbs: 130, kg: 60,  height: "5'4\""  },
+  { lbs: 154, kg: 70,  height: "5'7\""  },
+  { lbs: 165, kg: 75,  height: "5'11\"" },
+  { lbs: 175, kg: 80,  height: "6'1\""  },
+  { lbs: 200, kg: 90,  height: "6'4\""  },
+  { lbs: 220, kg: 100, height: "6'7\""  }
+];
+
+// V2 entry/patient state — separate from ctState (CPR engine) and ccState (calculator).
+// cr.patient locks once selected; "New Patient" clears everything and returns to entry.
+const cr = {
+  view: 'entry',   // 'entry' | 'entry-adult' | 'entry-peds' | 'dose'
+  patient: null,   // { type, weight, lbs?, height?, zone?, zoneLabel?, zoneColor?, zoneTextColor?, ageRange?, weightRange?, summary }
+};
+
+function crSetAdultIBW(ibw) {
+  cr.patient = {
+    type: 'adult',
+    weight: ibw.kg,
+    lbs: ibw.lbs,
+    height: ibw.height,
+    summary: `${ibw.lbs} lb / ${ibw.kg} kg · ${ibw.height} IBW`
+  };
+  cr.view = 'dose';
+  ccState.weight = String(ibw.kg);
+  ccState.unit = 'kg';
+  render();
+}
+
+function crSetAdultCustom(kg) {
+  if (!kg || kg < 30 || kg > 250) { showToast('Enter weight 30-250 kg', true); return; }
+  const lbs = Math.round(kg * 2.2046);
+  cr.patient = {
+    type: 'adult',
+    weight: kg,
+    lbs,
+    height: '—',
+    summary: `${lbs} lb / ${kg} kg · Custom`
+  };
+  cr.view = 'dose';
+  ccState.weight = String(kg);
+  ccState.unit = 'kg';
+  render();
+}
+
+function crSetBroselow(zone) {
+  cr.patient = {
+    type: 'peds',
+    weight: zone.weight,
+    zone: zone.code,
+    zoneLabel: zone.label,
+    zoneColor: zone.color,
+    zoneTextColor: zone.textColor,
+    ageRange: zone.ageRange,
+    weightRange: zone.weightRange,
+    summary: `${zone.label} · ${zone.weight} kg · ${zone.ageRange}`
+  };
+  cr.view = 'dose';
+  ccState.weight = String(zone.weight);
+  ccState.unit = 'kg';
+  render();
+}
+
+function crSetPedsCustom(kg, ageYears) {
+  if (!kg || kg < 0.5 || kg > 60) { showToast('Enter weight 0.5-60 kg', true); return; }
+  // Find nearest Broselow zone for reference color
+  let nearest = BROSELOW[0];
+  let minDiff = Math.abs(BROSELOW[0].weight - kg);
+  BROSELOW.forEach(z => {
+    const d = Math.abs(z.weight - kg);
+    if (d < minDiff) { minDiff = d; nearest = z; }
+  });
+  cr.patient = {
+    type: 'peds',
+    weight: kg,
+    zone: nearest.code,
+    zoneLabel: `Custom (≈ ${nearest.label})`,
+    zoneColor: nearest.color,
+    zoneTextColor: nearest.textColor,
+    ageYears: ageYears || null,
+    summary: `${kg} kg${ageYears ? ' · ' + ageYears + ' yr' : ''} · Custom`
+  };
+  cr.view = 'dose';
+  ccState.weight = String(kg);
+  ccState.unit = 'kg';
+  render();
+}
+
+function crNewPatient() {
+  if (ctState.running) {
+    if (!confirm('Stop active CPR and start a new patient?')) return;
+    ctPause();
+  }
+  // Full reset: timer, log, cumulative counters, rhythm state
+  ctReset();
+  ctClearLog();
+  ctState.lastRhythm = null;
+  ctState.cumulativeEpiMg = 0;
+  ctState.shockCount = 0;
+  ctState.antiDysrhythmicGiven = false;
+  ctState.dsdCued = false;
+  ctState.activeTab = 'code';
+  cr.patient = null;
+  cr.view = 'entry';
+  ccState.weight = '';
+  render();
+}
+
 function renderRunCode() {
   ctLoadSettings();
-  // Force kg + auto-derive band from weight
   ccState.unit = 'kg';
-  const kg = parseFloat(ccState.weight) || 0;
-  const valid = kg > 0 && kg < 300;
+
+  // Entry views — render picker UI, no dose tabs, no patient bar
+  if (cr.view === 'entry' || cr.view === 'entry-adult' || cr.view === 'entry-peds') {
+    return renderRunCodeHeader() + `
+      <div class="content ct-wrap rc-tabbed">
+        ${cr.view === 'entry' ? renderCREntry()
+          : cr.view === 'entry-adult' ? renderCREntryAdult()
+          : renderCREntryPeds()}
+      </div>
+    `;
+  }
+
+  // Dose view — patient is locked, show patient bar + existing tab content
+  const kg = parseFloat(ccState.weight) || cr.patient.weight;
+  ccState.weight = String(kg);
   ccState.ageBand = rcDeriveBand(kg);
-  ccState.ageYears = ''; // not used
-  const elec = valid ? ccGetElectrical() : null;
-  const drugs = valid ? ccFilterDrugsByRhythm(ccGetDrugs()) : [];
-  const a = valid ? ccGetAirway() : null;
-  const bandLabel = valid ? (ccState.ageBand === 'adult' ? 'Adult' : ccState.ageBand === 'pediatric' ? 'Pediatric' : 'Neonatal') : '';
+  ccState.ageYears = '';
+  const elec = ccGetElectrical();
+  const drugs = ccFilterDrugsByRhythm(ccGetDrugs());
+  const a = ccGetAirway();
+  const drugButtons = '';
 
-  const drugButtons = valid ? drugs.map((d, i) => `
-    <button class="rc-drug-card ${d.primary ? 'primary' : ''}" data-drug-idx="${i}">
-      <div class="rc-drug-card-head">
-        <div class="name">${d.name}</div>
-        <div class="ind">${d.indication}</div>
-      </div>
-      <div class="rc-drug-row dose">
-        <span class="label">Drug & Dose</span>
-        <span class="value">${d.weightDose}</span>
-      </div>
-      <div class="rc-drug-row package">
-        <span class="label">Package</span>
-        <span class="value">${d.packageSpec || d.readyVol || '—'}</span>
-      </div>
-      <div class="rc-drug-row delivery">
-        <span class="label">Delivery</span>
-        <span class="value">${d.deliveryDose || d.readyVol || '—'}</span>
-      </div>
-    </button>
-  `).join('') : '';
-
-  return `
-    <div class="header">
-      <img src="/gnfr-badge.jpg" alt="GNFR" class="header-badge" onclick="document.querySelector('.nav-item[data-page=home]').click()" title="Back to Command">
-      <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> GRANDTEVY</div>
-      <h1 class="page-title">Grand<span class="accent">Tevy</span></h1>
-      <div class="page-meta">CPR timer + weight-based ACLS dosing in one tool</div>
-    </div>
+  return renderRunCodeHeader() + `
     <div class="content ct-wrap rc-tabbed">
-      <div class="cc-disclaimer">
-        <strong>⚠ Training & Reference Tool</strong>
-        Enter patient weight + age group, then Start. Drug doses calculate automatically. Tap a drug
-        to log it. Always confirm against current GNFR protocols and medical control.
-      </div>
-
-      <div class="rc-patient-bar ${ctState.running ? 'active' : ''}" style="grid-template-columns: 1fr; gap: 12px;">
-        <div class="cc-field">
-          <div class="cc-field-label" style="font-size:12px;letter-spacing:0.2em;margin-bottom:8px;">Patient Weight (kg) ${valid ? `— <span style="color:var(--gold);">${bandLabel}</span>` : ''}</div>
-          <input type="number" id="rc-weight" value="${ccState.weight}" min="0" max="300" step="1" inputmode="numeric" pattern="[0-9]*" placeholder="0" autocomplete="off"
-            style="background:#000;border:2px solid var(--border-bright);color:var(--accent-bright);font-family:'Oswald',sans-serif;font-size:54px;font-weight:700;padding:12px 16px;border-radius:6px;outline:none;text-align:center;width:100%;box-sizing:border-box;letter-spacing:0.05em;line-height:1;">
-          <div class="rc-quick-weight">
-            <button class="rc-quick-btn ${parseFloat(ccState.weight) === 25 ? 'active' : ''}" data-quick-weight="25">25 kg (Peds)</button>
-            <button class="rc-quick-btn ${parseFloat(ccState.weight) === 70 ? 'active' : ''}" data-quick-weight="70">70 kg (IBW)</button>
-            <button class="rc-quick-btn ${parseFloat(ccState.weight) === 100 ? 'active' : ''}" data-quick-weight="100">100 kg</button>
-          </div>
-        </div>
-      </div>
+      ${renderCRPatientBar()}
 
       <div class="ct-audio-hint" id="ct-audio-hint">🔊 Tap <strong>Start Code</strong> to enable audio cues. <strong style="color:var(--gold);">iPhone:</strong> turn OFF the silent/mute switch on the side of the phone, or audio will not play.</div>
       <div class="ct-cue-banner" id="ct-cue-banner"></div>
 
-      ${valid ? `
-        <div class="rc-decision" id="rc-decision">
-          <div class="rc-decision-title">⚠ Rhythm Check — Decide Now</div>
-          <div class="rc-decision-buttons">
-            <button class="rc-decision-btn shock" id="rc-decision-shock">
-              <span class="big">⚡ SHOCK</span>
-              <span class="sub" id="rc-decision-joules">${elec.defib.primary}</span>
-              <span class="sub">VF / pVT</span>
-            </button>
-            <button class="rc-decision-btn noshock" id="rc-decision-noshock">
-              <span class="big">▶ NO SHOCK</span>
-              <span class="sub">Resume CPR</span>
-              <span class="sub">PEA / Asystole / ROSC</span>
-            </button>
-          </div>
+      <div class="rc-decision" id="rc-decision">
+        <div class="rc-decision-title">⚠ Rhythm Check — Decide Now</div>
+        <div class="rc-decision-buttons">
+          <button class="rc-decision-btn shock" id="rc-decision-shock">
+            <span class="big">⚡ SHOCK</span>
+            <span class="sub" id="rc-decision-joules">${elec.defib.primary}</span>
+            <span class="sub">VF / pVT</span>
+          </button>
+          <button class="rc-decision-btn noshock" id="rc-decision-noshock">
+            <span class="big">▶ NO SHOCK</span>
+            <span class="sub">Resume CPR</span>
+            <span class="sub">PEA / Asystole / ROSC</span>
+          </button>
         </div>
-        <div id="rc-tab-content">${rcRenderTabContent(kg, elec, drugs, a, drugButtons)}</div>
+      </div>
+      <div id="rc-tab-content">${rcRenderTabContent(kg, elec, drugs, a, drugButtons)}</div>
 
         <details class="ct-settings" style="margin-bottom:20px;">
           <summary style="cursor:pointer;font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);">Timer & Audio Settings</summary>
@@ -3952,9 +4303,119 @@ function renderRunCode() {
             </div>
           </div>
         </details>
-      ` : '<div class="cc-empty">Enter patient weight to load doses</div>'}
     </div>
-    ${valid ? rcRenderBottomBar() : ''}
+    ${rcRenderBottomBar()}
+  `;
+}
+
+/* ============================================================
+   V2 RENDER HELPERS — Header, Entry, Patient bar
+============================================================ */
+function renderRunCodeHeader() {
+  return `
+    <div class="header">
+      <img src="/gnfr-badge.jpg" alt="GNFR" class="header-badge" onclick="document.querySelector('.nav-item[data-page=home]').click()" title="Back to Command">
+      <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> GRANDTEVY</div>
+      <h1 class="page-title">Grand<span class="accent">Tevy</span></h1>
+      <div class="page-meta">CPR timer + weight-based ACLS dosing in one tool</div>
+    </div>
+  `;
+}
+
+function renderCREntry() {
+  return `
+    <div class="cr-entry">
+      <div class="cr-entry-title">New Patient</div>
+      <div class="cr-entry-sub">Select patient type to begin</div>
+      <div class="cr-entry-cards">
+        <button class="cr-entry-card peds" id="cr-go-peds">
+          <div class="plus">+</div>
+          <div class="icon">🧒</div>
+          <div class="label">Pediatric</div>
+        </button>
+        <button class="cr-entry-card adult" id="cr-go-adult">
+          <div class="plus">+</div>
+          <div class="icon">🧑</div>
+          <div class="label">Adult</div>
+        </button>
+      </div>
+      <div class="cc-disclaimer" style="margin-top: 8px;">
+        <strong>⚠ Training & Reference Tool</strong>
+        Pick patient type. Weight is locked once selected — start a New Patient if anything changes. Always confirm against current GNFR protocols and medical control.
+      </div>
+    </div>
+  `;
+}
+
+function renderCREntryAdult() {
+  return `
+    <div class="cr-entry">
+      <button class="cr-back" id="cr-entry-back">‹ Back</button>
+      <div class="cr-entry-title">Adult Patient</div>
+      <div class="cr-entry-sub">Choose closest Ideal Body Weight</div>
+      <div class="cr-ibw-grid">
+        ${ADULT_IBW.map(ibw => `
+          <button class="cr-ibw-tile" data-ibw-kg="${ibw.kg}">
+            <div class="cr-ibw-lbs">${ibw.lbs} LB</div>
+            <div class="cr-ibw-kg">${ibw.kg} kg · IBW</div>
+            <div class="cr-ibw-ht">${ibw.height}</div>
+          </button>`).join('')}
+      </div>
+      <div class="cr-manual">
+        <div class="cr-manual-label">Custom Adult Weight (kg)</div>
+        <div class="cr-manual-row">
+          <input type="number" id="cr-adult-custom" placeholder="Weight in kg" min="30" max="250" step="1" inputmode="decimal" autocomplete="off">
+        </div>
+        <button class="cr-manual-btn" id="cr-adult-custom-go">Use Custom Weight</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderCREntryPeds() {
+  return `
+    <div class="cr-entry">
+      <button class="cr-back" id="cr-entry-back">‹ Back</button>
+      <div class="cr-entry-title">Pediatric Patient</div>
+      <div class="cr-entry-sub">Select Broselow-Luten color zone — tape measurement preferred, age as fallback</div>
+      <div class="cr-broselow-grid">
+        ${BROSELOW.map(z => `
+          <button class="cr-zone" data-zone="${z.code}">
+            <div class="cr-zone-color" style="background:${z.color};color:${z.textColor}">${z.label}</div>
+            <div class="cr-zone-info">
+              <div class="cr-zone-weight">${z.weightRange}</div>
+              <div class="cr-zone-age">${z.ageRange}</div>
+            </div>
+            <div class="cr-zone-arrow">›</div>
+          </button>`).join('')}
+      </div>
+      <div class="cr-manual">
+        <div class="cr-manual-label">Custom Pediatric Weight</div>
+        <div class="cr-manual-row">
+          <input type="number" id="cr-peds-custom-kg" placeholder="Weight (kg)" min="0.5" max="60" step="0.1" inputmode="decimal" autocomplete="off">
+          <input type="number" id="cr-peds-custom-age" placeholder="Age (yr)" min="0" max="17" step="0.5" inputmode="decimal" autocomplete="off" style="max-width:120px">
+        </div>
+        <button class="cr-manual-btn" id="cr-peds-custom-go">Use Custom Weight</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderCRPatientBar() {
+  const p = cr.patient;
+  if (!p) return '';
+  const isPeds = p.type === 'peds';
+  const pill = isPeds && p.zoneColor
+    ? `<span class="zone-pill" style="background:${p.zoneColor};color:${p.zoneTextColor}">${p.zoneLabel}</span>`
+    : '';
+  const summary = isPeds
+    ? `${pill} ${p.weight} kg <span class="lt">· ${p.ageRange || (p.ageYears ? p.ageYears + ' yr' : 'Custom')}</span>`
+    : `${p.lbs} lb / <span style="color:var(--gold)">${p.weight} kg</span> <span class="lt">· ${p.height}${p.height === '—' ? ' Custom' : ' IBW'}</span>`;
+  return `
+    <div class="cr-patient-bar-v2 ${isPeds ? 'peds' : ''}">
+      <div class="cr-pat-summary">${summary}</div>
+      <button class="cr-new-pat-btn" id="cr-new-patient">⟲ New Patient</button>
+    </div>
   `;
 }
 
@@ -4354,23 +4815,17 @@ function rcRenderTabEquipment(a) {
 }
 
 function rcPartialRender() {
-  // Update only the tab content + bottom bar — keep patient bar input intact
+  // V2: only meaningful in dose view; full re-render handles entry views
+  if (cr.view !== 'dose' || !cr.patient) { render(); return; }
+
   const content = document.querySelector('.content.ct-wrap');
   if (!content) return;
-  const patientBar = content.querySelector('.rc-patient-bar');
-  if (!patientBar) return;
 
-  const kg = parseFloat(ccState.weight) || 0;
+  const kg = parseFloat(ccState.weight) || cr.patient.weight;
   const valid = kg > 0 && kg < 300;
   ccState.ageBand = rcDeriveBand(kg);
   ccState.unit = 'kg';
-  const bandLabel = valid ? (ccState.ageBand === 'adult' ? 'Adult' : ccState.ageBand === 'pediatric' ? 'Pediatric' : 'Neonatal') : '';
 
-  // Update the band label inline
-  const fieldLabel = patientBar.querySelector('.cc-field-label');
-  if (fieldLabel) {
-    fieldLabel.innerHTML = `Patient Weight (kg) ${valid ? `— <span style="color:var(--gold);">${bandLabel}</span>` : ''}`;
-  }
   const startBtn = document.getElementById('ct-start-btn');
   if (startBtn) startBtn.disabled = !valid;
 
@@ -4555,33 +5010,54 @@ function rcBindDynamicElements() {
 }
 
 function bindRunCodeEvents() {
-  // Patient weight — kg only, drives everything (partial render keeps input focused)
-  const w = document.getElementById('rc-weight');
-  if (w) {
-    w.addEventListener('input', (e) => {
-      ccState.weight = e.target.value;
-      ccState.unit = 'kg';
-      rcPartialRender();
+  // ENTRY FLOW — Adult/Peds picker
+  const goPeds = document.getElementById('cr-go-peds');
+  if (goPeds) goPeds.addEventListener('click', () => { cr.view = 'entry-peds'; render(); });
+  const goAdult = document.getElementById('cr-go-adult');
+  if (goAdult) goAdult.addEventListener('click', () => { cr.view = 'entry-adult'; render(); });
+  const back = document.getElementById('cr-entry-back');
+  if (back) back.addEventListener('click', () => { cr.view = 'entry'; render(); });
+
+  // ENTRY FLOW — Adult IBW tiles + custom
+  document.querySelectorAll('[data-ibw-kg]').forEach(t => {
+    t.addEventListener('click', () => {
+      const kg = parseInt(t.dataset.ibwKg);
+      const ibw = ADULT_IBW.find(x => x.kg === kg);
+      if (ibw) crSetAdultIBW(ibw);
     });
-    w.addEventListener('focus', (e) => e.target.select());
-    w.addEventListener('click', (e) => e.target.select());
-  }
+  });
+  const adultCustomGo = document.getElementById('cr-adult-custom-go');
+  if (adultCustomGo) adultCustomGo.addEventListener('click', () => {
+    const v = parseFloat(document.getElementById('cr-adult-custom').value);
+    crSetAdultCustom(v);
+  });
+  const adultCustomInput = document.getElementById('cr-adult-custom');
+  if (adultCustomInput) adultCustomInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') crSetAdultCustom(parseFloat(e.target.value));
+  });
+
+  // ENTRY FLOW — Pediatric Broselow zones + custom
+  document.querySelectorAll('[data-zone]').forEach(z => {
+    z.addEventListener('click', () => {
+      const zone = BROSELOW.find(x => x.code === z.dataset.zone);
+      if (zone) crSetBroselow(zone);
+    });
+  });
+  const pedsCustomGo = document.getElementById('cr-peds-custom-go');
+  if (pedsCustomGo) pedsCustomGo.addEventListener('click', () => {
+    const kg = parseFloat(document.getElementById('cr-peds-custom-kg').value);
+    const age = parseFloat(document.getElementById('cr-peds-custom-age').value) || null;
+    crSetPedsCustom(kg, age);
+  });
+
+  // DOSE VIEW — New Patient button (clears everything, returns to entry)
+  const newPat = document.getElementById('cr-new-patient');
+  if (newPat) newPat.addEventListener('click', crNewPatient);
 
   // Bottom tab bar — switch the tab content area
   document.querySelectorAll('[data-rc-tab]').forEach(btn => {
     btn.addEventListener('click', () => {
       ctState.activeTab = btn.dataset.rcTab;
-      rcPartialRender();
-    });
-  });
-
-  // Quick-tap weight buttons (25 / 70 / 100 kg)
-  document.querySelectorAll('[data-quick-weight]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      ccState.weight = btn.dataset.quickWeight;
-      ccState.unit = 'kg';
-      const input = document.getElementById('rc-weight');
-      if (input) input.value = btn.dataset.quickWeight;
       rcPartialRender();
     });
   });
