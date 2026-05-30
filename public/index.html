@@ -2644,6 +2644,126 @@
     .cr-rhythm-buttons { grid-template-columns: 1fr 1fr; }
     .cr-vital-tile .value { font-size: 18px; }
   }
+
+  /* ============================================================
+     V2 CLINICAL FOOTNOTE + EQUIPMENT / ELECTRICAL CARDS
+  ============================================================ */
+  .cr-meds-footnote {
+    padding: 12px 14px;
+    background: rgba(244, 197, 66, 0.1);
+    border-top: 1px solid var(--clin-border);
+    font-size: 11px;
+    color: var(--clin-text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1.5;
+  }
+  .cr-meds-footnote strong { color: #b8860b; }
+
+  .cr-equip-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .cr-equip-tile {
+    background: var(--clin-surface);
+    border: 1px solid var(--clin-border);
+    border-left: 3px solid var(--clin-blue);
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+  .cr-equip-tile .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--clin-text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .cr-equip-tile .value {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--clin-text);
+    line-height: 1.2;
+  }
+  .cr-equip-tile .detail {
+    font-size: 11px;
+    color: var(--clin-text-muted);
+    margin-top: 4px;
+    line-height: 1.3;
+  }
+
+  .cr-elec-stack {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .cr-elec-card-v2 {
+    background: var(--clin-surface);
+    border: 1px solid var(--clin-border);
+    border-left: 4px solid var(--clin-text-muted);
+    border-radius: 6px;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+  }
+  .cr-elec-card-v2.defib { border-left-color: var(--clin-red); }
+  .cr-elec-card-v2.cv { border-left-color: var(--clin-yellow); }
+  .cr-elec-card-v2.pace { border-left-color: var(--clin-blue); }
+  .cr-elec-info .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--clin-text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .cr-elec-info .primary {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--clin-text);
+    line-height: 1.1;
+  }
+  .cr-elec-info .secondary {
+    font-size: 12px;
+    color: var(--clin-text-dim);
+    margin-top: 4px;
+  }
+  .cr-elec-info .detail {
+    font-size: 11px;
+    color: var(--clin-text-muted);
+    margin-top: 4px;
+    line-height: 1.35;
+  }
+  .cr-elec-action {
+    background: var(--clin-surface);
+    border: 2px solid var(--clin-blue);
+    color: var(--clin-blue);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .cr-elec-action:hover { background: var(--clin-blue); color: white; }
+  .cr-elec-card-v2.defib .cr-elec-action {
+    border-color: var(--clin-red);
+    color: var(--clin-red);
+  }
+  .cr-elec-card-v2.defib .cr-elec-action:hover { background: var(--clin-red); color: white; }
+
+  @media (max-width: 520px) {
+    .cr-equip-grid { grid-template-columns: 1fr; }
+    .cr-elec-card-v2 { grid-template-columns: 1fr; }
+    .cr-elec-action { width: 100%; }
+  }
 </style>
 </head>
 <body>
@@ -5317,6 +5437,71 @@ function rcIsArrestDrug(d) {
   return d.primary === true || d.rhythm === 'all' || d.rhythm === 'shockable';
 }
 
+// V2 weight-based continuous infusion data — used by tabular Drips tab
+function rcGetDrips(kg) {
+  const isPed = kg < 40;
+  const pushDose = isPed
+    ? `${ccFmt(0.1 * Math.min(kg, 20), 1)} mL IVP (${ccFmt(Math.min(kg, 20), 0)} mcg) q2 min`
+    : '10 mL IVP (~100 mcg) titrate to BP';
+  const crystalloid = isPed ? `${ccFmt(20 * kg, 0)} mL (20 mL/kg)` : '500–1000 mL';
+  const diltMg = Math.min(0.25 * kg, 20);
+  const diltMl = diltMg; // 1 mg/mL
+  const epiPerfLow = Math.round(0.1 * kg);   // gtts/min at 0.1 mcg/kg/min, 10 gtts/set
+  const epiPerfHigh = Math.round(0.5 * kg);
+  return [
+    { name: 'Crystalloid Bolus', indication: 'Pseudo-PEA · Shock · Hypovolemia',
+      conc: 'NS or LR', rate: crystalloid + ' · rapid', isArrest: true,
+      detail: 'Rapid IV/IO push. Repeat as needed. Watch for fluid overload in CHF or elderly.', max: '40 mL/kg peds' },
+    { name: 'Push-Dose Epi', indication: 'Bridge to drip · Hypotension',
+      conc: '10 mcg/mL (1:1,000 in 100 mL D5W)', rate: pushDose, isArrest: true,
+      detail: 'Mix: 1 mL Epi 1:1,000 + 100 mL D5W bag = 10 mcg/mL. Draw 10 mL off bag · Push 10 mL IVP · titrate q2 min PRN.', max: '100 mcg/dose' },
+    { name: 'Epi Pressor Drip', indication: 'Pseudo-PEA · Post-ROSC pressor',
+      conc: '10 mcg/mL · 10 gtts/set', rate: `${epiPerfLow}–${epiPerfHigh} gtts/min`, isArrest: true,
+      detail: `Mix: 1 mg of 1:1,000 in 100 mL D5W = 10 mcg/mL · 10 gtts/set (macrodrip). Range 0.1–0.5 mcg/kg/min. At ${ccFmt(kg, 1)} kg: low ${epiPerfLow} gtts/min → high ${epiPerfHigh} gtts/min. Titrate to MAP > 65.`, max: '0.5 mcg/kg/min' },
+    { name: 'Epi Bradycardia Drip', indication: 'Symptomatic bradycardia',
+      conc: '10 mcg/mL · 60 gtts/set', rate: '12–60 gtts/min', isArrest: false,
+      detail: 'Mix: 1 mg of 1:1,000 in 100 mL D5W = 10 mcg/mL · 60 gtts/set (microdrip). Range 2–10 mcg/min · gtts/min = mcg/min × 6. NOT weight-based. Titrate to HR > 60 and perfusion.', max: '10 mcg/min' },
+    { name: 'Amiodarone Maintenance', indication: 'Post-ROSC after VF/pVT',
+      conc: '1.5 mg/mL · 10 gtts/set', rate: '100 gtts/min over 10 min', isArrest: true,
+      detail: '150 mg (3 mL) + 100 mL D5W = 1.5 mg/mL · 10 gtts/set. Run at 100 gtts/min for the first 10 min, then continue 1 mg/min for 6 hr, then 0.5 mg/min for 18 hr.', max: '2.2 g / 24 hr' },
+    { name: 'Mag Sulfate — Torsades', indication: 'Torsades de pointes · refractory VT',
+      conc: '20 mg/mL · 10 gtts/set', rate: 'Wide open 100 mL', isArrest: true,
+      detail: 'Mix: 4 mL of 50% (2 g) + 100 mL D5W = 20 mg/mL · 10 gtts/set. Wide open over 1–2 min in TdP arrest. 5–15 min in pulsed TdP.', max: '4 g' },
+    { name: 'Mag Sulfate — Asthma', indication: 'Severe asthma exacerbation',
+      conc: '20 mg/mL · 10 gtts/set', rate: '50 gtts/min over 20 min', isArrest: false,
+      detail: 'Mix: 4 mL of 50% (2 g) + 100 mL D5W = 20 mg/mL · 10 gtts/set. Slow infusion 50 gtts/min over 20 min.', max: '2 g' },
+    { name: 'Mag Sulfate — Eclampsia', indication: 'Eclamptic seizures',
+      conc: '40 mg/mL · 10 gtts/set', rate: '50 gtts/min over 20 min', isArrest: false,
+      detail: 'Mix: 8 mL of 50% (4 g) + 100 mL D5W = 40 mg/mL · 10 gtts/set. 4 g over 20 min initial loading dose. Maintenance 1–2 g/hr.', max: '6 g loading' },
+    { name: 'Diltiazem', indication: 'Stable AFib/AFlutter RVR · NOT WPW',
+      conc: '1 mg/mL', rate: `${ccFmt(diltMl, 1)} mL slow push over 2 min`, isArrest: false,
+      detail: `0.25 mg/kg slow IVP over 2 min, max 20 mg. At ${ccFmt(kg, 1)} kg: ${ccFmt(diltMg, 1)} mg = ${ccFmt(diltMl, 1)} mL of 1 mg/mL. If inadequate after 15 min, repeat 0.35 mg/kg.`, max: '20 mg' },
+  ];
+}
+
+// Open the drug modal for a drip (adapter — drip data shape → drug shape)
+function crShowDripModal(dripName) {
+  const kg = parseFloat(ccState.weight) || (cr.patient ? cr.patient.weight : 0);
+  const drip = rcGetDrips(kg).find(d => d.name === dripName);
+  if (!drip) return;
+  const adapted = {
+    name: drip.name,
+    class: 'Continuous infusion',
+    indication: drip.indication,
+    weightDose: drip.rate,
+    packageSpec: drip.conc,
+    deliveryDose: drip.rate,
+    route: 'IV / IO',
+    max: drip.max,
+    detail: drip.detail,
+    primary: drip.isArrest,
+    rhythm: drip.isArrest ? 'all' : 'non-arrest',
+  };
+  cr.drugRoute = 'IV';
+  cr.modal = { type: 'drug', drug: adapted, availableRoutes: ['IV', 'IO'] };
+  crRenderModal();
+}
+
 /* ============================================================
    V2 VITALS — Expected ranges by patient + ETCO2 + H's & T's state
 ============================================================ */
@@ -6288,155 +6473,39 @@ function rcRenderTabMeds(kg, elec) {
 }
 
 function rcRenderTabDrip(kg) {
-  // GNFR Infusion Chart — all drips use 100 mL D5W mixes
-  // Epi Perfusion: 1 mg in 100 mL D5W = 10 mcg/mL · 10 gtts/set (macrodrip)
-  //   gtts/min = mcg/kg/min × kg  (mathematically: mcg/min ÷ 10 mcg/mL × 10 gtts/mL = mcg/min)
-  // Epi Bradycardia: same mix · 60 gtts/set (microdrip)
-  //   gtts/min = mcg/min × 6
-  const epiPerf = [0.1, 0.2, 0.3, 0.4, 0.5].map(d => ({
-    dose: d,
-    gtts: Math.round(d * kg)
-  }));
-  const epiBrady = [2, 4, 6, 8, 10].map(mcg => ({
-    mcgmin: mcg,
-    gtts: mcg * 6
-  }));
-
-  // Diltiazem 0.25 mg/kg slow push over 2 min, max 20 mg (1 mg/mL concentration)
-  const diltMg = Math.min(0.25 * kg, 20);
-  const diltMl = diltMg; // 1 mg/mL so mg = mL
-
-  // Push-dose Epi (GNFR): 1 mL Epi 1:1,000 in 100 mL D5W bag = 10 mcg/mL
-  // Draw 10 mL from bag, push 10 mL IVP
-  const isPed = kg < 40;
-  const pushDose = isPed
-    ? `${ccFmt(0.1 * Math.min(kg, 20), 1)} mL IVP (${ccFmt(Math.min(kg, 20), 0)} mcg) q2 min PRN`
-    : '10 mL IVP (~ 100 mcg) titrate to BP';
-
-  const crystalloid = isPed ? `${ccFmt(20 * kg, 0)} mL (20 mL/kg)` : '500–1000 mL';
+  const drips = rcGetDrips(kg);
+  const rows = drips.map(d => `
+    <button class="cr-drug-row ${d.isArrest ? 'arrest' : ''}" data-drip-name="${escapeAttr(d.name)}">
+      <div class="cr-drug-cell drug">
+        <div class="name">${escapeHtml(d.name)}</div>
+        <div class="ind">${escapeHtml(d.indication)}</div>
+      </div>
+      <div class="cr-drug-cell conc">${escapeHtml(d.conc)}</div>
+      <div class="cr-drug-cell vol">${escapeHtml(d.rate)}</div>
+      <div class="cr-drug-cell rt"><span class="route-label">IV/IO</span><span class="arrow">›</span></div>
+    </button>
+  `).join('');
 
   return `
-    <div class="cc-section priority" style="margin-bottom:20px;">
-      <div class="cc-section-head">
-        <span class="cc-section-num">💧</span>
-        <span class="cc-section-title">Infusion Chart — ${ccFmt(kg, 1)} kg</span>
-        <span class="cc-section-tag">100 mL D5W mixes</span>
-      </div>
-      <div class="cc-disclaimer" style="font-size:11px;padding:10px 14px;margin-bottom:14px;">
-        <strong>⚠ Pseudo-PEA Protocol (SWFL 2025)</strong>
-        Organized rhythm + no pulse + 2 of: EtCO₂ >30, pulse-ox waveform, POCUS wall motion, palpable femoral/carotid → <strong>HOLD standard arrest Epi</strong>. Treat as profound shock.
-      </div>
-
-      <!-- IMMEDIATE PRESSORS -->
-      <div class="rc-drug-grid" style="margin-bottom:14px;">
-        <div class="rc-drug-card primary">
-          <div class="rc-drug-card-head">
-            <div class="name">Crystalloid Bolus</div>
-            <div class="ind">Pseudo-PEA · Hypovolemia · Shock</div>
-          </div>
-          <div class="rc-drug-row dose"><span class="label">Drug & Dose</span><span class="value">${crystalloid}</span></div>
-          <div class="rc-drug-row package"><span class="label">Package</span><span class="value">NS or LR · 1000 mL bag</span></div>
-          <div class="rc-drug-row delivery"><span class="label">Delivery</span><span class="value">Rapid IV/IO push</span></div>
-        </div>
-        <div class="rc-drug-card primary">
-          <div class="rc-drug-card-head">
-            <div class="name">Push-Dose Epi</div>
-            <div class="ind">Bridge to drip · While infusion preps</div>
-          </div>
-          <div class="rc-drug-row dose"><span class="label">Drug & Dose</span><span class="value">${pushDose}</span></div>
-          <div class="rc-drug-row package"><span class="label">Mix (GNFR)</span><span class="value">1 mL Epi 1:1,000 + 100 mL D5W bag = 10 mcg/mL</span></div>
-          <div class="rc-drug-row delivery"><span class="label">Delivery</span><span class="value">Draw 10 mL off bag · Push 10 mL IVP · titrate q2 min PRN</span></div>
+    <div class="cr-meds-card">
+      <div class="cr-meds-header">
+        <div class="cr-meds-icon">💧</div>
+        <div class="cr-meds-title">Drips · ${ccFmt(kg, 1)} kg</div>
+        <div class="cr-meds-actions">
+          <button class="cr-meds-action-btn primary" id="cr-drip-help" title="Protocols">⚙</button>
         </div>
       </div>
-
-      <!-- EPI USE-CASE QUICK REFERENCE -->
-      <div class="cc-elec-card" style="margin-bottom:14px;border-left-color:var(--gold);background:linear-gradient(135deg, rgba(212,163,65,0.08), transparent);">
-        <div class="label" style="color:var(--gold);font-size:11px;">Epinephrine — 4 Use Cases</div>
-        <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px;font-size:13px;font-family:'Inter',sans-serif;">
-          <div style="padding:8px 12px;background:rgba(0,0,0,0.3);border-left:3px solid var(--accent);border-radius:2px;">
-            <div style="font-family:'Oswald',sans-serif;font-weight:700;color:var(--accent-bright);font-size:14px;letter-spacing:0.05em;">CARDIAC ARREST</div>
-            <div style="color:var(--text);">Epi <strong>1:10,000</strong> · <strong>1 mg IV/IO</strong> · q3–5 min · max 3 mg</div>
-          </div>
-          <div style="padding:8px 12px;background:rgba(0,0,0,0.3);border-left:3px solid var(--gold);border-radius:2px;">
-            <div style="font-family:'Oswald',sans-serif;font-weight:700;color:var(--gold);font-size:14px;letter-spacing:0.05em;">ANAPHYLAXIS / AIRWAY</div>
-            <div style="color:var(--text);">Epi <strong>1:1,000</strong> · <strong>0.5 mg IM</strong> · lateral thigh · q5 min × 2</div>
-          </div>
-          <div style="padding:8px 12px;background:rgba(0,0,0,0.3);border-left:3px solid var(--text-dim);border-radius:2px;">
-            <div style="font-family:'Oswald',sans-serif;font-weight:700;color:var(--text);font-size:14px;letter-spacing:0.05em;">BRADYCARDIA DRIP</div>
-            <div style="color:var(--text);">Epi <strong>1:1,000</strong> in <strong>100 mL D5W</strong> · 2–10 mcg/min · 60 gtts/set</div>
-          </div>
-          <div style="padding:8px 12px;background:rgba(0,0,0,0.3);border-left:3px solid var(--text-dim);border-radius:2px;">
-            <div style="font-family:'Oswald',sans-serif;font-weight:700;color:var(--text);font-size:14px;letter-spacing:0.05em;">PRESSOR DRIP</div>
-            <div style="color:var(--text);">Epi <strong>1:1,000</strong> in <strong>100 mL D5W</strong> · 0.1–0.5 mcg/kg/min · 10 gtts/set</div>
-          </div>
+      <div class="cr-drug-table">
+        <div class="cr-drug-row header">
+          <div>Drug</div>
+          <div>Conc.</div>
+          <div>Rate</div>
+          <div>Rt.</div>
         </div>
+        ${rows}
       </div>
-
-      <!-- EPI PERFUSION DRIP (weight-based) -->
-      <div class="cc-elec-card" style="margin-bottom:14px;border-left-color:var(--accent);">
-        <div class="label" style="color:var(--gold);">Epi Pressor Drip — Perfusion (Pseudo-PEA / Post-ROSC)</div>
-        <div class="primary" style="font-size:20px;">${ccFmt(kg, 1)} kg @ 0.1–0.5 mcg/kg/min</div>
-        <div class="secondary">1 mg of 1:1,000 in 100 mL D5W bag · = 10 mcg/mL · 10 gtts/set</div>
-        <table style="width:100%;margin-top:10px;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:13px;">
-          <tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-size:10px;letter-spacing:0.15em;">Dose</th><th style="text-align:right;padding:6px 8px;color:var(--gold);font-size:10px;letter-spacing:0.15em;">Rate</th></tr>
-          ${epiPerf.map(r => `<tr style="border-bottom:1px solid rgba(255,255,255,0.04);"><td style="padding:6px 8px;color:var(--text);">${r.dose} mcg/kg/min</td><td style="padding:6px 8px;text-align:right;color:var(--accent-bright);font-weight:700;">${r.gtts} gtts/min</td></tr>`).join('')}
-        </table>
-      </div>
-
-      <!-- EPI BRADYCARDIA DRIP -->
-      <div class="cc-elec-card" style="margin-bottom:14px;border-left-color:var(--gold);">
-        <div class="label" style="color:var(--gold);">Epi Bradycardia Drip — Symptomatic Bradycardia</div>
-        <div class="primary" style="font-size:20px;">2–10 mcg/min (NOT weight-based)</div>
-        <div class="secondary">1 mg of 1:1,000 in 100 mL D5W bag · = 10 mcg/mL · 60 gtts/set (microdrip)</div>
-        <table style="width:100%;margin-top:10px;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:13px;">
-          <tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-size:10px;letter-spacing:0.15em;">Dose</th><th style="text-align:right;padding:6px 8px;color:var(--gold);font-size:10px;letter-spacing:0.15em;">Rate</th></tr>
-          ${epiBrady.map(r => `<tr style="border-bottom:1px solid rgba(255,255,255,0.04);"><td style="padding:6px 8px;color:var(--text);">${r.mcgmin} mcg/min</td><td style="padding:6px 8px;text-align:right;color:var(--accent-bright);font-weight:700;">${r.gtts} gtts/min</td></tr>`).join('')}
-        </table>
-      </div>
-
-      <!-- MAINTENANCE / OB / AV NODAL -->
-      <div class="rc-drug-grid">
-        <div class="rc-drug-card">
-          <div class="rc-drug-card-head">
-            <div class="name">Amiodarone Maintenance</div>
-            <div class="ind">Post-ROSC after VF/pVT arrest</div>
-          </div>
-          <div class="rc-drug-row dose"><span class="label">Drug & Dose</span><span class="value">150 mg</span></div>
-          <div class="rc-drug-row package"><span class="label">Package / Mix</span><span class="value">3 mL (150 mg) + 100 mL D5W · 10 gtts/set</span></div>
-          <div class="rc-drug-row delivery"><span class="label">Rate</span><span class="value">100 gtts/min over 10 min</span></div>
-        </div>
-        <div class="rc-drug-card">
-          <div class="rc-drug-card-head">
-            <div class="name">Mag Sulfate — Torsades</div>
-            <div class="ind">Refractory VT · Torsades de pointes</div>
-          </div>
-          <div class="rc-drug-row dose"><span class="label">Drug & Dose</span><span class="value">2 g</span></div>
-          <div class="rc-drug-row package"><span class="label">Package / Mix</span><span class="value">4 mL of 50% (2 g) + 100 mL D5W · 10 gtts/set</span></div>
-          <div class="rc-drug-row delivery"><span class="label">Rate</span><span class="value">100 gtts/min over 10 min</span></div>
-        </div>
-        <div class="rc-drug-card">
-          <div class="rc-drug-card-head">
-            <div class="name">Mag Sulfate — Eclampsia</div>
-            <div class="ind">Eclamptic seizures</div>
-          </div>
-          <div class="rc-drug-row dose"><span class="label">Drug & Dose</span><span class="value">4 g</span></div>
-          <div class="rc-drug-row package"><span class="label">Package / Mix</span><span class="value">8 mL of 50% (4 g) + 100 mL D5W · 10 gtts/set</span></div>
-          <div class="rc-drug-row delivery"><span class="label">Rate</span><span class="value">100 gtts/min over 10 min</span></div>
-        </div>
-        <div class="rc-drug-card">
-          <div class="rc-drug-card-head">
-            <div class="name">Diltiazem</div>
-            <div class="ind">Stable AFib / AFlutter RVR · NOT in WPW</div>
-          </div>
-          <div class="rc-drug-row dose"><span class="label">Drug & Dose</span><span class="value">${ccFmt(diltMg, 1)} mg ${diltMg >= 20 ? '(20 mg max)' : `(0.25 mg/kg)`}</span></div>
-          <div class="rc-drug-row package"><span class="label">Package</span><span class="value">100 mg / 100 mL (1 mg/mL)</span></div>
-          <div class="rc-drug-row delivery"><span class="label">Delivery</span><span class="value">${ccFmt(diltMl, 1)} mL slow push over 2 min</span></div>
-        </div>
-      </div>
-
-      <div class="cc-disclaimer" style="font-size:11px;padding:10px 14px;margin-top:14px;background:linear-gradient(90deg,rgba(212,163,65,0.15),rgba(212,163,65,0.05));border-color:var(--gold);border-left-color:var(--gold);">
-        <strong style="color:var(--gold);">⚠ Epi Concentrations</strong>
-        Arrest Epi = <strong>0.1 mg/mL (1:10,000)</strong>. Drip / Push-dose Epi = <strong>0.01 mg/mL (10 mcg/mL)</strong> — DO NOT confuse. All drips in this chart use <strong>100 mL D5W</strong>.
+      <div class="cr-meds-footnote">
+        <strong>⚠ Epi Concentrations:</strong> Arrest Epi = 0.1 mg/mL (1:10,000). Drip / Push-dose Epi = 0.01 mg/mL (10 mcg/mL). DO NOT confuse. All drips in this chart use 100 mL D5W.
       </div>
     </div>
   `;
@@ -6444,65 +6513,74 @@ function rcRenderTabDrip(kg) {
 
 function rcRenderTabElectricity(kg, elec) {
   return `
-    <div class="cc-section priority" style="margin-bottom:20px;">
-      <div class="cc-section-head">
-        <span class="cc-section-num">⚡</span>
-        <span class="cc-section-title">Electrical Therapy — ${ccFmt(kg, 1)} kg</span>
-        <span class="cc-section-tag">Shocks: ${ctState.shockCount}</span>
-      </div>
-      <div class="cc-electrical-grid">
-        <div class="cc-elec-card">
-          <div class="label">Defibrillation (VF / pVT)</div>
-          <div class="primary">${elec.defib.primary}</div>
-          <div class="secondary">${elec.defib.secondary}</div>
-          <div class="detail">${elec.defib.detail}</div>
-        </div>
-        <div class="cc-elec-card">
-          <div class="label">Synchronized Cardioversion</div>
-          <div class="primary">${elec.cardiovert.primary}</div>
-          <div class="secondary">${elec.cardiovert.secondary}</div>
-          <div class="detail">${elec.cardiovert.detail}</div>
-        </div>
-        <div class="cc-elec-card">
-          <div class="label">Transcutaneous Pacing</div>
-          <div class="primary">${elec.pace.primary}</div>
-          <div class="secondary">${elec.pace.secondary}</div>
-          <div class="detail">${elec.pace.detail}</div>
+    <div class="cr-meds-card">
+      <div class="cr-meds-header">
+        <div class="cr-meds-icon">⚡</div>
+        <div class="cr-meds-title">Electrical · ${ccFmt(kg, 1)} kg</div>
+        <div class="cr-meds-actions">
+          <div class="cr-vitals-head meta" style="background:none;padding:0;border:none;font-size:12px;">Shocks delivered: <strong style="color:var(--clin-red);font-size:14px;">${ctState.shockCount}</strong></div>
         </div>
       </div>
-      <div class="rc-action-row" style="margin-top:14px;">
-        <button class="rc-drug-btn rc-shock-btn" id="rc-shock-defib" style="text-align:center;">
-          <div class="name">Deliver Defib</div>
-          <div class="dose">${elec.defib.primary}</div>
-        </button>
-        <button class="rc-drug-btn rc-shock-btn" id="rc-shock-cv" style="text-align:center;">
-          <div class="name">Cardiovert</div>
-          <div class="dose">${elec.cardiovert.primary}</div>
-        </button>
+      <div class="cr-vitals-body">
+        <div class="cr-elec-stack">
+          <div class="cr-elec-card-v2 defib">
+            <div class="cr-elec-info">
+              <div class="label">Defibrillation (VF / pVT)</div>
+              <div class="primary">${escapeHtml(elec.defib.primary)}</div>
+              <div class="secondary">${escapeHtml(elec.defib.secondary)}</div>
+              <div class="detail">${escapeHtml(elec.defib.detail || '')}</div>
+            </div>
+            <button class="cr-elec-action" id="cr-elec-defib-open">⚡ Energy Ladder</button>
+          </div>
+          <div class="cr-elec-card-v2 cv">
+            <div class="cr-elec-info">
+              <div class="label">Synchronized Cardioversion</div>
+              <div class="primary">${escapeHtml(elec.cardiovert.primary)}</div>
+              <div class="secondary">${escapeHtml(elec.cardiovert.secondary)}</div>
+              <div class="detail">${escapeHtml(elec.cardiovert.detail || '')}</div>
+            </div>
+            <button class="cr-elec-action" id="cr-elec-cv-log">Log Cardiovert</button>
+          </div>
+          <div class="cr-elec-card-v2 pace">
+            <div class="cr-elec-info">
+              <div class="label">Transcutaneous Pacing</div>
+              <div class="primary">${escapeHtml(elec.pace.primary)}</div>
+              <div class="secondary">${escapeHtml(elec.pace.secondary)}</div>
+              <div class="detail">${escapeHtml(elec.pace.detail || '')}</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   `;
 }
 
 function rcRenderTabEquipment(a) {
+  const tile = (label, value, detail) => value
+    ? `<div class="cr-equip-tile"><div class="label">${escapeHtml(label)}</div><div class="value">${escapeHtml(value)}</div>${detail ? `<div class="detail">${escapeHtml(detail)}</div>` : ''}</div>`
+    : '';
   return `
-    <div class="cc-section priority" style="margin-bottom:20px;">
-      <div class="cc-section-head">
-        <span class="cc-section-num">🛠</span>
-        <span class="cc-section-title">Equipment & Airway</span>
-        <span class="cc-section-tag">Weight-based sizing</span>
+    <div class="cr-meds-card">
+      <div class="cr-meds-header">
+        <div class="cr-meds-icon">🛠</div>
+        <div class="cr-meds-title">Equipment &amp; Airway</div>
+        <div class="cr-meds-actions">
+          <div class="cr-vitals-head meta" style="background:none;padding:0;border:none;font-size:12px;">Weight-based sizing</div>
+        </div>
       </div>
-      <div class="cc-info-grid">
-        <div class="cc-info-card"><div class="label">ET Tube — Cuffed</div><div class="value">${a.ettCuffed}</div>${a.ettDetail ? `<div class="detail">${a.ettDetail}</div>` : ''}</div>
-        ${a.ettUncuffed ? `<div class="cc-info-card"><div class="label">ET Tube — Uncuffed</div><div class="value">${a.ettUncuffed}</div></div>` : ''}
-        <div class="cc-info-card"><div class="label">ETT Insertion Depth</div><div class="value">${a.ettDepth}</div></div>
-        <div class="cc-info-card"><div class="label">Laryngoscope Blade</div><div class="value">${a.bladeSize}</div></div>
-        <div class="cc-info-card"><div class="label">Supraglottic (LMA / iGel)</div><div class="value">${a.lma}</div></div>
-        <div class="cc-info-card"><div class="label">OPA</div><div class="value">${a.opa}</div></div>
-        <div class="cc-info-card"><div class="label">NPA</div><div class="value">${a.npa}</div></div>
-        <div class="cc-info-card"><div class="label">BVM</div><div class="value">${a.bvm}</div></div>
-        <div class="cc-info-card"><div class="label">Suction Catheter</div><div class="value">${a.suction}</div></div>
-        <div class="cc-info-card"><div class="label">IO Needle</div><div class="value">${a.io}</div><div class="detail">${a.ioDetail}</div></div>
+      <div class="cr-vitals-body">
+        <div class="cr-equip-grid">
+          ${tile('ET Tube — Cuffed', a.ettCuffed, a.ettDetail)}
+          ${tile('ET Tube — Uncuffed', a.ettUncuffed)}
+          ${tile('ETT Insertion Depth', a.ettDepth)}
+          ${tile('Laryngoscope Blade', a.bladeSize)}
+          ${tile('Supraglottic (LMA / iGel)', a.lma)}
+          ${tile('OPA', a.opa)}
+          ${tile('NPA', a.npa)}
+          ${tile('BVM', a.bvm)}
+          ${tile('Suction Catheter', a.suction)}
+          ${tile('IO Needle', a.io, a.ioDetail)}
+        </div>
       </div>
     </div>
   `;
@@ -6650,6 +6728,22 @@ function rcBindDynamicElements() {
       cr.medsView = b.dataset.medsView;
       rcPartialRender();
     });
+  });
+
+  // V2 Drips tab — row clicks open the drug modal with drip data
+  document.querySelectorAll('[data-drip-name]').forEach(b => {
+    b.addEventListener('click', () => crShowDripModal(b.dataset.dripName));
+  });
+
+  // V2 Electrical tab — defib launcher opens energy ladder modal
+  const elecDefibBtn = document.getElementById('cr-elec-defib-open');
+  if (elecDefibBtn) elecDefibBtn.addEventListener('click', crShowDefibModal);
+  const elecCvBtn = document.getElementById('cr-elec-cv-log');
+  if (elecCvBtn) elecCvBtn.addEventListener('click', () => {
+    const e = ccGetElectrical();
+    ctLogEvent('Cardiovert', `${e.cardiovert.primary} sync`);
+    ctShowCueBanner('Cardioversion logged', 'normal', 1800);
+    rcPartialRender();
   });
 
   // V2 Vitals tab — rhythm log buttons
