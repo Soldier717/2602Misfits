@@ -2156,6 +2156,262 @@
     .cr-drug-cell.conc, .cr-drug-cell.vol { font-size: 11px; }
     .cr-drug-cell.rt { font-size: 11px; }
   }
+
+  /* ============================================================
+     V2 CLINICAL MODALS — Drug detail, Defib energy ladder
+  ============================================================ */
+  .cr-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 40, 80, 0.55);
+    backdrop-filter: blur(3px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    padding: 16px;
+  }
+  .cr-modal-backdrop.show {
+    display: flex;
+    animation: cr-fade-in 0.18s ease-out;
+  }
+  @keyframes cr-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+  .cr-modal {
+    background: #2563eb;
+    color: white;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 92vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    animation: cr-pop-in 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes cr-pop-in {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .cr-modal-head {
+    background: var(--clin-blue);
+    padding: 16px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .cr-modal-title-block { flex: 1; min-width: 0; }
+  .cr-modal-title {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: white;
+    line-height: 1.05;
+  }
+  .cr-modal-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    margin-top: 4px;
+    letter-spacing: 0.02em;
+  }
+  .cr-modal-action {
+    background: white;
+    color: var(--clin-text);
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .cr-modal-close {
+    background: white;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: var(--clin-blue);
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .cr-modal-close:hover { background: var(--clin-blue-light); }
+
+  .cr-modal-body {
+    padding: 20px 20px 16px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .cr-modal-prompt {
+    color: #facc15;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 14px;
+  }
+
+  /* Drug modal: label / value rows */
+  .cr-modal-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    align-items: start;
+  }
+  .cr-modal-row:last-child { border-bottom: none; }
+  .cr-modal-label {
+    color: #facc15;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.02em;
+  }
+  .cr-modal-value {
+    color: #facc15;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+  .cr-modal-value.white { color: white; font-weight: 600; }
+  .cr-modal-value .sub {
+    display: block;
+    color: rgba(255,255,255,0.85);
+    font-style: italic;
+    font-size: 14px;
+    font-weight: 400;
+    margin-top: 4px;
+  }
+
+  /* Route toggle (IV / IO pill) */
+  .cr-route-toggle {
+    display: inline-flex;
+    background: white;
+    border: 2px solid #facc15;
+    border-radius: 8px;
+    overflow: hidden;
+    align-self: start;
+  }
+  .cr-route-toggle button {
+    background: white;
+    border: none;
+    padding: 8px 18px;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    color: var(--clin-text);
+    cursor: pointer;
+    border-right: 1px solid #facc15;
+  }
+  .cr-route-toggle button:last-child { border-right: none; }
+  .cr-route-toggle button.active {
+    background: #facc15;
+    color: var(--clin-text);
+  }
+
+  /* Defib energy ladder rows */
+  .cr-energy-row {
+    background: rgba(255,255,255,0.08);
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    padding: 16px 18px;
+    width: 100%;
+    text-align: left;
+    color: white;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.12s;
+  }
+  .cr-energy-row:hover { background: rgba(255,255,255,0.15); }
+  .cr-energy-row.active {
+    background: white;
+    color: var(--clin-text);
+  }
+  .cr-energy-row.active .check { color: var(--clin-text); font-size: 22px; }
+  .cr-energy-row .check { color: transparent; font-size: 20px; }
+  .cr-energy-row:first-child { border-top-left-radius: 8px; border-top-right-radius: 8px; }
+  .cr-energy-row:last-child { border-bottom: none; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
+
+  .cr-modal-note {
+    margin-top: 18px;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .cr-modal-note .label {
+    color: white;
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .cr-modal-note ul { margin: 0; padding-left: 22px; }
+  .cr-modal-note li { margin-bottom: 6px; }
+  .cr-modal-note strong { font-weight: 700; }
+
+  .cr-modal-foot {
+    background: rgba(0,0,0,0.18);
+    padding: 14px 18px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .cr-modal-btn {
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+    transition: filter 0.12s;
+  }
+  .cr-modal-btn:hover { filter: brightness(1.08); }
+  .cr-modal-btn.requested {
+    background: #facc15;
+    color: var(--clin-text);
+  }
+  .cr-modal-btn.given {
+    background: var(--clin-green);
+    color: white;
+  }
+  .cr-modal-btn.shock {
+    background: var(--clin-green);
+    color: white;
+  }
+  .cr-modal-btn.noshock {
+    background: #cbd5e1;
+    color: var(--clin-text);
+  }
+
+  @media (max-width: 520px) {
+    .cr-modal { max-width: 100%; border-radius: 12px; }
+    .cr-modal-title { font-size: 19px; }
+    .cr-modal-row { grid-template-columns: 90px 1fr; gap: 10px; }
+    .cr-modal-label { font-size: 14px; }
+    .cr-modal-value { font-size: 15px; }
+  }
 </style>
 </head>
 <body>
@@ -2267,6 +2523,9 @@
 </div>
 
 <div class="cc-code-overlay" id="cc-code-overlay"></div>
+
+<!-- GrandTevy V2 clinical modal mount (drug detail / defib energy ladder) -->
+<div class="cr-modal-backdrop" id="cr-modal-mount"></div>
 
 <div class="toast" id="toast"></div>
 
@@ -3334,7 +3593,10 @@ document.querySelectorAll('.modal-bg').forEach(bg => {
   bg.addEventListener('click', (e) => { if (e.target === bg) bg.classList.remove('show'); });
 });
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') document.querySelectorAll('.modal-bg.show').forEach(m => m.classList.remove('show'));
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-bg.show').forEach(m => m.classList.remove('show'));
+    if (cr && cr.modal) crCloseModal();
+  }
 });
 
 // ---------- BOOT ----------
@@ -4749,6 +5011,8 @@ const cr = {
   view: 'entry',     // 'entry' | 'entry-adult' | 'entry-peds' | 'dose'
   patient: null,     // { type, weight, lbs?, height?, zone?, zoneLabel?, zoneColor?, zoneTextColor?, ageRange?, weightRange?, summary }
   medsView: 'full',  // 'full' | 'protocol' — Meds tab sub-view
+  modal: null,       // null | { type: 'drug', drug } | { type: 'defib', selectedIdx }
+  drugRoute: 'IV',   // 'IV' | 'IO' — current route toggle in drug modal
 };
 
 // --- DRUG ROW PARSERS (V2 tabular layout) ---
@@ -4819,6 +5083,245 @@ function rcParseRoute(route) {
 // Whether to render a drug row in red (arrest pathway)
 function rcIsArrestDrug(d) {
   return d.primary === true || d.rhythm === 'all' || d.rhythm === 'shockable';
+}
+
+/* ============================================================
+   V2 CLINICAL MODALS — drug detail, defib energy ladder
+============================================================ */
+function crShowDrugModal(drugName) {
+  const d = ccGetDrugs().find(x => x.name === drugName);
+  if (!d) return;
+  // Default route: pick the first one from drug data
+  const routes = (d.route || 'IV').split(/[\/,]/).map(s => s.trim()).filter(Boolean);
+  cr.drugRoute = routes.includes('IV') ? 'IV' : routes[0] || 'IV';
+  cr.modal = { type: 'drug', drug: d, availableRoutes: routes };
+  crRenderModal();
+}
+
+function crShowDefibModal() {
+  const e = ccGetElectrical();
+  cr.modal = { type: 'defib', selectedIdx: ctState.shockCount, electrical: e };
+  crRenderModal();
+}
+
+function crCloseModal() {
+  cr.modal = null;
+  const mount = document.getElementById('cr-modal-mount');
+  if (mount) { mount.classList.remove('show'); mount.innerHTML = ''; }
+}
+
+function crRenderModal() {
+  const mount = document.getElementById('cr-modal-mount');
+  if (!mount || !cr.modal) return;
+  const html = cr.modal.type === 'drug' ? renderDrugModal(cr.modal)
+             : cr.modal.type === 'defib' ? renderDefibModal(cr.modal)
+             : '';
+  mount.innerHTML = html;
+  mount.classList.add('show');
+  bindModalEvents();
+}
+
+function renderDrugModal(m) {
+  const d = m.drug;
+  const conc = rcParseConc(d.packageSpec);
+  const mixDetail = (d.packageSpec || '').split(/·/).slice(1).join(' · ').trim();
+  const routes = m.availableRoutes && m.availableRoutes.length ? m.availableRoutes : ['IV'];
+  const routeToggle = routes.length > 1
+    ? `<div class="cr-route-toggle">
+         ${routes.map(r => `<button class="${cr.drugRoute === r ? 'active' : ''}" data-cr-route="${escapeAttr(r)}">${escapeHtml(r)}</button>`).join('')}
+       </div>`
+    : `<div class="cr-modal-value white">${escapeHtml(routes[0] || '—')}</div>`;
+  // Sub-heading: drug class / indication
+  const subtitle = `${d.class ? escapeHtml(d.class) + ' · ' : ''}${escapeHtml(d.indication || '')}`;
+  return `
+    <div class="cr-modal" role="dialog" aria-modal="true">
+      <div class="cr-modal-head">
+        <div class="cr-modal-title-block">
+          <div class="cr-modal-title">${escapeHtml(d.name)}</div>
+          <div class="cr-modal-subtitle">${subtitle}</div>
+        </div>
+        <button class="cr-modal-close" id="cr-modal-close-btn" aria-label="Close">✕</button>
+      </div>
+      <div class="cr-modal-body">
+        <div class="cr-modal-row">
+          <div class="cr-modal-label">Dose:</div>
+          <div class="cr-modal-value">${escapeHtml(d.weightDose || '—')}</div>
+        </div>
+        <div class="cr-modal-row">
+          <div class="cr-modal-label">Route:</div>
+          ${routeToggle}
+        </div>
+        <div class="cr-modal-row">
+          <div class="cr-modal-label">Conc:</div>
+          <div class="cr-modal-value">
+            ${escapeHtml(conc)}
+            ${mixDetail ? `<span class="sub">${escapeHtml(mixDetail)}</span>` : ''}
+          </div>
+        </div>
+        <div class="cr-modal-row">
+          <div class="cr-modal-label">Delivery:</div>
+          <div class="cr-modal-value white">${escapeHtml(d.deliveryDose || d.readyVol || '—')}</div>
+        </div>
+        ${d.max && d.max !== 'Per protocol' ? `
+        <div class="cr-modal-row">
+          <div class="cr-modal-label">Max:</div>
+          <div class="cr-modal-value">${escapeHtml(d.max)}</div>
+        </div>` : ''}
+        ${d.detail ? `
+        <div class="cr-modal-note">
+          <span class="label">Note:</span>
+          <ul><li>${escapeHtml(d.detail)}</li></ul>
+        </div>` : ''}
+      </div>
+      <div class="cr-modal-foot">
+        <button class="cr-modal-btn requested" data-cr-action="requested">Requested</button>
+        <button class="cr-modal-btn given" data-cr-action="given">Given</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderDefibModal(m) {
+  const e = m.electrical;
+  // Build energy ladder from current production's escalating sequence.
+  // ccGetElectrical returns current shock — we build the full ladder here.
+  const kg = parseFloat(ccState.weight) || (cr.patient ? cr.patient.weight : 0);
+  const band = ccState.ageBand;
+  let ladder;
+  if (band === 'adult') {
+    // GNFR escalating: 120 → 150 → 200 → 200 (cap)
+    ladder = [
+      { label: '1st', joules: '120 J' },
+      { label: '2nd', joules: '150 J' },
+      { label: '3rd', joules: '200 J' },
+      { label: '4th+', joules: '200 J' },
+    ];
+  } else {
+    // Pediatric / neonatal: 2 J/kg → 4 J/kg → 4 J/kg → 4–10 J/kg
+    const j1 = (2 * kg).toFixed(0);
+    const j2 = (4 * kg).toFixed(0);
+    ladder = [
+      { label: '1st', joules: `${j1} J · 2 J/kg` },
+      { label: '2nd', joules: `${j2} J · 4 J/kg` },
+      { label: '3rd', joules: `${j2} J · 4 J/kg` },
+      { label: '4th+', joules: `${j2}-${(10*kg).toFixed(0)} J · 4-10 J/kg` },
+    ];
+  }
+  const selectedIdx = Math.min(ctState.shockCount, ladder.length - 1);
+  return `
+    <div class="cr-modal" role="dialog" aria-modal="true">
+      <div class="cr-modal-head">
+        <div class="cr-modal-title-block">
+          <div class="cr-modal-title">ZOLL</div>
+          <div class="cr-modal-subtitle">Defibrillation</div>
+        </div>
+        <button class="cr-modal-close" id="cr-modal-close-btn" aria-label="Close">✕</button>
+      </div>
+      <div class="cr-modal-body">
+        <div class="cr-modal-prompt">Select an energy dose below</div>
+        ${ladder.map((row, i) => `
+          <button class="cr-energy-row ${i === selectedIdx ? 'active' : ''}" data-energy-idx="${i}">
+            <span>${row.label.toUpperCase()}: ${escapeHtml(row.joules)}</span>
+            <span class="check">${i === selectedIdx ? '✓' : ''}</span>
+          </button>
+        `).join('')}
+        <div class="cr-modal-note">
+          <span class="label">Note:</span>
+          <ul>
+            <li><strong>Cardiac Arrest: VF &amp; pVT</strong> — For VF/VT Storm, after 3rd shock consider vector change to anterior-posterior (AP) pad placement. After 5th shock consider dual sequential external defibrillation (DSED).</li>
+            <li>Pad placement default: Anterior / Apex. Minimize peri-shock pauses.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cr-modal-foot">
+        <button class="cr-modal-btn shock" data-cr-action="shock-delivered">SHOCK DELIVERED</button>
+        <button class="cr-modal-btn noshock" data-cr-action="no-shock">NO SHOCK ADVISED</button>
+      </div>
+    </div>
+  `;
+}
+
+function bindModalEvents() {
+  const mount = document.getElementById('cr-modal-mount');
+  if (!mount) return;
+
+  // Close on backdrop click (but not inside modal)
+  mount.onclick = (e) => { if (e.target === mount) crCloseModal(); };
+
+  // Close button
+  const closeBtn = document.getElementById('cr-modal-close-btn');
+  if (closeBtn) closeBtn.addEventListener('click', crCloseModal);
+
+  // Route toggle in drug modal
+  mount.querySelectorAll('[data-cr-route]').forEach(b => {
+    b.addEventListener('click', () => {
+      cr.drugRoute = b.dataset.crRoute;
+      crRenderModal();
+    });
+  });
+
+  // Energy row selection in defib modal
+  mount.querySelectorAll('[data-energy-idx]').forEach(b => {
+    b.addEventListener('click', () => {
+      if (cr.modal && cr.modal.type === 'defib') {
+        cr.modal.selectedIdx = parseInt(b.dataset.energyIdx);
+        crRenderModal();
+      }
+    });
+  });
+
+  // Action buttons (Requested / Given / Shock Delivered / No Shock Advised)
+  mount.querySelectorAll('[data-cr-action]').forEach(b => {
+    b.addEventListener('click', () => {
+      const action = b.dataset.crAction;
+      if (!cr.modal) return;
+      if (cr.modal.type === 'drug') handleDrugModalAction(action);
+      else if (cr.modal.type === 'defib') handleDefibModalAction(action);
+    });
+  });
+}
+
+function handleDrugModalAction(action) {
+  const d = cr.modal && cr.modal.drug;
+  if (!d) { crCloseModal(); return; }
+  const route = cr.drugRoute || 'IV';
+  if (action === 'requested') {
+    ctLogEvent('Request', `${d.name} ${d.weightDose || ''} ${route} — requested`);
+    ctShowCueBanner(`${d.name} requested`, 'normal', 1500);
+  } else if (action === 'given') {
+    ctLogEvent('Drug', `${d.name} ${d.weightDose || ''} ${route} (${d.deliveryDose || d.readyVol || ''})`);
+    ctShowCueBanner(`${d.name} given`, d.primary ? 'epi' : 'normal', 1800);
+    // Cumulative Epi tracking (arrest Epi only)
+    const isArrestEpi = (d.name === 'Epinephrine' || d.name === 'Epinephrine 1:10,000') && d.rhythm === 'all';
+    if (isArrestEpi) {
+      ctState.lastEpiMs = ctState.elapsedMs;
+      const m = (d.weightDose || '').match(/([\d.]+)\s*mg/);
+      if (m) ctState.cumulativeEpiMg += parseFloat(m[1]);
+    }
+    if (d.name === 'Amiodarone' || d.name === 'Lidocaine') ctState.antiDysrhythmicGiven = true;
+  }
+  crCloseModal();
+  rcPartialRender();
+}
+
+function handleDefibModalAction(action) {
+  const e = cr.modal && cr.modal.electrical;
+  const idx = cr.modal ? cr.modal.selectedIdx : 0;
+  if (action === 'shock-delivered') {
+    ctState.shockCount++;
+    const energyStr = e && e.defib ? e.defib.primary : '';
+    ctLogEvent('Shock', `Defib #${ctState.shockCount} — ${energyStr}`);
+    ctShowCueBanner(`Shock #${ctState.shockCount} Delivered — Resume CPR`, 'normal', 2000);
+    ctSpeak('Shock delivered. Resume CPR.');
+    ctState.lastRhythm = null;
+  } else if (action === 'no-shock') {
+    ctLogEvent('No Shock', `No shock advised — Resume CPR, consider epi`);
+    ctShowCueBanner('No Shock — Resume CPR · Check Epi', 'epi', 2000);
+    ctSpeak('No shock advised. Resume CPR.');
+    ctState.lastRhythm = null;
+  }
+  crCloseModal();
+  rcPartialRender();
 }
 
 function crSetAdultIBW(ibw) {
@@ -5742,23 +6245,9 @@ function rcBindDynamicElements() {
     ctReset();
   });
 
-  // Drug buttons — look up by name (works regardless of which tab/grid)
-  const allDrugs = ccGetDrugs();
+  // Drug buttons — open the V2 detail modal (Requested → Given workflow)
   document.querySelectorAll('[data-drug-name]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const d = allDrugs.find(x => x.name === btn.dataset.drugName);
-      if (!d) return;
-      ctLogEvent('Drug', `${d.name} ${d.weightDose} (${d.deliveryDose || d.readyVol || ''})`);
-      ctShowCueBanner(`${d.name} logged`, d.primary ? 'epi' : 'normal', 1800);
-      // Track cumulative Epi ONLY for arrest Epi (1:10,000 / 'all' tag)
-      const isArrestEpi = (d.name === 'Epinephrine' || d.name === 'Epinephrine 1:10,000') && d.rhythm === 'all';
-      if (isArrestEpi) {
-        ctState.lastEpiMs = ctState.elapsedMs;
-        const m = (d.weightDose || '').match(/([\d.]+)\s*mg/);
-        if (m) ctState.cumulativeEpiMg += parseFloat(m[1]);
-      }
-      if (d.name === 'Amiodarone' || d.name === 'Lidocaine') ctState.antiDysrhythmicGiven = true;
-    });
+    btn.addEventListener('click', () => crShowDrugModal(btn.dataset.drugName));
   });
 
   // V2 Meds sub-tabs (Full List / By Protocol)
@@ -5884,22 +6373,14 @@ function bindRunCodeEvents() {
     render();
   });
   const cprDefibBtn = document.getElementById('cpr-defib-btn');
-  if (cprDefibBtn) cprDefibBtn.addEventListener('click', () => {
-    // Phase 2C will open a full defib energy ladder modal; for now, log + reuse decision panel
-    const e = ccGetElectrical();
-    ctState.shockCount++;
-    ctLogEvent('Shock', `Defib #${ctState.shockCount} — ${e.defib.primary}`);
-    ctShowCueBanner(`Shock #${ctState.shockCount} Delivered — Resume CPR`, 'normal', 2000);
-    ctSpeak('Shock delivered. Resume CPR.');
-    rcPartialRender();
-  });
+  if (cprDefibBtn) cprDefibBtn.addEventListener('click', crShowDefibModal);
+
   const cprEpiBtn = document.getElementById('cpr-epi-btn');
   if (cprEpiBtn) cprEpiBtn.addEventListener('click', () => {
-    ctState.lastEpiMs = ctState.elapsedMs;
-    ctState.cumulativeEpiMg += 1; // adult arrest standard dose
-    ctLogEvent('Drug', `Epinephrine 1 mg IV/IO (quick log from CPR bar)`);
-    ctShowCueBanner('Epinephrine 1 mg logged', 'epi', 1800);
-    rcPartialRender();
+    // Open Epi modal directly (find first Epi entry in current band's drug list)
+    const epi = ccGetDrugs().find(d => /^Epinephrine( 1:10,000)?$/.test(d.name) && d.rhythm === 'all')
+              || ccGetDrugs().find(d => d.name.startsWith('Epinephrine'));
+    if (epi) crShowDrugModal(epi.name);
   });
 
   // Refresh pulse mini-dot ref for metronome flashing
