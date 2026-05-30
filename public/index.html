@@ -1940,6 +1940,222 @@
     .cpr-row-mid { gap: 8px; }
     .cpr-reset-btn { width: 64px; height: 64px; font-size: 12px; }
   }
+
+  /* ============================================================
+     V2 TABULAR MEDS — Drug | Conc | Vol | Rt rows, arrest = red
+  ============================================================ */
+  .cr-meds-card {
+    background: var(--clin-surface);
+    border: 1px solid var(--clin-border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    box-shadow: var(--clin-shadow);
+  }
+  .cr-meds-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--clin-blue-light);
+    border-bottom: 1px solid var(--clin-border);
+  }
+  .cr-meds-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--clin-blue);
+    color: white;
+    border-radius: 6px;
+    font-size: 18px;
+  }
+  .cr-meds-title {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: 0.04em;
+    color: var(--clin-text);
+    flex: 1;
+  }
+  .cr-meds-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .cr-meds-action-btn {
+    background: var(--clin-surface);
+    border: 1px solid var(--clin-border);
+    width: 38px;
+    height: 38px;
+    border-radius: 6px;
+    color: var(--clin-blue);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cr-meds-action-btn:hover { background: var(--clin-blue-light); border-color: var(--clin-blue); }
+  .cr-meds-action-btn.primary {
+    background: var(--clin-blue);
+    color: white;
+    border-color: var(--clin-blue);
+  }
+  .cr-meds-action-btn.primary:hover { background: #15294d; }
+
+  .cr-meds-subtabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--clin-surface-alt);
+    border-bottom: 1px solid var(--clin-border);
+  }
+  .cr-meds-subtab {
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 12px;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    color: var(--clin-text-muted);
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .cr-meds-subtab.active {
+    background: var(--clin-surface);
+    color: var(--clin-text);
+    border-bottom-color: var(--clin-blue);
+  }
+
+  .cr-meds-banner {
+    background: var(--clin-surface);
+    padding: 14px;
+    border-bottom: 1px solid var(--clin-border);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    color: var(--clin-text);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cr-meds-banner .ico { color: var(--clin-blue); font-size: 18px; }
+
+  .cr-drug-table { background: var(--clin-surface); }
+  .cr-drug-row {
+    display: grid;
+    grid-template-columns: 2.2fr 1fr 0.8fr 0.7fr;
+    align-items: center;
+    border-bottom: 1px solid var(--clin-surface-alt);
+    padding: 10px 14px;
+    background: var(--clin-surface);
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    text-align: left;
+    color: var(--clin-text);
+    cursor: pointer;
+    font-family: inherit;
+    gap: 8px;
+    width: 100%;
+  }
+  .cr-drug-row.header {
+    background: #2a2e35;
+    color: white;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 12px 14px;
+    cursor: default;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  .cr-drug-row.header > div { padding: 0; }
+  .cr-drug-row:not(.header):nth-child(odd):not(.arrest) {
+    background: var(--clin-surface-alt);
+  }
+  .cr-drug-row.arrest {
+    background: var(--clin-red);
+    color: white;
+  }
+  .cr-drug-row.arrest .ind { color: rgba(255,255,255,0.85); }
+  .cr-drug-row.arrest:hover { background: #a82d17; }
+  .cr-drug-row:not(.header):not(.arrest):hover { background: var(--clin-blue-light); }
+  .cr-drug-cell .name {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    line-height: 1.25;
+  }
+  .cr-drug-cell .ind {
+    font-style: italic;
+    font-size: 12px;
+    color: var(--clin-text-dim);
+    margin-top: 2px;
+    line-height: 1.25;
+  }
+  .cr-drug-cell.conc, .cr-drug-cell.vol {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .cr-drug-cell.vol {
+    background: rgba(214,230,245,0.4);
+    padding: 6px 8px;
+    border-radius: 4px;
+    text-align: center;
+  }
+  .cr-drug-row.arrest .cr-drug-cell.vol {
+    background: rgba(255,255,255,0.18);
+  }
+  .cr-drug-cell.rt {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    gap: 4px;
+  }
+  .cr-drug-cell.rt .route-label {
+    text-align: center;
+    line-height: 1.1;
+  }
+  .cr-drug-cell.rt .arrow {
+    font-size: 18px;
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+
+  .cr-drug-empty {
+    padding: 36px 20px;
+    text-align: center;
+    color: var(--clin-text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 720px) {
+    .cr-drug-row { grid-template-columns: 1.8fr 0.9fr 0.7fr 0.6fr; padding: 10px 10px; gap: 6px; }
+    .cr-drug-cell .name { font-size: 13px; }
+    .cr-drug-cell .ind { font-size: 11px; }
+    .cr-drug-cell.conc, .cr-drug-cell.vol { font-size: 11px; }
+    .cr-drug-cell.rt { font-size: 11px; }
+  }
 </style>
 </head>
 <body>
@@ -4530,9 +4746,80 @@ const ADULT_IBW = [
 // V2 entry/patient state — separate from ctState (CPR engine) and ccState (calculator).
 // cr.patient locks once selected; "New Patient" clears everything and returns to entry.
 const cr = {
-  view: 'entry',   // 'entry' | 'entry-adult' | 'entry-peds' | 'dose'
-  patient: null,   // { type, weight, lbs?, height?, zone?, zoneLabel?, zoneColor?, zoneTextColor?, ageRange?, weightRange?, summary }
+  view: 'entry',     // 'entry' | 'entry-adult' | 'entry-peds' | 'dose'
+  patient: null,     // { type, weight, lbs?, height?, zone?, zoneLabel?, zoneColor?, zoneTextColor?, ageRange?, weightRange?, summary }
+  medsView: 'full',  // 'full' | 'protocol' — Meds tab sub-view
 };
+
+// --- DRUG ROW PARSERS (V2 tabular layout) ---
+// Pull the concentration string out of a packageSpec like
+//   "0.1 mg/mL · 10 mL prefilled syringe"         → "0.1 mg/mL"
+//   "50% (500 mg/mL) · 10 mL vial"                → "500 mg/mL"
+//   "50 mg/mL · 3 mL vial (150 mg)"               → "50 mg/mL"
+//   "1 mg/mL (1:1,000) · 1 mL ampule"             → "1 mg/mL"
+function rcParseConc(spec) {
+  if (!spec) return '—';
+  // Parenthesized mg/mL — e.g. "(500 mg/mL)" or "(20 mg/mL)"
+  const paren = spec.match(/\(([\d.]+\s*(?:mcg|mg|g)\s*\/\s*mL)\)/i);
+  if (paren) return paren[1].replace(/\s+/g, ' ');
+  // Standard "X mg/mL" — slash directly into mL, no intermediate number
+  const m = spec.match(/[\d.]+\s*(?:mcg|mg|g|mEq)\s*\/\s*mL/i);
+  if (m) return m[0].replace(/\s+/g, ' ');
+  // "X mg / Y mL vial" form — show as "X mg/Y mL"
+  const vial = spec.match(/([\d.]+\s*(?:mcg|mg|g))\s*\/\s*([\d.]+\s*mL)/i);
+  if (vial) return `${vial[1].replace(/\s+/g, ' ')}/${vial[2].replace(/\s+/g, ' ')}`;
+  // Tabs / sprays — "81 mg/tab" or "0.4 mg/spray"
+  const unit = spec.match(/[\d.]+\s*(?:mcg|mg|g)\s*\/\s*(?:tab|spray|neb|puff)/i);
+  if (unit) return unit[0].replace(/\s+/g, ' ');
+  // Fallback: first segment before " · "
+  const first = spec.split(/·/)[0].trim();
+  return first.length > 18 ? first.substring(0, 16) + '…' : first;
+}
+
+// Pull the volume to push from a deliveryDose string.
+//   "Push 10 mL IV/IO"                            → "10 mL"
+//   "1st: Push 6 mL IVP · 2nd: Push 3 mL IVP"     → "6 / 3 mL"
+//   "0.4–2 mL IV/IM"                              → "0.4-2 mL"
+//   "0.5 mL IM lateral thigh"                     → "0.5 mL"
+function rcParseVol(dose) {
+  if (!dose) return '—';
+  // Multi-dose "1st / 2nd" pattern in mL
+  if (/1st|first/i.test(dose)) {
+    const mm = dose.match(/(\d[\d.]*)\s*mL[^·]*[·][^·]*?(\d[\d.]*)\s*mL/i);
+    if (mm) return `${mm[1]} / ${mm[2]} mL`;
+  }
+  // Single mL volume (possibly range)
+  const m = dose.match(/([\d.]+(?:\s*[–-]\s*[\d.]+)?)\s*mL/i);
+  if (m) return `${m[1].replace(/\s+/g, '')} mL`;
+  // No mL → tab / spray / neb / puff
+  const tab = dose.match(/(\d+)\s*(tab|spray|neb|puff)/i);
+  if (tab) return `${tab[1]} ${tab[2]}`;
+  // Grams (e.g. glucose tube)
+  const g = dose.match(/([\d.]+)\s*g\b/i);
+  if (g) return `${g[1]} g`;
+  return dose.length > 14 ? dose.substring(0, 12) + '…' : dose;
+}
+
+// Normalize the route string for the Rt column.
+//   "IV / IO"          → "IV/IO"
+//   "IV / IO / IM"     → "IV/IO"  (display first two for space)
+//   "IM"               → "IM"
+//   "Nebulized"        → "NEB"
+function rcParseRoute(route) {
+  if (!route) return '—';
+  if (/neb/i.test(route)) return 'NEB';
+  if (/oral|po/i.test(route)) return 'PO';
+  // Split on / and pick up to 2
+  const parts = route.split(/[\/,]/).map(p => p.trim()).filter(Boolean);
+  if (parts.length === 0) return '—';
+  if (parts.length === 1) return parts[0].toUpperCase();
+  return parts.slice(0, 2).join('/').toUpperCase().replace(/\s+/g, '');
+}
+
+// Whether to render a drug row in red (arrest pathway)
+function rcIsArrestDrug(d) {
+  return d.primary === true || d.rhythm === 'all' || d.rhythm === 'shockable';
+}
 
 function crSetAdultIBW(ibw) {
   cr.patient = {
@@ -5043,26 +5330,62 @@ function rcRenderTabCode(kg, elec) {
 }
 
 function rcRenderTabMeds(kg, elec) {
-  // Meds tab: ALL drugs, no rhythm filter (full drug box reference)
+  // V2 tabular layout — Drug | Conc | Vol | Rt rows
+  // Sub-views: 'full' (all meds alphabetical) | 'protocol' (cardiac arrest only)
   const allDrugs = ccGetDrugs();
-  // Group by category
-  const arrestDrugs = allDrugs.filter(d => d.rhythm === 'all' || d.rhythm === 'shockable' || d.rhythm === 'nonshockable');
-  const nonArrestDrugs = allDrugs.filter(d => d.rhythm === 'non-arrest');
+  const view = cr.medsView || 'full';
+  const drugs = view === 'protocol'
+    ? allDrugs.filter(rcIsArrestDrug)
+    : [...allDrugs].sort((a, b) => a.name.localeCompare(b.name));
+
+  const protocolBanner = view === 'protocol'
+    ? `<div class="cr-meds-banner"><span class="ico">⚡</span><span>VENTRICULAR FIBRILLATION &amp; VT without a Pulse</span></div>`
+    : '';
+
+  const rows = drugs.length === 0
+    ? `<div class="cr-drug-empty">No drugs match this view</div>`
+    : drugs.map(d => {
+        const arrest = rcIsArrestDrug(d);
+        return `
+          <button class="cr-drug-row ${arrest ? 'arrest' : ''}" data-drug-name="${escapeAttr(d.name)}">
+            <div class="cr-drug-cell drug">
+              <div class="name">${escapeHtml(d.name)}</div>
+              <div class="ind">${escapeHtml(d.indication || '')}</div>
+            </div>
+            <div class="cr-drug-cell conc">${escapeHtml(rcParseConc(d.packageSpec))}</div>
+            <div class="cr-drug-cell vol">${escapeHtml(rcParseVol(d.deliveryDose || d.readyVol || d.weightDose))}</div>
+            <div class="cr-drug-cell rt">
+              <span class="route-label">${escapeHtml(rcParseRoute(d.route))}</span>
+              <span class="arrow">›</span>
+            </div>
+          </button>
+        `;
+      }).join('');
 
   return `
-    <div class="cc-section priority" style="margin-bottom:20px;">
-      <div class="cc-section-head">
-        <span class="cc-section-num">💊</span>
-        <span class="cc-section-title">GNFR Drug Box — ${ccFmt(kg, 1)} kg</span>
-        <span class="cc-section-tag">Reference · All meds</span>
+    <div class="cr-meds-card">
+      <div class="cr-meds-header">
+        <div class="cr-meds-icon">💊</div>
+        <div class="cr-meds-title">Medications · ${ccFmt(kg, 1)} kg</div>
+        <div class="cr-meds-actions">
+          <button class="cr-meds-action-btn" id="cr-meds-filter" title="Filter">⚙</button>
+          <button class="cr-meds-action-btn primary" id="cr-meds-send" title="Send to log">▶</button>
+        </div>
       </div>
-      <div class="cc-disclaimer" style="font-size:11px;padding:10px 14px;margin-bottom:14px;">
-        Weight-based dosing reference. To run an active code, use the <strong>Code</strong> tab.
+      <div class="cr-meds-subtabs">
+        <button class="cr-meds-subtab ${view==='full'?'active':''}" data-meds-view="full">Full List</button>
+        <button class="cr-meds-subtab ${view==='protocol'?'active':''}" data-meds-view="protocol">By Protocol</button>
       </div>
-      <p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin:0 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px;">Cardiac Arrest</p>
-      <div class="rc-drug-grid" style="margin-bottom:20px;">${rcBuildDrugButtons(arrestDrugs)}</div>
-      <p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin:0 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px;">Non-Arrest Drug Box</p>
-      <div class="rc-drug-grid">${rcBuildDrugButtons(nonArrestDrugs)}</div>
+      ${protocolBanner}
+      <div class="cr-drug-table">
+        <div class="cr-drug-row header">
+          <div>Drug</div>
+          <div>Conc.</div>
+          <div>Vol.</div>
+          <div>Rt.</div>
+        </div>
+        ${rows}
+      </div>
     </div>
   `;
 }
@@ -5435,6 +5758,14 @@ function rcBindDynamicElements() {
         if (m) ctState.cumulativeEpiMg += parseFloat(m[1]);
       }
       if (d.name === 'Amiodarone' || d.name === 'Lidocaine') ctState.antiDysrhythmicGiven = true;
+    });
+  });
+
+  // V2 Meds sub-tabs (Full List / By Protocol)
+  document.querySelectorAll('[data-meds-view]').forEach(b => {
+    b.addEventListener('click', () => {
+      cr.medsView = b.dataset.medsView;
+      rcPartialRender();
     });
   });
 
