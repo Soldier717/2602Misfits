@@ -2412,6 +2412,238 @@
     .cr-modal-label { font-size: 14px; }
     .cr-modal-value { font-size: 15px; }
   }
+
+  /* ============================================================
+     V2 VITALS TAB — Expected vitals, ETCO2, Rhythm log, H's & T's
+  ============================================================ */
+  .cr-vitals-card {
+    background: var(--clin-surface);
+    border: 1px solid var(--clin-border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    box-shadow: var(--clin-shadow);
+    overflow: hidden;
+  }
+  .cr-vitals-head {
+    background: var(--clin-blue-light);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--clin-border);
+  }
+  .cr-vitals-head .ico {
+    width: 30px;
+    height: 30px;
+    background: var(--clin-blue);
+    color: white;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .cr-vitals-head .title {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.06em;
+    color: var(--clin-text);
+    text-transform: uppercase;
+    flex: 1;
+  }
+  .cr-vitals-head .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--clin-text-dim);
+    letter-spacing: 0.06em;
+  }
+  .cr-vitals-body { padding: 14px; }
+
+  /* Expected vitals grid */
+  .cr-vital-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .cr-vital-tile {
+    background: var(--clin-surface-alt);
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 3px solid var(--clin-blue);
+  }
+  .cr-vital-tile .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--clin-text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .cr-vital-tile .value {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--clin-text);
+    line-height: 1.1;
+  }
+  .cr-vital-tile .value .unit {
+    font-size: 12px;
+    color: var(--clin-text-dim);
+    font-weight: 500;
+    margin-left: 4px;
+  }
+  .cr-vital-tile .sub {
+    font-size: 11px;
+    color: var(--clin-text-muted);
+    margin-top: 2px;
+  }
+
+  /* ETCO2 reference */
+  .cr-etco2-bands {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .cr-etco2-band {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 5px;
+    background: var(--clin-surface-alt);
+    border-left: 4px solid var(--clin-text-muted);
+  }
+  .cr-etco2-band.danger { border-left-color: var(--clin-red); background: #fde8e8; }
+  .cr-etco2-band.warning { border-left-color: var(--clin-yellow); background: #fdf5d4; }
+  .cr-etco2-band.good { border-left-color: var(--clin-green); background: #e6f5ea; }
+  .cr-etco2-band.rosc { border-left-color: var(--clin-blue); background: var(--clin-blue-light); }
+  .cr-etco2-range {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--clin-text);
+  }
+  .cr-etco2-desc {
+    font-size: 12px;
+    color: var(--clin-text);
+    line-height: 1.4;
+  }
+
+  /* Rhythm log buttons + timeline */
+  .cr-rhythm-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .cr-rhythm-btn-v2 {
+    background: var(--clin-surface);
+    border: 2px solid var(--clin-border);
+    color: var(--clin-text);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 12px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .cr-rhythm-btn-v2:hover { border-color: var(--clin-blue); color: var(--clin-blue); }
+  .cr-rhythm-btn-v2.shockable { border-color: var(--clin-red); color: var(--clin-red); }
+  .cr-rhythm-btn-v2.shockable:hover { background: var(--clin-red); color: white; }
+  .cr-rhythm-btn-v2.nonshockable { border-color: var(--clin-yellow); color: #b8860b; }
+  .cr-rhythm-btn-v2.nonshockable:hover { background: var(--clin-yellow); color: var(--clin-text); }
+  .cr-rhythm-btn-v2.rosc { border-color: var(--clin-green); color: var(--clin-green); }
+  .cr-rhythm-btn-v2.rosc:hover { background: var(--clin-green); color: white; }
+
+  .cr-rhythm-timeline {
+    background: var(--clin-surface-alt);
+    border-radius: 6px;
+    padding: 10px;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .cr-rhythm-empty {
+    text-align: center;
+    color: var(--clin-text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    padding: 14px;
+  }
+  .cr-rhythm-entry {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--clin-border);
+    font-size: 13px;
+    align-items: center;
+  }
+  .cr-rhythm-entry:last-child { border-bottom: none; }
+  .cr-rhythm-entry .time {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--clin-blue);
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .cr-rhythm-entry .rhythm {
+    color: var(--clin-text);
+    font-weight: 600;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.02em;
+  }
+  .cr-rhythm-entry .rhythm.shockable { color: var(--clin-red); }
+  .cr-rhythm-entry .rhythm.nonshockable { color: #b8860b; }
+  .cr-rhythm-entry .rhythm.rosc { color: var(--clin-green); }
+
+  /* H's & T's checklist */
+  .cr-hts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .cr-ht-tile {
+    background: var(--clin-surface-alt);
+    border: 1.5px solid var(--clin-border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    cursor: pointer;
+    text-align: left;
+    color: var(--clin-text);
+    font-family: inherit;
+    transition: all 0.12s;
+  }
+  .cr-ht-tile:hover { border-color: var(--clin-blue); }
+  .cr-ht-tile.addressed {
+    background: #e6f5ea;
+    border-color: var(--clin-green);
+  }
+  .cr-ht-tile.addressed .label::before { content: '✓ '; color: var(--clin-green); font-weight: 700; }
+  .cr-ht-tile .label {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--clin-text);
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  .cr-ht-tile .detail {
+    font-size: 11px;
+    color: var(--clin-text-dim);
+    line-height: 1.35;
+  }
+
+  @media (max-width: 520px) {
+    .cr-vital-grid { grid-template-columns: 1fr; }
+    .cr-hts-grid { grid-template-columns: 1fr; }
+    .cr-rhythm-buttons { grid-template-columns: 1fr 1fr; }
+    .cr-vital-tile .value { font-size: 18px; }
+  }
 </style>
 </head>
 <body>
@@ -5086,6 +5318,51 @@ function rcIsArrestDrug(d) {
 }
 
 /* ============================================================
+   V2 VITALS — Expected ranges by patient + ETCO2 + H's & T's state
+============================================================ */
+// Expected vital ranges by age band — pulled from PALS/AHA references.
+const EXPECTED_VITALS = {
+  adult:   { hr: '60–100', rr: '12–20',  sbp: '90–140', dbp: '60–90', spo2: '≥ 94%', temp: '36–38 °C' },
+  // Pediatric tiers — Broselow weight maps to an age band that picks the right tier
+  neonate: { hr: '120–160', rr: '40–60', sbp: '60–90',  dbp: '30–60', spo2: '≥ 95% (post-ductal)', temp: '36.5–37.5 °C' },
+  infant:  { hr: '100–160', rr: '30–50', sbp: '70–100', dbp: '50–65', spo2: '≥ 94%', temp: '36.5–37.5 °C' },
+  toddler: { hr: '90–140',  rr: '24–40', sbp: '80–110', dbp: '50–70', spo2: '≥ 94%', temp: '36.5–37.5 °C' },
+  preschool:{hr: '80–120',  rr: '22–34', sbp: '90–110', dbp: '55–70', spo2: '≥ 94%', temp: '36.5–37.5 °C' },
+  school:  { hr: '70–110',  rr: '18–30', sbp: '95–120', dbp: '55–75', spo2: '≥ 94%', temp: '36.5–37.5 °C' },
+  adolescent:{hr:'60–100',  rr: '12–20', sbp:'100–130', dbp: '60–80', spo2: '≥ 94%', temp: '36–38 °C' }
+};
+
+// Pick the right pediatric tier from a Broselow zone or kg
+function rcPickPedsTier(zone, kg) {
+  if (zone === '3kg' || zone === '4kg' || zone === '5kg' || (kg && kg < 5)) return 'neonate';
+  if (zone === 'pink' || zone === 'red' || (kg && kg < 10)) return 'infant';
+  if (zone === 'purple' || zone === 'yellow' || (kg && kg < 14)) return 'toddler';
+  if (zone === 'white' || (kg && kg < 19)) return 'preschool';
+  if (zone === 'blue' || zone === 'orange' || (kg && kg < 30)) return 'school';
+  return 'adolescent';
+}
+
+function rcGetExpectedVitals() {
+  if (!cr.patient) return EXPECTED_VITALS.adult;
+  if (cr.patient.type === 'adult') return EXPECTED_VITALS.adult;
+  const tier = rcPickPedsTier(cr.patient.zone, cr.patient.weight);
+  return EXPECTED_VITALS[tier] || EXPECTED_VITALS.infant;
+}
+
+// H's & T's checklist state — tracks which causes have been addressed
+const crHTsAddressed = new Set();
+
+function crToggleHT(label) {
+  if (crHTsAddressed.has(label)) {
+    crHTsAddressed.delete(label);
+    ctLogEvent('H/T', `${label} — cleared`);
+  } else {
+    crHTsAddressed.add(label);
+    ctLogEvent('H/T', `${label} — addressed`);
+  }
+}
+
+/* ============================================================
    V2 CLINICAL MODALS — drug detail, defib energy ladder
 ============================================================ */
 function crShowDrugModal(drugName) {
@@ -5410,9 +5687,11 @@ function crNewPatient() {
   ctState.shockCount = 0;
   ctState.antiDysrhythmicGiven = false;
   ctState.dsdCued = false;
-  ctState.activeTab = 'code';
+  ctState.activeTab = 'meds';
+  crHTsAddressed.clear();
   cr.patient = null;
   cr.view = 'entry';
+  cr.medsView = 'full';
   ccState.weight = '';
   render();
 }
@@ -5684,7 +5963,8 @@ function rcRenderBottomBar() {
       ${tab('meds', 'Meds', 'M12 2v20M2 12h20')}
       ${tab('drip', 'Drips', 'M12 2C8 8 6 11 6 14a6 6 0 0 0 12 0c0-3-2-6-6-12z')}
       ${tab('equipment', 'Equip', 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z')}
-      ${tab('electricity', 'Electric', 'M13 2L3 14h7l-1 8 10-12h-7l1-8z')}
+      ${tab('electricity', 'Elec', 'M13 2L3 14h7l-1 8 10-12h-7l1-8z')}
+      ${tab('vitals', 'Vitals', 'M3 12h3l2-8 4 16 2-8h7')}
       ${tab('more', 'More', 'M6 12a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0z')}
     </div>
   `;
@@ -5699,8 +5979,122 @@ function rcRenderTabContent(kg, elec, drugs, a, drugButtons) {
   if (t === 'drip') return rcRenderTabDrip(kg);
   if (t === 'electricity') return rcRenderTabElectricity(kg, elec);
   if (t === 'equipment') return rcRenderTabEquipment(a);
+  if (t === 'vitals') return rcRenderTabVitals(kg);
   if (t === 'more') return rcRenderTabMore();
   return '';
+}
+
+function rcRenderTabVitals(kg) {
+  const v = rcGetExpectedVitals();
+  const patientLabel = cr.patient
+    ? (cr.patient.type === 'peds' ? `${cr.patient.zoneLabel || 'Pediatric'} · ${cr.patient.weight} kg` : `${cr.patient.lbs} lb · ${cr.patient.weight} kg adult`)
+    : '—';
+
+  // Rhythm log: extract all Rhythm events from the main log (latest first)
+  const rhythmEntries = ctState.log.filter(e => e.type === 'Rhythm' || e.type === 'ROSC' || e.type === 'Shock' || e.type === 'No Shock');
+
+  return `
+    <!-- Expected Vitals -->
+    <div class="cr-vitals-card">
+      <div class="cr-vitals-head">
+        <div class="ico">📊</div>
+        <div class="title">Expected Vitals</div>
+        <div class="meta">${escapeHtml(patientLabel)}</div>
+      </div>
+      <div class="cr-vitals-body">
+        <div class="cr-vital-grid">
+          <div class="cr-vital-tile"><div class="label">Heart Rate</div><div class="value">${v.hr}<span class="unit">bpm</span></div></div>
+          <div class="cr-vital-tile"><div class="label">Resp Rate</div><div class="value">${v.rr}<span class="unit">/min</span></div></div>
+          <div class="cr-vital-tile"><div class="label">Systolic BP</div><div class="value">${v.sbp}<span class="unit">mmHg</span></div></div>
+          <div class="cr-vital-tile"><div class="label">Diastolic BP</div><div class="value">${v.dbp}<span class="unit">mmHg</span></div></div>
+          <div class="cr-vital-tile"><div class="label">SpO₂</div><div class="value">${v.spo2}</div></div>
+          <div class="cr-vital-tile"><div class="label">Temp</div><div class="value">${v.temp}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ETCO2 Reference -->
+    <div class="cr-vitals-card">
+      <div class="cr-vitals-head">
+        <div class="ico">💨</div>
+        <div class="title">ETCO₂ Targets</div>
+        <div class="meta">Capnography</div>
+      </div>
+      <div class="cr-vitals-body">
+        <div class="cr-etco2-bands">
+          <div class="cr-etco2-band good">
+            <div class="cr-etco2-range">35–45 mmHg</div>
+            <div class="cr-etco2-desc"><strong>Normal</strong> · target post-ROSC ventilation</div>
+          </div>
+          <div class="cr-etco2-band warning">
+            <div class="cr-etco2-range">≥ 10 mmHg</div>
+            <div class="cr-etco2-desc"><strong>During CPR</strong> · adequate compressions</div>
+          </div>
+          <div class="cr-etco2-band danger">
+            <div class="cr-etco2-range">&lt; 10 mmHg</div>
+            <div class="cr-etco2-desc"><strong>Poor compressions</strong> or misplaced tube — re-check both</div>
+          </div>
+          <div class="cr-etco2-band rosc">
+            <div class="cr-etco2-range">Sudden ↑ ≥ 35</div>
+            <div class="cr-etco2-desc"><strong>Likely ROSC</strong> — pulse check at next rhythm pause</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rhythm Log -->
+    <div class="cr-vitals-card">
+      <div class="cr-vitals-head">
+        <div class="ico">💓</div>
+        <div class="title">Rhythm Log</div>
+        <div class="meta">${rhythmEntries.length} entries</div>
+      </div>
+      <div class="cr-vitals-body">
+        <div class="cr-rhythm-buttons">
+          <button class="cr-rhythm-btn-v2 shockable" data-vital-rhythm="VF/pVT">VF / pVT</button>
+          <button class="cr-rhythm-btn-v2 nonshockable" data-vital-rhythm="PEA">PEA</button>
+          <button class="cr-rhythm-btn-v2 nonshockable" data-vital-rhythm="Asystole">Asystole</button>
+          <button class="cr-rhythm-btn-v2 rosc" data-vital-rhythm="ROSC">✓ ROSC</button>
+        </div>
+        <div class="cr-rhythm-timeline">
+          ${rhythmEntries.length === 0
+            ? `<div class="cr-rhythm-empty">No rhythm changes yet — tap a button above to log</div>`
+            : rhythmEntries.slice(0, 50).map(e => {
+                const noteText = (e.note || '').toLowerCase();
+                let cls = '';
+                if (noteText.includes('vf') || noteText.includes('vt') || noteText.includes('pvt') || noteText.includes('shock')) cls = 'shockable';
+                else if (noteText.includes('pea') || noteText.includes('asys') || noteText.includes('no shock')) cls = 'nonshockable';
+                else if (noteText.includes('rosc')) cls = 'rosc';
+                return `
+                  <div class="cr-rhythm-entry">
+                    <div class="time">${escapeHtml(e.time || '')}</div>
+                    <div class="rhythm ${cls}">${escapeHtml(e.note || '')}</div>
+                  </div>`;
+              }).join('')
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- H's & T's -->
+    <div class="cr-vitals-card">
+      <div class="cr-vitals-head">
+        <div class="ico">⚠</div>
+        <div class="title">Reversible Causes · H's &amp; T's</div>
+        <div class="meta">${crHTsAddressed.size}/${CC_HS_TS.length} addressed</div>
+      </div>
+      <div class="cr-vitals-body">
+        <div class="cr-hts-grid">
+          ${CC_HS_TS.map(item => `
+            <button class="cr-ht-tile ${crHTsAddressed.has(item.label) ? 'addressed' : ''}" data-vital-ht="${escapeAttr(item.label)}">
+              <div class="label">${escapeHtml(item.label)}</div>
+              <div class="detail">${escapeHtml(item.detail)}</div>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function rcRenderTabMore() {
@@ -6254,6 +6648,24 @@ function rcBindDynamicElements() {
   document.querySelectorAll('[data-meds-view]').forEach(b => {
     b.addEventListener('click', () => {
       cr.medsView = b.dataset.medsView;
+      rcPartialRender();
+    });
+  });
+
+  // V2 Vitals tab — rhythm log buttons
+  document.querySelectorAll('[data-vital-rhythm]').forEach(b => {
+    b.addEventListener('click', () => {
+      const r = b.dataset.vitalRhythm;
+      if (r === 'ROSC') ctMarkROSC();
+      else ctMarkRhythm(r);
+      rcPartialRender();
+    });
+  });
+
+  // V2 Vitals tab — H's & T's checklist toggles
+  document.querySelectorAll('[data-vital-ht]').forEach(b => {
+    b.addEventListener('click', () => {
+      crToggleHT(b.dataset.vitalHt);
       rcPartialRender();
     });
   });
