@@ -4784,12 +4784,12 @@ function ccGetDrugs() {
         deliveryDose: `Push ${ccFmt(1*kg, 0)} mL IV/IO`,
         readyVol: `${ccFmt(1*kg, 0)} mL of 8.4% (1 mEq/mL)`,
         detail: '1 mEq/kg IV/IO. PEARL: Blind administration NOT recommended.', route: 'IV / IO', max: 'Per protocol' },
-      { rhythm: 'nonshockable', name: 'Calcium Chloride 10%', class: 'Electrolyte', indication: 'SUSPECTED hyperkalemia, CCB OD, hypocalcemia',
+      { rhythm: 'nonshockable', name: 'Calcium Chloride 10%', class: 'Electrolyte', indication: 'Hyperkalemia, CCB OD, BB OD, Whole Blood Admin',
         weightDose: '1 g',
         packageSpec: '10% (100 mg/mL) · 10 mL prefilled syringe',
         deliveryDose: 'Push 10 mL slow (large vessel)',
         readyVol: '10 mL of 10%',
-        detail: 'Slow IV/IO push. Caustic — large vessel preferred. PEARL: Blind administration NOT recommended.', route: 'IV / IO (central preferred)', max: 'Per protocol' },
+        detail: 'Slow IV/IO push. Caustic — large vessel preferred. PEARL: Blind administration NOT recommended.', route: 'IV / IO', max: 'Per protocol' },
 
       // ====== GNFR Drug Box — Non-Arrest Meds (only show when no rhythm tagged) ======
       { rhythm: 'non-arrest', name: 'Aspirin', class: 'Antiplatelet', indication: 'Suspected ACS / chest pain',
@@ -4949,7 +4949,7 @@ function ccGetDrugs() {
         deliveryDose: `Push ${ccFmt(bicarb, 0)} mL IV/IO (dilute for infants)`,
         readyVol: `${ccFmt(bicarb, 0)} mL of 8.4%`,
         detail: '1 mEq/kg IV/IO. PEARL: Blind admin NOT recommended. Infants <2y: use 4.2% or dilute.', route: 'IV / IO', max: 'Per protocol' },
-      { rhythm: 'nonshockable', name: 'Calcium Chloride 10%', class: 'Electrolyte', indication: 'SUSPECTED hyperkalemia, CCB toxicity, hypocalcemia',
+      { rhythm: 'nonshockable', name: 'Calcium Chloride 10%', class: 'Electrolyte', indication: 'Hyperkalemia, CCB OD, BB OD, Whole Blood Admin',
         weightDose: `${ccFmt(ca_mg, 0)} mg`,
         packageSpec: '10% (100 mg/mL) · 10 mL prefilled syringe',
         deliveryDose: `Push ${ccFmt(ca_mg/100, 1)} mL slow (large vessel)`,
