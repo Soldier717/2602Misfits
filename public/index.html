@@ -6303,58 +6303,8 @@ function renderRunCode() {
   return renderRunCodeHeader() + `
     <div class="content ct-wrap rc-tabbed">
       ${renderCRPatientBar()}
-      ${renderCPRControlBar()}
 
-      <div class="ct-audio-hint" id="ct-audio-hint">🔊 Tap <strong>Start CPR</strong> to enable audio cues. <strong>iPhone:</strong> turn OFF the silent/mute switch on the side of the phone, or audio will not play.</div>
-      <div class="ct-cue-banner" id="ct-cue-banner"></div>
-
-      <div class="rc-decision" id="rc-decision">
-        <div class="rc-decision-title">⚠ Rhythm Check — Decide Now</div>
-        <div class="rc-decision-buttons">
-          <button class="rc-decision-btn shock" id="rc-decision-shock">
-            <span class="big">⚡ SHOCK</span>
-            <span class="sub" id="rc-decision-joules">${elec.defib.primary}</span>
-            <span class="sub">VF / pVT</span>
-          </button>
-          <button class="rc-decision-btn noshock" id="rc-decision-noshock">
-            <span class="big">▶ NO SHOCK</span>
-            <span class="sub">Resume CPR</span>
-            <span class="sub">PEA / Asystole / ROSC</span>
-          </button>
-        </div>
-      </div>
       <div id="rc-tab-content">${rcRenderTabContent(kg, elec, drugs, a, drugButtons)}</div>
-
-        <details class="ct-settings" style="margin-bottom:20px;">
-          <summary style="cursor:pointer;font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);">Timer & Audio Settings</summary>
-          <div style="margin-top:14px;">
-            <div class="ct-toggle-row">
-              <div class="ct-toggle-label"><div class="main">Compression Metronome</div><div class="sub">${ctState.bpm} BPM clicks</div></div>
-              <div class="ct-toggle ${ctState.metronomeOn ? 'on' : ''}" data-setting="metronomeOn"></div>
-            </div>
-            <div class="ct-bpm-row">
-              <div class="ct-toggle-label" style="flex:1"><div class="main">Compression Rate</div><div class="sub">AHA: 100–120 BPM</div></div>
-              <input type="range" id="ct-bpm-slider" min="100" max="120" step="1" value="${ctState.bpm}">
-              <div class="ct-bpm-val" id="ct-bpm-val">${ctState.bpm} BPM</div>
-            </div>
-            <div class="ct-toggle-row">
-              <div class="ct-toggle-label"><div class="main">Breath Cues</div><div class="sub">Adult 6s · Peds 4s · Neo 3s</div></div>
-              <div class="ct-toggle ${ctState.advancedAirway ? 'on' : ''}" data-setting="advancedAirway"></div>
-            </div>
-            <div class="ct-toggle-row">
-              <div class="ct-toggle-label"><div class="main">Voice Cues</div><div class="sub">"Precharge monitor" · "Rhythm check"</div></div>
-              <div class="ct-toggle ${ctState.voiceOn ? 'on' : ''}" data-setting="voiceOn"></div>
-            </div>
-            <div class="ct-toggle-row">
-              <div class="ct-toggle-label"><div class="main">Tones</div><div class="sub">Beeps for cues & metronome</div></div>
-              <div class="ct-toggle ${ctState.toneOn ? 'on' : ''}" data-setting="toneOn"></div>
-            </div>
-            <div class="ct-toggle-row">
-              <div class="ct-toggle-label"><div class="main">Epi Reminder</div><div class="sub">Every ${Math.round(ctState.epiIntervalMs/60000*10)/10} min</div></div>
-              <div class="ct-toggle ${ctState.epiReminderOn ? 'on' : ''}" data-setting="epiReminderOn"></div>
-            </div>
-          </div>
-        </details>
     </div>
     ${rcRenderBottomBar()}
   `;
@@ -6369,7 +6319,7 @@ function renderRunCodeHeader() {
       <img src="/misfits-badge.png" alt="GNFR Misfits" class="header-badge" onclick="document.querySelector('.nav-item[data-page=home]').click()" title="Back to Command">
       <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> RCTG CALC</div>
       <h1 class="page-title">RCTG <span class="accent">Calc</span></h1>
-      <div class="page-meta">CPR timer + weight-based ACLS dosing in one tool</div>
+      <div class="page-meta">Weight-based ACLS dosing, protocols & electrical reference</div>
     </div>
   `;
 }
@@ -6463,13 +6413,11 @@ function renderCRPatientBar() {
   const summary = isPeds
     ? `${pill} ${p.weight} kg <span class="lt">· ${p.ageRange || (p.ageYears ? p.ageYears + ' yr' : 'Custom')}</span>`
     : `${p.lbs} lb / ${p.weight} kg <span class="lt">· ${p.height}${p.height === '—' ? ' Custom' : ' Ideal Weight'}</span>`;
-  const cprRunning = ctState.running;
   return `
     <div class="cr-patient-bar-v2 ${isPeds ? 'peds' : ''}">
       <div class="cr-pat-summary">${summary}</div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <button class="cr-new-pat-btn" id="cr-new-patient">⟲ New</button>
-        <button class="cr-cpr-toggle-btn ${cprRunning ? 'active' : ''}" id="cr-cpr-toggle">${cprRunning ? 'Stop CPR' : 'Start CPR'}</button>
       </div>
     </div>
   `;
@@ -6611,7 +6559,7 @@ function renderMoreLog() {
     </div>
     <div class="cr-log-section-head">Timeline</div>
     ${recent.length === 0
-      ? `<div style="color:var(--clin-text-muted);font-size:13px;text-align:center;padding:20px 0;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;">No events yet — Start CPR or tap a drug to begin logging</div>`
+      ? `<div style="color:var(--clin-text-muted);font-size:13px;text-align:center;padding:20px 0;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;">No events yet — tap a drug to begin logging</div>`
       : recent.map(e => `
         <div style="display:grid;grid-template-columns:60px 90px 1fr;gap:10px;padding:7px 0;border-bottom:1px solid var(--clin-surface-alt);font-size:12px;align-items:baseline;">
           <div style="font-family:'JetBrains Mono',monospace;color:var(--clin-blue);font-weight:700;">${escapeHtml(e.time || '')}</div>
