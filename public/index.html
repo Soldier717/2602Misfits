@@ -1578,21 +1578,24 @@
      V2 LIGHT CLINICAL THEME — scoped to body.on-coderun only
      Academy / dashboard pages keep the dark theme.
   ============================================================ */
+  /* Palette mirrors Greater Naples Fire Rescue (greaternaplesfire.org):
+     fire red #B71125 / dark red #AA0E21 / gold #FDCA68 / charcoal #383838 / cream #FDFAF4.
+     Var names kept (--clin-blue etc.) to avoid churn; --clin-blue is now the GNFR red primary. */
   :root {
-    --clin-bg: #f4f7fb;
+    --clin-bg: #fdfaf4;
     --clin-surface: #ffffff;
-    --clin-surface-alt: #eef2f7;
-    --clin-border: #d8e0ea;
-    --clin-text: #1a2230;
-    --clin-text-dim: #5a6878;
-    --clin-text-muted: #94a0b0;
-    --clin-blue: #1d3a6b;
-    --clin-blue-light: #d6e6f5;
+    --clin-surface-alt: #f4efe6;
+    --clin-border: #e6dfd2;
+    --clin-text: #383838;
+    --clin-text-dim: #54595f;
+    --clin-text-muted: #9a948a;
+    --clin-blue: #b71125;
+    --clin-blue-light: #f7dde1;
     --clin-pink: #fbe0e6;
-    --clin-red: #c8341a;
-    --clin-yellow: #f4c542;
+    --clin-red: #b71125;
+    --clin-yellow: #fdca68;
     --clin-green: #2fa84f;
-    --clin-shadow: 0 2px 8px rgba(20,40,80,0.08);
+    --clin-shadow: 0 2px 8px rgba(56,56,56,0.10);
   }
 
   body.on-coderun .main {
@@ -1660,7 +1663,7 @@
     border-color: var(--clin-border);
     color: var(--clin-text);
   }
-  body.on-coderun .main .cr-ibw-tile:hover { border-color: var(--clin-blue); background: #c5dbf0; }
+  body.on-coderun .main .cr-ibw-tile:hover { border-color: var(--clin-blue); background: #f1ccd1; }
   body.on-coderun .main .cr-ibw-lbs { color: var(--clin-text); }
   body.on-coderun .main .cr-ibw-kg { color: var(--clin-text); }
   body.on-coderun .main .cr-ibw-ht { color: var(--clin-text-dim); }
@@ -1679,7 +1682,7 @@
     background: var(--clin-blue);
     color: white;
   }
-  body.on-coderun .main .cr-manual-btn:hover { background: #15294d; }
+  body.on-coderun .main .cr-manual-btn:hover { background: #aa0e21; }
 
   /* Patient bar — V2 clinical look */
   body.on-coderun .main .cr-patient-bar-v2 {
@@ -1690,7 +1693,7 @@
     border-radius: 0;
     padding: 14px 18px;
     margin-bottom: 0;
-    box-shadow: 0 1px 2px rgba(20,40,80,0.05);
+    box-shadow: 0 1px 2px rgba(56,56,56,0.06);
   }
   body.on-coderun .main .cr-patient-bar-v2.peds {
     background: var(--clin-pink);
@@ -1719,7 +1722,7 @@
     border-color: var(--clin-red);
     color: white;
   }
-  .cr-cpr-toggle-btn.active:hover { background: #a82d17; border-color: #a82d17; }
+  .cr-cpr-toggle-btn.active:hover { background: #aa0e21; border-color: #aa0e21; }
 
   /* New Patient: subtler button in clinical theme */
   body.on-coderun .main .cr-new-pat-btn {
@@ -1833,10 +1836,10 @@
     font-size: 13px;
     letter-spacing: 0.08em;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(29,58,107,0.35);
+    box-shadow: 0 4px 12px rgba(183,17,37,0.35);
     text-transform: uppercase;
   }
-  .cpr-reset-btn:hover { background: #15294d; transform: scale(1.03); }
+  .cpr-reset-btn:hover { background: #aa0e21; transform: scale(1.03); }
   .cpr-time-cell {
     text-align: right;
     display: flex;
@@ -1886,14 +1889,14 @@
     margin-right: 4px;
     vertical-align: middle;
   }
-  .cr-pulse-mini.beat { opacity: 1; transform: scale(1.5); box-shadow: 0 0 10px rgba(200,52,26,0.6); }
+  .cr-pulse-mini.beat { opacity: 1; transform: scale(1.5); box-shadow: 0 0 10px rgba(183,17,37,0.6); }
 
   /* Bottom tab bar — clinical look */
   body.on-coderun .main .rc-tabbar {
     background: var(--clin-blue);
     color: white;
     border-top: none;
-    box-shadow: 0 -2px 8px rgba(20,40,80,0.15);
+    box-shadow: 0 -2px 8px rgba(56,56,56,0.15);
   }
   body.on-coderun .main .rc-tab-btn {
     background: none;
@@ -2003,7 +2006,7 @@
     color: white;
     border-color: var(--clin-blue);
   }
-  .cr-meds-action-btn.primary:hover { background: #15294d; }
+  .cr-meds-action-btn.primary:hover { background: #aa0e21; }
 
   .cr-meds-subtabs {
     display: grid;
@@ -2066,7 +2069,7 @@
     width: 100%;
   }
   .cr-drug-row.header {
-    background: #2a2e35;
+    background: #383838;
     color: white;
     font-family: 'Oswald', sans-serif;
     font-weight: 600;
@@ -2088,7 +2091,7 @@
     color: white;
   }
   .cr-drug-row.arrest .ind { color: rgba(255,255,255,0.85); }
-  .cr-drug-row.arrest:hover { background: #a82d17; }
+  .cr-drug-row.arrest:hover { background: #aa0e21; }
   .cr-drug-row:not(.header):not(.arrest):hover { background: var(--clin-blue-light); }
   .cr-drug-cell .name {
     font-family: 'Oswald', sans-serif;
@@ -2111,7 +2114,7 @@
     line-height: 1.3;
   }
   .cr-drug-cell.vol {
-    background: rgba(214,230,245,0.4);
+    background: rgba(247,221,225,0.55);
     padding: 6px 8px;
     border-radius: 4px;
     text-align: center;
@@ -2163,7 +2166,7 @@
   .cr-modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(20, 40, 80, 0.55);
+    background: rgba(56, 56, 56, 0.55);
     backdrop-filter: blur(3px);
     display: none;
     align-items: center;
@@ -2178,7 +2181,7 @@
   @keyframes cr-fade-in { from { opacity: 0; } to { opacity: 1; } }
 
   .cr-modal {
-    background: #2563eb;
+    background: #b71125;
     color: white;
     border-radius: 14px;
     width: 100%;
@@ -2255,7 +2258,7 @@
     flex: 1;
   }
   .cr-modal-prompt {
-    color: #facc15;
+    color: #fdca68;
     font-family: 'Inter', sans-serif;
     font-size: 15px;
     font-weight: 500;
@@ -2273,14 +2276,14 @@
   }
   .cr-modal-row:last-child { border-bottom: none; }
   .cr-modal-label {
-    color: #facc15;
+    color: #fdca68;
     font-family: 'Inter', sans-serif;
     font-weight: 700;
     font-size: 16px;
     letter-spacing: 0.02em;
   }
   .cr-modal-value {
-    color: #facc15;
+    color: #fdca68;
     font-family: 'Inter', sans-serif;
     font-weight: 500;
     font-size: 16px;
@@ -2300,7 +2303,7 @@
   .cr-route-toggle {
     display: inline-flex;
     background: white;
-    border: 2px solid #facc15;
+    border: 2px solid #fdca68;
     border-radius: 8px;
     overflow: hidden;
     align-self: start;
@@ -2315,11 +2318,11 @@
     letter-spacing: 0.06em;
     color: var(--clin-text);
     cursor: pointer;
-    border-right: 1px solid #facc15;
+    border-right: 1px solid #fdca68;
   }
   .cr-route-toggle button:last-child { border-right: none; }
   .cr-route-toggle button.active {
-    background: #facc15;
+    background: #fdca68;
     color: var(--clin-text);
   }
 
@@ -2389,7 +2392,7 @@
   }
   .cr-modal-btn:hover { filter: brightness(1.08); }
   .cr-modal-btn.requested {
-    background: #facc15;
+    background: #fdca68;
     color: var(--clin-text);
   }
   .cr-modal-btn.given {
@@ -2650,7 +2653,7 @@
   ============================================================ */
   .cr-meds-footnote {
     padding: 12px 14px;
-    background: rgba(244, 197, 66, 0.1);
+    background: rgba(253, 202, 104, 0.14);
     border-top: 1px solid var(--clin-border);
     font-size: 11px;
     color: var(--clin-text-dim);
@@ -4725,8 +4728,8 @@ function ccGetElectrical() {
     const shockLabel = ctState.shockCount === 0 ? '1st shock' : ctState.shockCount === 1 ? '2nd shock' : ctState.shockCount === 2 ? '3rd shock' : `${ctState.shockCount + 1}th shock`;
     return {
       defib: { primary: `${nextShockJ} J`, secondary: `${shockLabel} · biphasic`, detail: 'Pad placement: Anterior/Posterior. GNFR escalating: 120 J (1st) → 150 J (2nd) → 200 J (3rd+). Monophasic: 360 J. After 3rd shock + anti-dysrhythmic → consider DSD for refractory VF.' },
-      cardiovert: { primary: '100 J', secondary: 'narrow regular', detail: 'Narrow regular: 50–100 J | Narrow irregular: 120–200 J | Wide regular: 100 J | Polymorphic VT: use defib doses (unsynchronized).' },
-      pace: { primary: '60–80 BPM', secondary: 'increase mA until capture', detail: 'Start 60–80 BPM. Increase mA by 10 until electrical + mechanical capture. Typical 50–100 mA.' }
+      cardiovert: { primary: '70 J → 120 J → 150 J', secondary: 'escalating · sync', detail: 'Synchronized cardioversion — escalating energy ladder: 70 J (1st) → 120 J (2nd) → 150 J (3rd+). Sedate if conscious and time permits. Polymorphic VT: treat as VF with unsynchronized defib doses.' },
+      pace: { primary: '80 BPM', secondary: 'increase mA until capture', detail: 'Start 80 BPM. Increase mA by 10 until electrical + mechanical capture. Typical 50–100 mA.' }
     };
   } else if (band === 'pediatric') {
     const first_j = Math.min(2 * kg, 200);
