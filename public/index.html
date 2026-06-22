@@ -2149,6 +2149,19 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
+  /* Future-use (not currently carried) — dimmed & non-clickable */
+  .cr-drug-row.future { opacity: 0.45; cursor: default; }
+  .cr-drug-row.future .name { text-decoration: line-through; text-decoration-thickness: 1px; }
+  .cc-proto-item.future {
+    opacity: 0.5; cursor: default;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  }
+  .future-tag {
+    font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 10px;
+    letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
+    color: var(--clin-text-muted);
+    border: 1px solid var(--clin-border); border-radius: 3px; padding: 2px 6px;
+  }
 
   @media (max-width: 720px) {
     .cr-drug-row { grid-template-columns: 1.8fr 0.9fr 0.7fr 0.6fr; padding: 10px 10px; gap: 6px; }
@@ -7050,6 +7063,14 @@ function rcRenderProtocolView() {
   return `<div class="cc-proto-menu">${groups}</div>`;
 }
 
+// Drugs the unit does not currently stock — rendered dimmed, tagged "FUTURE USE",
+// and non-clickable (no dose modal) in both the Full List and By Protocol links.
+// Add the exact drug-list name(s) here to flag them.
+const CC_FUTURE_USE = new Set([
+  // e.g. 'Labetalol', 'Whole Blood', 'Levetiracetam (Keppra)',
+]);
+function crIsFutureUse(name) { return CC_FUTURE_USE.has(name); }
+
 function rcRenderProtocolDetail(p) {
   const sec = (label, items, warn) => `
     <div class="cc-proto-section${warn ? ' warn' : ''}">
@@ -7059,6 +7080,8 @@ function rcRenderProtocolDetail(p) {
           return `<button class="cc-proto-item jump" data-proto-sel="${escapeAttr(it.jump)}"><span>${escapeHtml(it.t)}</span><span class="arrow">→</span></button>`;
         }
         const match = warn ? null : crProtoDrugMatch(it);
+        if (match && crIsFutureUse(match))
+          return `<div class="cc-proto-item future"><span>${escapeHtml(it)}</span><span class="future-tag">FUTURE USE</span></div>`;
         return match
           ? `<button class="cc-proto-item drug" data-drug-name="${escapeAttr(match)}"><span>${escapeHtml(it)}</span><span class="arrow">›</span></button>`
           : `<div class="cc-proto-item">${escapeHtml(it)}</div>`;
@@ -7110,8 +7133,8 @@ function rcRenderTabMeds(kg, elec) {
     ? `<div class="cr-drug-empty">No drugs match this view</div>`
     : drugs.map(d => {
         const arrest = rcIsArrestDrug(d);
-        return `
-          <button class="cr-drug-row ${arrest ? 'arrest' : ''}" data-drug-name="${escapeAttr(d.name)}">
+        const future = crIsFutureUse(d.name);
+        const inner = `
             <div class="cr-drug-cell drug">
               <div class="name">${escapeHtml(d.name)}</div>
               <div class="ind">${escapeHtml(d.indication || '')}</div>
@@ -7119,11 +7142,13 @@ function rcRenderTabMeds(kg, elec) {
             <div class="cr-drug-cell conc">${escapeHtml(rcParseConc(d.packageSpec))}</div>
             <div class="cr-drug-cell vol">${escapeHtml(rcParseVol(d.deliveryDose || d.readyVol || d.weightDose))}</div>
             <div class="cr-drug-cell rt">
-              <span class="route-label">${escapeHtml(rcParseRoute(d.route))}</span>
-              <span class="arrow">›</span>
-            </div>
-          </button>
-        `;
+              ${future
+                ? '<span class="future-tag">FUTURE USE</span>'
+                : `<span class="route-label">${escapeHtml(rcParseRoute(d.route))}</span><span class="arrow">›</span>`}
+            </div>`;
+        return future
+          ? `<div class="cr-drug-row future">${inner}</div>`
+          : `<button class="cr-drug-row ${arrest ? 'arrest' : ''}" data-drug-name="${escapeAttr(d.name)}">${inner}</button>`;
       }).join('');
 
   return `
