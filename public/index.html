@@ -2798,7 +2798,7 @@
   .cr-elec-card-v2.cv { border-left-color: var(--clin-yellow); }
   .cr-elec-card-v2.pace { border-left-color: var(--clin-blue); }
   .cr-elec-card-v2.torsades { border-left-color: var(--clin-red); }
-  .cr-elec-torsades {
+  .cr-elec-title {
     font-family: 'Oswald', sans-serif;
     font-weight: 700;
     font-size: 28px;
@@ -2807,6 +2807,14 @@
     color: var(--clin-red);
     line-height: 1;
     margin-bottom: 6px;
+  }
+  .cr-elec-title .sub {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--clin-text-dim);
+    margin-top: 4px;
   }
   .cr-elec-info .label {
     font-family: 'JetBrains Mono', monospace;
@@ -7250,7 +7258,7 @@ function rcRenderTabElectricity(kg, elec) {
         <div class="cr-elec-stack">
           <div class="cr-elec-card-v2 defib">
             <div class="cr-elec-info">
-              <div class="label">Defibrillation (VF / pVT)</div>
+              <div class="cr-elec-title">Defibrillation<span class="sub">VF / pVT</span></div>
               <div class="primary">${escapeHtml(elec.defib.primary)}</div>
               <div class="secondary">${escapeHtml(elec.defib.secondary)}</div>
               <div class="detail">${escapeHtml(elec.defib.detail || '')}</div>
@@ -7259,7 +7267,7 @@ function rcRenderTabElectricity(kg, elec) {
           </div>
           <div class="cr-elec-card-v2 cv">
             <div class="cr-elec-info">
-              <div class="label">Synchronized Cardioversion</div>
+              <div class="cr-elec-title">Cardioversion<span class="sub">Synchronized</span></div>
               <div class="primary">${escapeHtml(elec.cardiovert.primary)}</div>
               <div class="secondary">${escapeHtml(elec.cardiovert.secondary)}</div>
               <div class="detail">${escapeHtml(elec.cardiovert.detail || '')}</div>
@@ -7268,8 +7276,7 @@ function rcRenderTabElectricity(kg, elec) {
           </div>
           <div class="cr-elec-card-v2 torsades">
             <div class="cr-elec-info">
-              <div class="cr-elec-torsades">Torsades</div>
-              <div class="label">Unsynchronized Cardioversion</div>
+              <div class="cr-elec-title">Torsades<span class="sub">Unsynchronized Cardioversion</span></div>
               <div class="primary">200 J</div>
               <div class="secondary">Polymorphic VT · unsynchronized (defib dose)</div>
               <div class="detail">Unstable polymorphic VT / Torsades: shock UNsynchronized at defibrillation dose — do not attempt to sync on a polymorphic rhythm. Give Magnesium Sulfate 2 g IV/IO. Peds: 2 J/kg → 4 J/kg.</div>
@@ -7277,7 +7284,7 @@ function rcRenderTabElectricity(kg, elec) {
           </div>
           <div class="cr-elec-card-v2 pace">
             <div class="cr-elec-info">
-              <div class="label">Transcutaneous Pacing</div>
+              <div class="cr-elec-title">Pacing<span class="sub">Transcutaneous</span></div>
               <div class="primary">${escapeHtml(elec.pace.primary)}</div>
               <div class="secondary">${escapeHtml(elec.pace.secondary)}</div>
               <div class="detail">${escapeHtml(elec.pace.detail || '')}</div>
