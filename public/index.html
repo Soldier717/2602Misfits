@@ -2159,6 +2159,64 @@
   }
 
   /* ============================================================
+     BY PROTOCOL — selector menu + structured detail
+  ============================================================ */
+  .cc-proto-menu { padding: 12px; display: flex; flex-direction: column; gap: 16px; }
+  .cc-proto-group { display: flex; flex-direction: column; gap: 6px; }
+  .cc-proto-cat-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--clin-text-muted); padding: 0 2px 2px;
+  }
+  .cc-proto-btn {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    background: var(--clin-surface); border: 1px solid var(--clin-border);
+    border-left: 3px solid var(--clin-blue); border-radius: 6px;
+    padding: 13px 14px; cursor: pointer; text-align: left; width: 100%;
+    font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 14px;
+    letter-spacing: 0.02em; color: var(--clin-text); transition: all 0.12s;
+  }
+  .cc-proto-btn:hover { background: var(--clin-blue-light); border-left-color: var(--clin-red); }
+  .cc-proto-btn .arrow { color: var(--clin-text-muted); font-size: 18px; }
+
+  .cc-proto-back {
+    display: inline-flex; align-items: center; gap: 4px; margin: 12px 12px 0;
+    background: none; border: none; cursor: pointer;
+    font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 13px;
+    letter-spacing: 0.04em; text-transform: uppercase; color: var(--clin-blue);
+  }
+  .cc-proto-back:hover { color: var(--clin-red); }
+  .cc-proto-detail { padding: 4px 12px 14px; display: flex; flex-direction: column; gap: 14px; }
+  .cc-proto-section { display: flex; flex-direction: column; gap: 6px; }
+  .cc-proto-section-label {
+    font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 12px;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--clin-blue);
+    border-bottom: 1px solid var(--clin-border); padding-bottom: 4px;
+  }
+  .cc-proto-section.warn .cc-proto-section-label { color: var(--clin-red); }
+  .cc-proto-item {
+    background: var(--clin-surface-alt); border-radius: 5px; padding: 10px 12px;
+    font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--clin-text);
+    line-height: 1.35;
+  }
+  .cc-proto-section.warn .cc-proto-item { background: #fde8e8; }
+  button.cc-proto-item.drug {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    width: 100%; text-align: left; cursor: pointer; border: 1px solid var(--clin-border);
+    border-left: 3px solid var(--clin-red); font-weight: 600;
+  }
+  button.cc-proto-item.drug:hover { background: var(--clin-blue-light); }
+  button.cc-proto-item.drug .arrow { color: var(--clin-red); font-size: 16px; flex-shrink: 0; }
+
+  .cc-proto-memory { padding: 8px 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+  .cc-mem-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 9px 12px; background: var(--clin-surface-alt); border-radius: 5px;
+    border-left: 3px solid var(--clin-yellow);
+  }
+  .cc-mem-drug { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: 13px; color: var(--clin-text); }
+  .cc-mem-dose { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; color: var(--clin-red); white-space: nowrap; }
+
+  /* ============================================================
      V2 CLINICAL MODALS — Drug detail, Defib energy ladder
   ============================================================ */
   .cr-modal-backdrop {
@@ -5417,6 +5475,7 @@ const cr = {
   view: 'entry',     // 'entry' | 'entry-adult' | 'entry-peds' | 'dose'
   patient: null,     // { type, weight, lbs?, height?, zone?, zoneLabel?, zoneColor?, zoneTextColor?, ageRange?, weightRange?, summary }
   medsView: 'full',  // 'full' | 'protocol' — Meds tab sub-view
+  protocolSel: null, // null (menu) | protocol id — By Protocol drill-in
   moreView: 'log',   // 'log' | 'vitals' | 'etco2' | 'hts' — More tab sub-view
   modal: null,       // null | { type: 'drug', drug } | { type: 'defib', selectedIdx }
   drugRoute: 'IV',   // 'IV' | 'IO' — current route toggle in drug modal
@@ -5932,6 +5991,7 @@ function crNewPatient() {
   cr.patient = null;
   cr.view = 'entry';
   cr.medsView = 'full';
+  cr.protocolSel = null;
   cr.moreView = 'log';
   ccState.weight = '';
   render();
@@ -6451,19 +6511,203 @@ function rcRenderTabCode(kg, elec) {
   `;
 }
 
+// ============================================================
+// BY PROTOCOL — structured treatment algorithms (GNFR 26-02)
+// Adult-oriented reference. Tapping a drug line opens the
+// weight-based dose modal when a matching drug exists.
+// ============================================================
+const CC_PROTOCOLS = [
+  { cat: 'Cardiac Arrest', list: [
+    { id: 'vfvt', name: 'VF / Pulseless VT', banner: 'Ventricular Fibrillation & VT without a Pulse', sections: [
+      { label: 'Primary Treatment', items: ['CPR','Defibrillation','Epinephrine 1 mg IV/IO every 3–5 min','Amiodarone 300 mg IV/IO after 3rd shock','Amiodarone 150 mg IV/IO repeat dose'] },
+      { label: 'Alternative', items: ['Lidocaine 1–1.5 mg/kg IV/IO'] },
+      { label: 'Special Circumstances', items: ['Magnesium Sulfate 2 g IV/IO (Torsades)','Calcium Chloride 1 g IV/IO (Hyperkalemia)','Sodium Bicarbonate 50–75 mEq IV/IO (Hyperkalemia, TCA OD, severe acidosis)'] },
+    ]},
+    { id: 'peaasys', name: 'PEA / Asystole', banner: 'Pulseless Electrical Activity / Asystole', sections: [
+      { label: 'Primary Treatment', items: ['CPR','Epinephrine 1 mg IV/IO every 3–5 min'] },
+      { label: 'Consider (reversible causes)', items: ['D10W (hypoglycemia)','Calcium Chloride (hyperkalemia)','Sodium Bicarbonate (hyperkalemia, TCA OD)'] },
+    ]},
+  ]},
+  { cat: 'Airway / Breathing', list: [
+    { id: 'asthma', name: 'Asthma', banner: 'Asthma', sections: [
+      { label: 'Mild – Moderate', items: ['Albuterol 2.5 mg Neb','Dexamethasone 10 mg PO'] },
+      { label: 'Moderate – Severe', items: ['Albuterol 2.5 mg Neb','Solu-Medrol 125 mg IV/IO','Epinephrine 0.5 mg IM'] },
+    ]},
+    { id: 'copd', name: 'COPD Exacerbation', banner: 'COPD Exacerbation', sections: [
+      { label: 'Treatment', items: ['Albuterol 2.5 mg Neb','Solu-Medrol 125 mg IV/IO','CPAP as indicated'] },
+    ]},
+    { id: 'anaphylaxis', name: 'Anaphylaxis', banner: 'Anaphylaxis', sections: [
+      { label: 'First-Line', items: ['Epinephrine 0.5 mg IM'] },
+      { label: 'Adjuncts', items: ['Diphenhydramine 50 mg IV/IO','Solu-Medrol 125 mg IV/IO','Albuterol 2.5 mg Neb if wheezing'] },
+    ]},
+    { id: 'croup', name: 'Croup', banner: 'Croup', sections: [
+      { label: 'Treatment', items: ['Dexamethasone 10 mg PO'] },
+    ]},
+  ]},
+  { cat: 'Cardiac', list: [
+    { id: 'brady', name: 'Bradycardia', banner: 'Symptomatic Bradycardia', sections: [
+      { label: 'Treatment', items: ['Atropine 1 mg IV/IO','Repeat every 3–5 minutes','Maximum dose 3 mg'] },
+      { label: 'If Unstable', items: ['Transcutaneous Pacing (TCP)','Vasopressor infusion per protocol'] },
+    ]},
+    { id: 'tachy', name: 'Tachycardia', banner: 'Tachycardia', sections: [
+      { label: 'Stable Narrow Regular SVT', items: ['Adenosine 6 mg rapid IV push','Adenosine 12 mg rapid IV push','Repeat 12 mg if needed'] },
+      { label: 'Stable AFib / AFlutter w/ RVR (not WPW)', items: ['Diltiazem 0.25 mg/kg IV'] },
+      { label: 'Torsades — With Pulse', items: ['Magnesium Sulfate 2 g IV'] },
+      { label: 'Torsades — Without Pulse', items: ['Defibrillation','Magnesium Sulfate 2 g IV/IO','→ Cardiac Arrest Protocol'] },
+    ]},
+    { id: 'acs', name: 'Chest Pain / ACS', banner: 'Chest Pain / ACS', sections: [
+      { label: 'Treatment', items: ['Aspirin 324 mg PO','Nitroglycerin 0.4 mg SL every 5 min as indicated','Obtain & monitor 12-Lead ECG'] },
+    ], warn: { label: 'Nitro Contraindications', items: ['SBP < 100','Recent PDE-5 inhibitor use','Suspected RV infarct'] } },
+    { id: 'chf', name: 'CHF / Pulmonary Edema', banner: 'CHF / Pulmonary Edema', sections: [
+      { label: 'Primary Treatment', items: ['CPAP','Nitroglycerin 0.4 mg SL ×3 initially'] },
+      { label: 'Severe Pulmonary Edema', items: ['Aggressive Nitroglycerin therapy','CPAP'] },
+    ]},
+  ]},
+  { cat: 'Metabolic', list: [
+    { id: 'hypoglycemia', name: 'Hypoglycemia', banner: 'Hypoglycemia', sections: [
+      { label: 'Conscious', items: ['Oral Glucose 15 g PO'] },
+      { label: 'Unconscious', items: ['D10W 25 g IV/IO'] },
+    ]},
+    { id: 'hyperk', name: 'Hyperkalemia', banner: 'Hyperkalemia', sections: [
+      { label: 'Medications', items: ['Calcium Chloride 1 g IV/IO','Sodium Bicarbonate 50–75 mEq IV/IO','Albuterol Neb'] },
+      { label: 'Monitor', items: ['ECG changes','Hemodynamic stability'] },
+    ]},
+  ]},
+  { cat: 'Overdose / Tox', list: [
+    { id: 'opioid', name: 'Opioid Overdose', banner: 'Opioid Overdose', sections: [
+      { label: 'Treatment', items: ['Naloxone 0.4–2 mg IV/IO/IN','Airway management','BVM as needed'] },
+    ]},
+    { id: 'tca', name: 'TCA Overdose', banner: 'TCA Overdose', sections: [
+      { label: 'Treatment', items: ['Sodium Bicarbonate 50–75 mEq IV/IO'] },
+    ]},
+    { id: 'ccbod', name: 'Calcium Channel Blocker OD', banner: 'Calcium Channel Blocker Overdose', sections: [
+      { label: 'Treatment', items: ['Calcium Chloride 1 g IV/IO'] },
+    ]},
+  ]},
+  { cat: 'Trauma', list: [
+    { id: 'hemorrhage', name: 'Significant Hemorrhage', banner: 'Significant Hemorrhage', sections: [
+      { label: 'Treatment', items: ['TXA 1 g IV over 10 minutes','Blood products if available','Hemorrhage control'] },
+    ]},
+    { id: 'traumaarrest', name: 'Traumatic Arrest', banner: 'Traumatic Arrest', sections: [
+      { label: 'Consider Reversible Causes', items: ['Massive Hemorrhage','Tension Pneumothorax','Cardiac Tamponade','Hyperkalemia','Acidosis'] },
+      { label: 'Medications', items: ['TXA','Calcium Chloride','Sodium Bicarbonate'] },
+    ]},
+  ]},
+  { cat: 'Reference', list: [
+    { id: 'memory', name: 'Critical Med Memory List', banner: 'Critical Medication Memory List', memory: [
+      ['Epinephrine — Arrest','1 mg'],['Epinephrine — IM','0.5 mg'],['Adenosine','6 → 12 → 12 mg'],['Amiodarone','300 → 150 mg'],['Magnesium','2 g'],['Aspirin','324 mg'],['Nitroglycerin','0.4 mg'],['Albuterol','2.5 mg'],['Solu-Medrol','125 mg'],['D10W','25 g'],['Naloxone','0.4–2 mg'],['Atropine','1 mg'],['Calcium Chloride','1 g'],['Sodium Bicarbonate','50–75 mEq'],['TXA','1 g'],
+    ]},
+  ]},
+];
+
+function crFindProto(id) {
+  for (const c of CC_PROTOCOLS) { const p = c.list.find(x => x.id === id); if (p) return p; }
+  return null;
+}
+
+// Map a protocol line to a canonical drug name in the current patient's list (or null).
+function crProtoDrugMatch(text) {
+  const t = text.toLowerCase();
+  const KEY = [
+    ['epinephrine 0.5 mg', 'Epinephrine 1:1,000'],
+    ['epinephrine 1 mg', 'Epinephrine 1:10,000'],
+    ['epinephrine', 'Epinephrine'],
+    ['amiodarone', 'Amiodarone'],
+    ['lidocaine', 'Lidocaine'],
+    ['magnesium', 'Magnesium Sulfate'],
+    ['calcium chloride', 'Calcium Chloride 10%'],
+    ['sodium bicarbonate', 'Sodium Bicarbonate'],
+    ['albuterol', 'Albuterol'],
+    ['dexamethasone', 'Dexamethasone'],
+    ['solu-medrol', 'Solu-Medrol'],
+    ['diphenhydramine', 'Diphenhydramine'],
+    ['atropine', 'Atropine'],
+    ['adenosine', 'Adenosine (Adenocard)'],
+    ['diltiazem', 'Diltiazem'],
+    ['aspirin', 'Aspirin'],
+    ['nitroglycerin', 'Nitroglycerine'],
+    ['naloxone', 'Naloxone (Narcan)'],
+    ['oral glucose', 'Oral Glucose'],
+    ['d10w', 'D10W'],
+    ['txa', 'Tranexamic Acid (TXA)'],
+    ['tranexamic', 'Tranexamic Acid (TXA)'],
+  ];
+  const drugs = ccGetDrugs();
+  for (const [kw, name] of KEY) {
+    if (t.includes(kw)) {
+      const exact = drugs.find(d => d.name === name);
+      if (exact) return exact.name;
+      const first = name.split(/[ (]/)[0].toLowerCase();
+      const partial = drugs.find(d => d.name.toLowerCase().includes(first));
+      return partial ? partial.name : null;
+    }
+  }
+  return null;
+}
+
+function rcRenderProtocolView() {
+  if (cr.protocolSel) {
+    const p = crFindProto(cr.protocolSel);
+    if (p) return rcRenderProtocolDetail(p);
+    cr.protocolSel = null;
+  }
+  const groups = CC_PROTOCOLS.map(c => `
+    <div class="cc-proto-group">
+      <div class="cc-proto-cat-label">${escapeHtml(c.cat)}</div>
+      ${c.list.map(p => `<button class="cc-proto-btn" data-proto-sel="${escapeAttr(p.id)}"><span>${escapeHtml(p.name)}</span><span class="arrow">›</span></button>`).join('')}
+    </div>
+  `).join('');
+  return `<div class="cc-proto-menu">${groups}</div>`;
+}
+
+function rcRenderProtocolDetail(p) {
+  const sec = (label, items, warn) => `
+    <div class="cc-proto-section${warn ? ' warn' : ''}">
+      <div class="cc-proto-section-label">${warn ? '⚠ ' : ''}${escapeHtml(label)}</div>
+      ${items.map(it => {
+        const match = warn ? null : crProtoDrugMatch(it);
+        return match
+          ? `<button class="cc-proto-item drug" data-drug-name="${escapeAttr(match)}"><span>${escapeHtml(it)}</span><span class="arrow">›</span></button>`
+          : `<div class="cc-proto-item">${escapeHtml(it)}</div>`;
+      }).join('')}
+    </div>`;
+  let body;
+  if (p.memory) {
+    body = `<div class="cc-proto-memory">${p.memory.map(([d, dose]) => `<div class="cc-mem-row"><span class="cc-mem-drug">${escapeHtml(d)}</span><span class="cc-mem-dose">${escapeHtml(dose)}</span></div>`).join('')}</div>`;
+  } else {
+    body = `<div class="cc-proto-detail">${(p.sections || []).map(s => sec(s.label, s.items, false)).join('')}${p.warn ? sec(p.warn.label, p.warn.items, true) : ''}</div>`;
+  }
+  return `
+    <button class="cc-proto-back" data-proto-back>‹ All Protocols</button>
+    <div class="cr-meds-banner"><span class="ico">▣</span><span>${escapeHtml(p.banner || p.name)}</span></div>
+    ${body}
+  `;
+}
+
 function rcRenderTabMeds(kg, elec) {
   // V2 tabular layout — Drug | Conc | Vol | Rt rows
-  // Sub-views: 'full' (all meds alphabetical) | 'protocol' (cardiac arrest only)
-  const allDrugs = ccGetDrugs();
+  // Sub-views: 'full' (all meds alphabetical) | 'protocol' (treatment algorithms)
   const view = cr.medsView || 'full';
-  const drugs = view === 'protocol'
-    ? allDrugs.filter(rcIsArrestDrug)
-    : [...allDrugs].sort((a, b) => a.name.localeCompare(b.name));
 
-  const protocolBanner = view === 'protocol'
-    ? `<div class="cr-meds-banner"><span class="ico">⚡</span><span>VENTRICULAR FIBRILLATION &amp; VT without a Pulse</span></div>`
-    : '';
+  // By Protocol — structured treatment algorithms (select → drill in)
+  if (view === 'protocol') {
+    return `
+    <div class="cr-meds-card">
+      <div class="cr-meds-header">
+        <div class="cr-meds-icon">📋</div>
+        <div class="cr-meds-title">Protocols · ${ccFmt(kg, 1)} kg</div>
+      </div>
+      <div class="cr-meds-subtabs">
+        <button class="cr-meds-subtab" data-meds-view="full">Full List</button>
+        <button class="cr-meds-subtab active" data-meds-view="protocol">By Protocol</button>
+      </div>
+      ${rcRenderProtocolView()}
+    </div>
+    `;
+  }
 
+  // Full List — all meds, alphabetical
+  const drugs = [...ccGetDrugs()].sort((a, b) => a.name.localeCompare(b.name));
   const rows = drugs.length === 0
     ? `<div class="cr-drug-empty">No drugs match this view</div>`
     : drugs.map(d => {
@@ -6495,10 +6739,9 @@ function rcRenderTabMeds(kg, elec) {
         </div>
       </div>
       <div class="cr-meds-subtabs">
-        <button class="cr-meds-subtab ${view==='full'?'active':''}" data-meds-view="full">Full List</button>
-        <button class="cr-meds-subtab ${view==='protocol'?'active':''}" data-meds-view="protocol">By Protocol</button>
+        <button class="cr-meds-subtab active" data-meds-view="full">Full List</button>
+        <button class="cr-meds-subtab" data-meds-view="protocol">By Protocol</button>
       </div>
-      ${protocolBanner}
       <div class="cr-drug-table">
         <div class="cr-drug-row header">
           <div>Drug</div>
@@ -6766,8 +7009,22 @@ function rcBindDynamicElements() {
   document.querySelectorAll('[data-meds-view]').forEach(b => {
     b.addEventListener('click', () => {
       cr.medsView = b.dataset.medsView;
+      cr.protocolSel = null;
       rcPartialRender();
     });
+  });
+
+  // By Protocol — select a protocol / back to menu
+  document.querySelectorAll('[data-proto-sel]').forEach(b => {
+    b.addEventListener('click', () => {
+      cr.protocolSel = b.dataset.protoSel;
+      rcPartialRender();
+    });
+  });
+  const protoBack = document.querySelector('[data-proto-back]');
+  if (protoBack) protoBack.addEventListener('click', () => {
+    cr.protocolSel = null;
+    rcPartialRender();
   });
 
   // V2 More sub-tabs (Pt. Log / Target Vitals / EtCO₂ / H's & T's)
