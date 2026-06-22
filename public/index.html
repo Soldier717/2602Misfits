@@ -2222,6 +2222,15 @@
     background: rgba(253, 202, 104, 0.18); border-left: 3px solid var(--clin-yellow);
     font-family: 'Inter', sans-serif; font-size: 12.5px; line-height: 1.4; color: var(--clin-text);
   }
+  .cc-proto-pearl {
+    padding: 9px 12px; border-radius: 5px; background: rgba(183, 17, 37, 0.06);
+    border-left: 3px solid var(--clin-red); font-family: 'Inter', sans-serif;
+    font-size: 12.5px; font-style: italic; line-height: 1.4; color: var(--clin-text);
+  }
+  .cc-proto-pearl .lbl {
+    font-style: normal; font-family: 'Oswald', sans-serif; font-weight: 700;
+    font-size: 11px; letter-spacing: 0.08em; color: var(--clin-red); margin-right: 6px;
+  }
 
   .cc-proto-memory { padding: 8px 12px 14px; display: flex; flex-direction: column; gap: 4px; }
   .cc-mem-row {
@@ -6546,13 +6555,25 @@ function rcRenderTabCode(kg, elec) {
 const CC_PROTOCOLS = [
   { cat: 'Cardiac Arrest', list: [
     { id: 'vfvt', name: 'VF / Pulseless VT', banner: 'Ventricular Fibrillation & VT without a Pulse', sections: [
-      { label: 'Primary Treatment', items: ['CPR','Defibrillation','Amiodarone 300 mg IV/IO (1st dose)','Amiodarone 150 mg IV/IO (2nd dose)','Epinephrine 1 mg IV/IO every 3–5 min'] },
-      { label: 'Alternative', items: ['Lidocaine 1–1.5 mg/kg IV/IO'] },
-      { label: 'Special Circumstances', items: ['Magnesium Sulfate 2 g IV/IO (Torsades)','Calcium Chloride 1 g IV/IO (Hyperkalemia)','Sodium Bicarbonate 50–75 mEq IV/IO (Hyperkalemia, TCA OD, severe acidosis)'] },
+      { label: 'Primary Treatment', items: ['CPR','Defibrillation — Anterior/Posterior placement (Handtevy for peds energy)','Advanced airway management as needed','Epinephrine 0.5–1 mg IV/IO every 3–5 min (max 3 mg) · Peds 0.01 mg/kg'] },
+      { label: 'Anti-Dysrhythmic — choose one', items: ['Amiodarone 300 mg IV/IO (1st) → 150 mg (2nd) · Peds 5 mg/kg, up to 3 doses (≤ adult total)','Lidocaine 1.5 mg/kg IV/IO (1st) → 0.5 mg/kg (2nd) · Peds 1 mg/kg','Magnesium Sulfate 2 g IV/IO — torsades or refractory VT · Peds 50 mg/kg (max 2 g)'] },
+      { label: 'Refractory VF (Adult)', items: ['Dual Sequential Defibrillation (DSD) after 3rd shock — shocks < 1 sec apart'] },
+      { label: 'Suspected Hyperkalemia', items: ['Calcium Chloride 1 g IV/IO'] },
+    ], pearls: [
+      'Shockable arrests benefit from defibrillation and anti-dysrhythmic BEFORE epinephrine',
+      'Refractory VF = defibrillated ≥ 3× and 1st anti-dysrhythmic given, still in VF',
+      'Lidocaine preferred when arrest is toxicology-related',
+      'Blind administration of sodium bicarb or calcium is NOT recommended',
+      'Naloxone not indicated for cardiac arrest',
     ]},
     { id: 'peaasys', name: 'PEA / Asystole', banner: 'Pulseless Electrical Activity / Asystole', sections: [
-      { label: 'Primary Treatment', items: ['CPR','Epinephrine 1 mg IV/IO every 3–5 min'] },
-      { label: 'Consider (reversible causes)', items: ['D10W (hypoglycemia)','Calcium Chloride (hyperkalemia)','Sodium Bicarbonate (hyperkalemia, TCA OD)'] },
+      { label: 'Primary Treatment', items: ['CPR','Advanced airway management as needed','Epinephrine 0.5–1 mg IV/IO every 3–5 min (max 3 mg) · Peds 0.01 mg/kg'] },
+      { label: 'Identify & Treat Reversible Causes', items: ['Work the H\'s & T\'s — consider pseudo-PEA','D10W for hypoglycemia'] },
+      { label: 'Suspected Hyperkalemia', items: ['Calcium Chloride 1 g IV/IO'] },
+    ], pearls: [
+      'If POCUS is available, scan all PEA rhythms to identify pseudo-PEA',
+      'Blind administration of sodium bicarb or calcium is NOT recommended',
+      'Naloxone not indicated for cardiac arrest',
     ]},
   ]},
   { cat: 'Airway / Breathing', list: [
@@ -6622,7 +6643,7 @@ const CC_PROTOCOLS = [
   ]},
   { cat: 'Reference', list: [
     { id: 'memory', name: 'Critical Med Memory List', banner: 'Critical Medication Memory List', memory: [
-      ['Epinephrine — Arrest','1 mg'],['Epinephrine — IM','0.5 mg'],['Adenosine','6 → 12 → 12 mg'],['Amiodarone','300 → 150 mg'],['Magnesium','2 g'],['Aspirin','324 mg'],['Nitroglycerin','0.4 mg'],['Albuterol','2.5 mg'],['Solu-Medrol','125 mg'],['D10W','25 g'],['Naloxone','0.4–2 mg'],['Atropine','1 mg'],['Calcium Chloride','1 g'],['Sodium Bicarbonate','50–75 mEq'],['TXA','1 g'],
+      ['Epinephrine — Arrest','0.5–1 mg'],['Epinephrine — IM','0.5 mg'],['Adenosine','6 → 12 → 12 mg'],['Amiodarone','300 → 150 mg'],['Magnesium','2 g'],['Aspirin','324 mg'],['Nitroglycerin','0.4 mg'],['Albuterol','2.5 mg'],['Solu-Medrol','125 mg'],['D10W','25 g'],['Naloxone','0.4–2 mg'],['Atropine','1 mg'],['Calcium Chloride','1 g'],['Sodium Bicarbonate','50–75 mEq'],['TXA','1 g'],
     ]},
   ]},
 ];
@@ -6702,13 +6723,14 @@ function rcRenderProtocolDetail(p) {
       }).join('')}
     </div>`;
   const pedsNote = (cr.patient && cr.patient.type === 'peds')
-    ? `<div class="cc-proto-peds-note">⚠ Pediatric patient — listed doses are <strong>adult</strong> references. Tap a drug for the weight-based pediatric dose.</div>`
+    ? `<div class="cc-proto-peds-note">⚠ Pediatric patient — tap a drug for the weight-based pediatric dose. Inline doses are reference values.</div>`
     : '';
   let body;
   if (p.memory) {
     body = `<div class="cc-proto-memory">${p.memory.map(([d, dose]) => `<div class="cc-mem-row"><span class="cc-mem-drug">${escapeHtml(d)}</span><span class="cc-mem-dose">${escapeHtml(dose)}</span></div>`).join('')}</div>`;
   } else {
-    body = `<div class="cc-proto-detail">${(p.sections || []).map(s => sec(s.label, s.items, false)).join('')}${p.warn ? sec(p.warn.label, p.warn.items, true) : ''}</div>`;
+    const pearls = (p.pearls || []).map(t => `<div class="cc-proto-pearl"><span class="lbl">PEARL</span> ${escapeHtml(t)}</div>`).join('');
+    body = `<div class="cc-proto-detail">${(p.sections || []).map(s => sec(s.label, s.items, false)).join('')}${p.warn ? sec(p.warn.label, p.warn.items, true) : ''}${pearls}</div>`;
   }
   return `
     <button class="cc-proto-back" data-proto-back>‹ All Protocols</button>
