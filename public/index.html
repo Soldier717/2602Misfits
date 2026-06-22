@@ -6635,14 +6635,78 @@ const CC_PROTOCOLS = [
     ]},
   ]},
   { cat: 'Overdose / Tox', list: [
-    { id: 'opioid', name: 'Opioid Overdose', banner: 'Opioid Overdose', sections: [
-      { label: 'Treatment', items: ['Naloxone 0.4–2 mg IV/IO/IN','Airway management','BVM as needed'] },
+    { id: 'opioid', name: 'Opioid Overdose', banner: 'Opioid (Narcotic) Overdose', sections: [
+      { label: 'Treatment', items: ['Naloxone 0.4 mg IV/IO/IN/IM · repeat PRN','Airway management / BVM as needed','Consider CPAP 5–15 cmH₂O'] },
+    ], pearls: [
+      'Goal is to restore spontaneous respiration, not mentation',
+      'Fentanyl and similar may require larger Naloxone doses',
+      'Not appropriate with an advanced airway in place or in cardiac arrest',
     ]},
-    { id: 'tca', name: 'TCA Overdose', banner: 'TCA Overdose', sections: [
-      { label: 'Treatment', items: ['Sodium Bicarbonate 50–75 mEq IV/IO'] },
-    ]},
+    { id: 'cholinergic', name: 'Cholinergic (SLUDGEM)', banner: 'Cholinergic / Organophosphate', sections: [
+      { label: 'Treatment', items: ['Atropine 1 mg IV/IO q5 min until airway secretions resolve · Peds ≥12: 1 mg · Peds <12: 0.05 mg/kg'] },
+    ], pearls: [ 'For SLUDGEM — no maximum dose' ]},
+    { id: 'tca', name: 'TCA Overdose', banner: 'Tricyclic Antidepressant Overdose', sections: [
+      { label: 'Treatment', items: ['Sodium Bicarbonate 1 mEq/kg IV/IO'] },
+    ], pearls: [ 'For TCA OD with HR > 120 bpm & QRS > 120 ms; repeat until QRS narrows' ]},
+    { id: 'sympathomimetic', name: 'Sympathomimetic', banner: 'Sympathomimetic Toxicity', sections: [
+      { label: 'Treatment', items: ['Midazolam 5 mg IV/IO or 10 mg IM/IN · repeat q5 min until HR/RR/BP normalize'] },
+    ], pearls: [ 'For hyperadrenergic states with HR > 120 bpm' ]},
     { id: 'ccbod', name: 'Calcium Channel Blocker OD', banner: 'Calcium Channel Blocker Overdose', sections: [
       { label: 'Treatment', items: ['Calcium Chloride 1 g IV/IO'] },
+    ]},
+    { id: 'dystonic', name: 'Dystonic / EPS', banner: 'Dystonic Reaction / Extrapyramidal', sections: [
+      { label: 'Treatment', items: ['Diphenhydramine 50 mg IV/IO/IM'] },
+    ]},
+  ]},
+  { cat: 'Neuro', list: [
+    { id: 'seizure', name: 'Seizure', banner: 'Seizure / Status Epilepticus', sections: [
+      { label: 'Check First', items: ['Blood glucose — if < 60, treat hypoglycemia'] },
+      { label: 'Anticonvulsant (choose one)', items: ['Midazolam 5 mg IV/IO or 10 mg IM/IN · repeat q5 min · Peds 0.2 mg/kg (max 5 mg IV / 10 mg IM-IN)','Lorazepam 2 mg IV/IO/IM · may repeat ×1 (max 8 mg) · Peds 0.1 mg/kg (max 2 mg)','Diazepam 5 mg IV/IO · repeat q5 min · Peds 0.2 mg/kg (max 5 mg)'] },
+      { label: 'Refractory / Prolonged', items: ['Levetiracetam (Keppra) 2 g IV/IO infusion'] },
+    ], pearls: [ 'Levetiracetam is second-line for prolonged or refractory seizures' ]},
+    { id: 'stroke', name: 'Stroke', banner: 'Suspected Stroke', sections: [
+      { label: 'Assess', items: ['Blood glucose — if < 60, treat hypoglycemia','Perform BEFAST / VAN stroke assessment','Establish last-known-well time'] },
+      { label: 'Supportive', items: ['Crystalloid to maintain cerebral perfusion','Treat nausea/vomiting (reduces ICP)'] },
+    ], pearls: [
+      'FAST-positive → closest Stroke Center',
+      'VAN-positive or suspected hemorrhagic → Comprehensive / Thrombectomy-Capable Stroke Center',
+    ]},
+  ]},
+  { cat: 'Sepsis & Shock', list: [
+    { id: 'sepsis', name: 'Sepsis', banner: 'Sepsis / Septic Shock', sections: [
+      { label: 'Assess', items: ['Complete Sepsis Checklist (qSOFA + EtCO₂) — positive = Sepsis Alert'] },
+      { label: 'Treatment', items: ['Crystalloid 20 mL/kg IV/IO over 60 min (adult & peds)','CPAP 5–15 cmH₂O if indicated','Pressor — second-line for shock after fluids'] },
+    ], pearls: [ 'Crystalloid is paramount for survival; do not withhold in normotensive patients' ]},
+  ]},
+  { cat: 'OB', list: [
+    { id: 'eclampsia', name: 'Peripartum HTN / Eclampsia', banner: 'Peripartum Hypertension & Eclampsia', sections: [
+      { label: 'General', items: ['Left lateral recumbent position','BP every 5 minutes'] },
+      { label: 'Antihypertensive (SBP ≥160 / DBP ≥110 ×10 min)', items: ['Labetalol 20 mg IV → 40 mg → 80 mg q10 min (max cumulative 300 mg) · target SBP 130–150 / DBP 80–100'] },
+      { label: 'Magnesium (severe features or seizing)', items: ['Magnesium Sulfate 4 g in 100 mL D5W IV/IO over 20 min (10 g IM if no access)','Actively seizing: 4 g IV/IO wide open until seizure stops'] },
+    ], warn: { label: 'Labetalol Exclusions', items: ['Trauma','HR < 60','CHF','Heart block on ECG','Asthma'] }, pearls: [
+      'Antihypertensives are the highest priority when both are indicated',
+      'Elevated BP in pregnancy & up to 6 weeks postpartum requires treatment',
+    ]},
+  ]},
+  { cat: 'Pain / Sedation', list: [
+    { id: 'pain', name: 'Pain & Anxiety', banner: 'Pain & Anxiety Management', sections: [
+      { label: 'Opioid Analgesia (choose one)', items: ['Fentanyl 1 mcg/kg IV/IO/IM/IN q10 min PRN','Hydromorphone 1 mg IV/IO/IM/IN q20 min PRN · Peds 5 mcg/kg','Morphine 0.2 mg/kg IV/IO/IM/IN q20 min PRN · Peds 0.1 mg/kg'] },
+      { label: 'Non-Opioid (choose one)', items: ['Acetaminophen 1 g IV/IO over 15 min · Peds 15 mg/kg (max 500 mg)','Ketorolac 15 mg IV/IO/IM · Peds 0.5 mg/kg (max 15 mg)','Ketamine 0.2 mg/kg IV/IO/IM/IN q20 min'] },
+      { label: 'IO Infusion Pain', items: ['Lidocaine 2% 40 mg IO over 2 min, dwell 60 s · Peds 0.5 mg/kg (max 40 mg)'] },
+      { label: 'Severe Anxiety', items: ['Midazolam 2 mg IV/IO/IM/IN q10 min PRN'] },
+    ], warn: { label: 'Caution', items: ['Ketorolac contraindicated in patients > 75 y/o'] }, pearls: [
+      'Pain medication should not be held in fear of masking an injury/illness',
+    ]},
+    { id: 'nausea', name: 'Nausea & Vomiting', banner: 'Nausea & Vomiting', sections: [
+      { label: 'Antiemetic (choose one)', items: ['Ondansetron 4 mg IV/IO/IM (or 4 mg ODT) · repeat 10 min · Peds 0.1 mg/kg','Promethazine 25 mg IV','Droperidol 1.25 mg IV/IO/IM'] },
+    ]},
+    { id: 'delirium', name: 'Hyperactive Delirium', banner: 'Hyperactive Delirium', sections: [
+      { label: 'Dissociation (first-line)', items: ['Ketamine 4 mg/kg IM (max 500 mg) — target large muscle'] },
+      { label: 'Alternatives', items: ['Droperidol 5 mg IM/IV/IO','Midazolam 5 mg IV or 10 mg IM'] },
+    ], pearls: [
+      'First-line therapy; no absolute contraindications',
+      'Patients shall never be placed prone',
+      'Document RASS like a vital sign',
     ]},
   ]},
   { cat: 'Trauma', list: [
@@ -6688,6 +6752,7 @@ function crProtoDrugMatch(text) {
     ['aspirin', 'Aspirin'],
     ['nitroglycerin', 'Nitroglycerine'],
     ['naloxone', 'Naloxone (Narcan)'],
+    ['ondansetron', 'Ondansetron'],
     ['oral glucose', 'Oral Glucose'],
     ['d10w', 'D10W'],
     ['txa', 'Tranexamic Acid (TXA)'],
