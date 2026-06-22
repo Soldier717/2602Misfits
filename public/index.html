@@ -4983,11 +4983,11 @@ function ccGetDrugs() {
         readyVol: '20 mL of 100 mg/mL',
         detail: '2 g IV/IO slow push over 2 min. Within 3 hours of injury. Peds: 15 mg/kg max 1 g.', route: 'IV / IO', max: '2 g' },
       { rhythm: 'non-arrest', name: 'Oral Glucose', class: 'Carbohydrate', indication: 'Conscious hypoglycemia',
-        weightDose: '15 g',
-        packageSpec: '15 g tube',
+        weightDose: '30 g',
+        packageSpec: '15 g tube (2 tubes)',
         deliveryDose: 'Squeeze between gum & cheek',
-        readyVol: '1 tube',
-        detail: 'Only if patient can protect airway and swallow.', route: 'PO / Buccal', max: 'Per protocol' },
+        readyVol: '2 tubes',
+        detail: 'Adult 30 g PO (Peds 15 g). Only if patient can protect airway and swallow.', route: 'PO / Buccal', max: 'Per protocol' },
       { rhythm: 'non-arrest', name: 'D10W', class: 'Carbohydrate', indication: 'Unconscious hypoglycemia (BGL <60)',
         weightDose: '25 g (full bag)',
         packageSpec: 'D10 (0.1 g/mL) · 250 mL bag',
@@ -6594,14 +6594,27 @@ const CC_PROTOCOLS = [
   ]},
   { cat: 'Cardiac', list: [
     { id: 'brady', name: 'Bradycardia', banner: 'Symptomatic Bradycardia', sections: [
-      { label: 'Treatment', items: ['Atropine 1 mg IV/IO','Repeat every 3–5 minutes','Maximum dose 3 mg'] },
-      { label: 'If Unstable', items: ['Transcutaneous Pacing (TCP)','Vasopressor infusion per protocol'] },
+      { label: 'First', items: ['Prioritize oxygenation & ventilation','Peds HR < 60 with hypoperfusion → Medical Cardiac Arrest'] },
+      { label: 'Symptomatic', items: ['Atropine 1 mg IV/IO (repeat q3–5 min, max 3 mg) · Peds 0.02 mg/kg (min 0.1 mg, max 0.5 mg)'] },
+      { label: 'If Atropine Ineffective', items: ['Transcutaneous Pacing — rate 80, titrate mA to capture','Epinephrine 2–10 mcg/min IV/IO'] },
+      { label: 'Suspected Hyperkalemia / Beta-Blocker / CCB Tox', items: ['Calcium Chloride 1 g IV/IO'] },
+    ], pearls: [
+      'Do not repeat Atropine if the initial dose is ineffective',
+      'For high-degree AV blocks, consider moving directly to pacing or epinephrine',
+      'Push-dose epinephrine may be given while the infusion is prepared',
     ]},
     { id: 'tachy', name: 'Tachycardia', banner: 'Tachycardia', sections: [
-      { label: 'Stable Narrow Regular SVT', items: ['Adenosine 6 mg rapid IV push','Adenosine 12 mg rapid IV push','Repeat 12 mg if needed'] },
-      { label: 'Stable AFib / AFlutter w/ RVR (not WPW)', items: ['Diltiazem 0.25 mg/kg IV'] },
-      { label: 'Torsades — With Pulse', items: ['Magnesium Sulfate 2 g IV'] },
-      { label: 'Torsades — Without Pulse', items: ['Defibrillation','Magnesium Sulfate 2 g IV/IO',{ jump: 'vfvt', t: 'Go to VF / Pulseless VT protocol' }] },
+      { label: 'First', items: ['Vagal stimulation'] },
+      { label: 'Stable · Narrow Regular (SVT)', items: ['Adenosine 12 mg rapid IV/IO · may repeat 12 mg once · Peds 0.1 mg/kg → 0.2 mg/kg (max 12 mg)'] },
+      { label: 'Stable · AFib/AFlutter or refractory SVT', items: ['Diltiazem 0.25 mg/kg IV over 2 min (max 20 mg)'] },
+      { label: 'Stable · Wide Monomorphic VT', items: ['Amiodarone 150 mg in 100 mL over 10 min · Peds 5 mg/kg (max 150 mg) over 30 min','Lidocaine 1 mg/kg → 0.5 mg/kg if refractory (up to 3 mg/kg)'] },
+      { label: 'Torsades de Pointes', items: ['Magnesium Sulfate 2 g in 100 mL IV/IO over 10 min'] },
+      { label: 'Unstable · Regular (narrow or wide)', items: ['Synchronized Cardioversion — Zoll 70 → 120 → 150 J · Peds per Handtevy'] },
+      { label: 'Unstable · Narrow Irregular', items: ['Synchronized Cardioversion — Zoll 70 → 120 → 150 J'] },
+      { label: 'Unstable · Wide Irregular', items: ['Asynchronized Cardioversion 200 J'] },
+      { label: 'Suspected Hyperkalemia', items: ['Calcium Chloride 1 g IV/IO'] },
+    ], pearls: [
+      'Consider Medical Control for stable refractory tachycardia not responsive to the above',
     ]},
     { id: 'acs', name: 'Chest Pain / ACS', banner: 'Chest Pain / ACS', sections: [
       { label: 'Treatment', items: ['Aspirin 324 mg PO','Nitroglycerin 0.4 mg SL every 5 min as indicated','Obtain & monitor 12-Lead ECG'] },
@@ -6613,7 +6626,7 @@ const CC_PROTOCOLS = [
   ]},
   { cat: 'Metabolic', list: [
     { id: 'hypoglycemia', name: 'Hypoglycemia', banner: 'Hypoglycemia', sections: [
-      { label: 'Conscious', items: ['Oral Glucose 15 g PO'] },
+      { label: 'Conscious', items: ['Oral Glucose 30 g PO · Peds 15 g'] },
       { label: 'Unconscious', items: ['D10W 25 g IV/IO'] },
     ]},
     { id: 'hyperk', name: 'Hyperkalemia', banner: 'Hyperkalemia', sections: [
@@ -6643,7 +6656,7 @@ const CC_PROTOCOLS = [
   ]},
   { cat: 'Reference', list: [
     { id: 'memory', name: 'Critical Med Memory List', banner: 'Critical Medication Memory List', memory: [
-      ['Epinephrine — Arrest','0.5–1 mg'],['Epinephrine — IM','0.5 mg'],['Adenosine','6 → 12 → 12 mg'],['Amiodarone','300 → 150 mg'],['Magnesium','2 g'],['Aspirin','324 mg'],['Nitroglycerin','0.4 mg'],['Albuterol','2.5 mg'],['Solu-Medrol','125 mg'],['D10W','25 g'],['Naloxone','0.4–2 mg'],['Atropine','1 mg'],['Calcium Chloride','1 g'],['Sodium Bicarbonate','50–75 mEq'],['TXA','1 g'],
+      ['Epinephrine — Arrest','0.5–1 mg'],['Epinephrine — IM','0.5 mg'],['Adenosine','12 mg, repeat ×1'],['Amiodarone','300 → 150 mg'],['Magnesium','2 g'],['Aspirin','324 mg'],['Nitroglycerin','0.4 mg'],['Albuterol','2.5 mg'],['Solu-Medrol','125 mg'],['D10W','25 g'],['Naloxone','0.4–2 mg'],['Atropine','1 mg'],['Calcium Chloride','1 g'],['Sodium Bicarbonate','50–75 mEq'],['TXA','1 g'],
     ]},
   ]},
 ];
