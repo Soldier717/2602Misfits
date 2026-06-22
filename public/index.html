@@ -2449,6 +2449,7 @@
     margin-bottom: 6px;
     display: block;
   }
+  .cr-modal-note.warn .label { color: #fdca68; }
   .cr-modal-note ul { margin: 0; padding-left: 22px; }
   .cr-modal-note li { margin-bottom: 6px; }
   .cr-modal-note strong { font-weight: 700; }
@@ -5733,8 +5734,57 @@ function crRenderModal() {
   bindModalEvents();
 }
 
+// Pharmacology reference (SWFL 2025 drug ref) — keyed by simple slug.
+// crDrugRef() maps any drug-list name (incl. concentration variants) to one entry.
+const CC_DRUG_REF = {
+  epinephrine: { action: 'Alpha & beta agonist — ↑ heart rate, contractility, SVR & BP; bronchodilation.', contra: ['None in emergency settings'], precautions: ['Cardiovascular disease, hypertension, tachyarrhythmia','Protect from light; deactivated by alkaline solutions (bicarb)'] },
+  adenosine: { action: 'Slows AV-node conduction; interrupts reentrant AV-nodal pathways.', contra: ['None in emergent settings'], precautions: ['Not for hemodynamically unstable patients','Bronchoconstrictive disease — auscultate lungs after','Must be pushed rapidly and followed by flush'] },
+  albuterol: { action: 'Selective β2 agonist — smooth-muscle relaxation & bronchodilation.', contra: ['None in emergent settings'], precautions: ['Symptomatic tachycardia — may precipitate angina/dysrhythmia'] },
+  amiodarone: { action: 'Class III antidysrhythmic — blocks Na/K/Ca channels; prolongs action potential.', contra: ['QTc > 500 ms'], precautions: ['Heart failure','Torsades de Pointes'] },
+  aspirin: { action: 'Inhibits platelet aggregation.', contra: ['Known anaphylaxis','Active, uncontrolled bleeding'], precautions: ['GI bleeding','Give full dose even if patient took a morning 81 mg'] },
+  atropine: { action: 'Parasympatholytic — blocks acetylcholine receptors; ↑ heart rate; ↓ secretions.', contra: ['None when used emergently'], precautions: ['If administered too slowly, reflex bradycardia may occur'] },
+  calcium: { action: '↑ cardiac contractility (positive inotrope); may enhance ventricular automaticity.', contra: ['None when used emergently'], precautions: ['VF (relative); digitalis toxicity','Local infiltration → necrosis; 3× potency of calcium gluconate'] },
+  dextrose: { action: 'Rapidly raises serum glucose.', contra: ['None in emergent setting'], precautions: ['Extravasation → tissue necrosis at higher concentrations'] },
+  diltiazem: { action: 'Class IV calcium-channel blocker — slows AV node, dilates arteries.', contra: ['Wide-complex tachycardia','Wolff-Parkinson-White'], precautions: ['Hypotension / cardiogenic shock','Renal or hepatic dysfunction'] },
+  diphenhydramine: { action: 'Antihistamine (H1 blocker); sedating.', contra: ['None in emergency setting'], precautions: ['Asthma, hypotension, nursing mothers','NOT the primary treatment for anaphylaxis'] },
+  lidocaine: { action: 'Antidysrhythmic / local anesthetic — blocks Na channels.', contra: ['None in emergent situation'], precautions: ['Monitor for CNS toxicity','Preferred antidysrhythmic if dysrhythmia is toxin-induced'] },
+  magnesium: { action: 'Electrolyte / smooth-muscle relaxant; blocks neuromuscular transmission.', contra: ['Hypotension / hypoperfused','Heart block'], precautions: ['Caution with digitalis and in renal failure'] },
+  steroid: { action: 'Corticosteroid — anti-inflammatory; upregulates β receptors.', contra: ['None in emergency setting'], precautions: ['Onset of action may be 2–6 h; Solu-Medrol must be reconstituted'] },
+  naloxone: { action: 'Opioid antagonist — reverses opioid respiratory depression.', contra: ['Cardiac arrest'], precautions: ['Goal is restoring respiration, not full mentation','Shorter half-life than many opioids — may need repeat','May precipitate withdrawal'] },
+  nitroglycerin: { action: 'Smooth-muscle relaxant; dilates coronary & systemic arteries; ↓ cardiac work.', contra: ['ED medications within 72 h','Hypotension / hypoperfusion'], precautions: ['Constantly monitor BP','RV infarct; syncope'] },
+  ondansetron: { action: 'Serotonin (5-HT3) receptor antagonist — antiemetic.', contra: ['None in emergent situations'], precautions: ['QT prolongation; caution with SSRIs'] },
+  bicarb: { action: 'Alkalizing buffer — neutralizes metabolic acidosis.', contra: ['None in emergent situations'], precautions: ['Repeat in TCA OD until QRS narrows','Deactivates other meds; hypernatremia'] },
+  txa: { action: 'Anti-fibrinolytic — inhibits plasminogen binding, ↓ fibrinolysis.', contra: ['None in emergent situations'], precautions: ['Give within 3 h of injury','Hypotension observed with rapid IV push'] },
+  crystalloid: { action: 'Volume expansion.', contra: ['None'], precautions: ['Auscultate lungs — consider pulmonary edema'] },
+};
+function crDrugRef(name) {
+  const n = (name || '').toLowerCase();
+  const R = CC_DRUG_REF;
+  if (n.includes('epi') || n.includes('epinephrine')) return R.epinephrine;
+  if (n.includes('adenosine')) return R.adenosine;
+  if (n.includes('albuterol')) return R.albuterol;
+  if (n.includes('amiodarone')) return R.amiodarone;
+  if (n.includes('aspirin')) return R.aspirin;
+  if (n.includes('atropine')) return R.atropine;
+  if (n.includes('calcium')) return R.calcium;
+  if (n.includes('dextrose') || n.includes('d10') || n.includes('glucose')) return R.dextrose;
+  if (n.includes('diltiazem')) return R.diltiazem;
+  if (n.includes('diphenhydramine')) return R.diphenhydramine;
+  if (n.includes('lidocaine')) return R.lidocaine;
+  if (n.includes('mag')) return R.magnesium;
+  if (n.includes('solu-medrol') || n.includes('methylpred') || n.includes('dexamethasone')) return R.steroid;
+  if (n.includes('naloxone') || n.includes('narcan')) return R.naloxone;
+  if (n.includes('nitro')) return R.nitroglycerin;
+  if (n.includes('ondansetron')) return R.ondansetron;
+  if (n.includes('bicarb')) return R.bicarb;
+  if (n.includes('tranexamic') || n.includes('txa')) return R.txa;
+  if (n.includes('saline') || n.includes('crystalloid') || n.includes('volume')) return R.crystalloid;
+  return null;
+}
+
 function renderDrugModal(m) {
   const d = m.drug;
+  const ref = crDrugRef(d.name);
   const conc = rcParseConc(d.packageSpec);
   const mixDetail = (d.packageSpec || '').split(/·/).slice(1).join(' · ').trim();
   const routes = m.availableRoutes && m.availableRoutes.length ? m.availableRoutes : ['IV'];
@@ -5783,6 +5833,20 @@ function renderDrugModal(m) {
         <div class="cr-modal-note">
           <span class="label">Note:</span>
           <ul><li>${escapeHtml(d.detail)}</li></ul>
+        </div>` : ''}
+        ${ref && ref.action ? `
+        <div class="cr-modal-note">
+          <span class="label">Action:</span> ${escapeHtml(ref.action)}
+        </div>` : ''}
+        ${ref && ref.contra && ref.contra.length ? `
+        <div class="cr-modal-note warn">
+          <span class="label">Contraindications:</span>
+          <ul>${ref.contra.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>
+        </div>` : ''}
+        ${ref && ref.precautions && ref.precautions.length ? `
+        <div class="cr-modal-note">
+          <span class="label">Precautions:</span>
+          <ul>${ref.precautions.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>
         </div>` : ''}
       </div>
       <div class="cr-modal-foot">
