@@ -2087,11 +2087,12 @@
     background: var(--clin-surface-alt);
   }
   .cr-drug-row.arrest {
-    background: var(--clin-red);
-    color: white;
+    border: 2px solid var(--clin-red);
+    border-radius: 6px;
+    margin: 2px 0;
   }
-  .cr-drug-row.arrest .ind { color: rgba(255,255,255,0.85); }
-  .cr-drug-row.arrest:hover { background: #aa0e21; }
+  .cr-drug-row.arrest .name { color: var(--clin-red); }
+  .cr-drug-row.arrest:hover { background: var(--clin-blue-light); }
   .cr-drug-row:not(.header):not(.arrest):hover { background: var(--clin-blue-light); }
   .cr-drug-cell .name {
     font-family: 'Oswald', sans-serif;
@@ -2118,9 +2119,6 @@
     padding: 6px 8px;
     border-radius: 4px;
     text-align: center;
-  }
-  .cr-drug-row.arrest .cr-drug-cell.vol {
-    background: rgba(255,255,255,0.18);
   }
   .cr-drug-cell.rt {
     display: flex;
