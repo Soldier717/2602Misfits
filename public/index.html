@@ -2787,6 +2787,17 @@
   .cr-elec-card-v2.defib { border-left-color: var(--clin-red); }
   .cr-elec-card-v2.cv { border-left-color: var(--clin-yellow); }
   .cr-elec-card-v2.pace { border-left-color: var(--clin-blue); }
+  .cr-elec-card-v2.torsades { border-left-color: var(--clin-red); }
+  .cr-elec-torsades {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--clin-red);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
   .cr-elec-info .label {
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
@@ -6846,6 +6857,15 @@ function rcRenderTabElectricity(kg, elec) {
               <div class="detail">${escapeHtml(elec.cardiovert.detail || '')}</div>
             </div>
             <button class="cr-elec-action" id="cr-elec-cv-log">Log Cardiovert</button>
+          </div>
+          <div class="cr-elec-card-v2 torsades">
+            <div class="cr-elec-info">
+              <div class="cr-elec-torsades">Torsades</div>
+              <div class="label">Unsynchronized Cardioversion</div>
+              <div class="primary">200 J</div>
+              <div class="secondary">Polymorphic VT · unsynchronized (defib dose)</div>
+              <div class="detail">Unstable polymorphic VT / Torsades: shock UNsynchronized at defibrillation dose — do not attempt to sync on a polymorphic rhythm. Give Magnesium Sulfate 2 g IV/IO. Peds: 2 J/kg → 4 J/kg.</div>
+            </div>
           </div>
           <div class="cr-elec-card-v2 pace">
             <div class="cr-elec-info">
