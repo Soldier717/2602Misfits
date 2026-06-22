@@ -3005,8 +3005,8 @@
         <span class="nav-text">Quick Links</span>
       </div>
       <div class="nav-item" data-page="coderun">
-        <span class="nav-num">RC</span>
-        <span class="nav-text">RCTG Calc</span>
+        <span class="nav-num">ML</span>
+        <span class="nav-text">MedicLens</span>
       </div>
     </div>
 
@@ -3059,7 +3059,7 @@
 
 <div class="cc-code-overlay" id="cc-code-overlay"></div>
 
-<!-- RCTG Calc V2 clinical modal mount (drug detail / defib energy ladder) -->
+<!-- MedicLens V2 clinical modal mount (drug detail / defib energy ladder) -->
 <div class="cr-modal-backdrop" id="cr-modal-mount"></div>
 
 <div class="toast" id="toast"></div>
@@ -3283,7 +3283,7 @@ document.querySelectorAll('.nav-item').forEach(item => {
 // ---------- RENDER ----------
 function render() {
   const main = document.getElementById('main');
-  // Toggle clinical-theme body class for RCTG Calc / Code Run only
+  // Toggle clinical-theme body class for MedicLens only
   document.body.classList.toggle('on-coderun', currentPage === 'coderun');
   if (currentPage === 'home') {
     main.innerHTML = renderHome();
@@ -6330,8 +6330,8 @@ function renderRunCodeHeader() {
   return `
     <div class="header">
       <img src="/misfits-badge.png" alt="GNFR Misfits" class="header-badge" onclick="document.querySelector('.nav-item[data-page=home]').click()" title="Back to Command">
-      <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> RCTG CALC</div>
-      <h1 class="page-title">RCTG <span class="accent">Calc</span></h1>
+      <div class="breadcrumb">2602 MISFITS <span class="sep">/</span> MEDICLENS</div>
+      <h1 class="page-title">Medic<span class="accent">Lens</span></h1>
       <div class="page-meta">Weight-based ACLS dosing, protocols & electrical reference</div>
     </div>
   `;
@@ -6467,7 +6467,7 @@ function renderCPRControlBar() {
         <button class="cpr-ratio-btn ${r==='continuous'?'active':''}" data-cpr-ratio="continuous">Continuous</button>
         <button class="cpr-action-btn epi" id="cpr-epi-btn">💉 Epinephrine</button>
       </div>
-      <div class="cpr-footer">Powered by RCTG Calc · 2602 Misfits</div>
+      <div class="cpr-footer">Powered by MedicLens · 2602 Misfits</div>
     </div>
   `;
 }
