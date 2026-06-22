@@ -6575,6 +6575,18 @@ const CC_PROTOCOLS = [
       'Blind administration of sodium bicarb or calcium is NOT recommended',
       'Naloxone not indicated for cardiac arrest',
     ]},
+    { id: 'pseudopea', name: 'Pseudo-PEA', banner: 'Pseudo-PEA', sections: [
+      { label: 'Recognize (organized rhythm, no pulse, AND ≥ 2)', items: ['EtCO₂ persistently > 30 mmHg','Pleth waveform matching the monitor rate','Cardiac wall motion on POCUS','Femoral/carotid pulsation on POCUS'] },
+      { label: 'Treatment', items: ['Continue CPR until a definitive palpable pulse','Crystalloid 20 mL/kg IV/IO','Norepinephrine 0.1–0.5 mcg/kg/min','Epinephrine infusion 0.1–0.5 mcg/kg/min (use if HR < 50)','Push-dose Epinephrine 2 mL q2 min PRN · Peds 0.1 mL/kg up to 20 kg'] },
+    ], pearls: [
+      'HOLD standard arrest epinephrine (0.1 mg/mL) — prioritize the profound shock state',
+      'If the patient deteriorates, resume standard resuscitation',
+    ]},
+    { id: 'postarrest', name: 'Post-Arrest (ROSC)', banner: 'Post-Resuscitation Care', sections: [
+      { label: 'Goals', items: ['Maintain airway, ventilation & oxygenation','MAP > 65 mmHg','HR > 50 bpm','Maintain temperature < 101 °F'] },
+      { label: 'Treatment', items: ['Obtain & transmit 12-Lead ECG','Prepare a pressor agent','Bradycardia guideline as needed (be prepared to resume CPR)'] },
+      { label: 'Transport', items: ['Medical post-arrest → PCI center','Trauma post-arrest → Trauma center'] },
+    ], pearls: [ 'Push-dose epinephrine for the rapidly deteriorating patient' ]},
   ]},
   { cat: 'Airway / Breathing', list: [
     { id: 'asthma', name: 'Asthma', banner: 'Asthma', sections: [
@@ -6711,11 +6723,53 @@ const CC_PROTOCOLS = [
   ]},
   { cat: 'Trauma', list: [
     { id: 'hemorrhage', name: 'Significant Hemorrhage', banner: 'Significant Hemorrhage', sections: [
-      { label: 'Treatment', items: ['TXA 1 g IV over 10 minutes','Blood products if available','Hemorrhage control'] },
+      { label: 'Control', items: ['Direct pressure, pressure dressing, tourniquet, wound packing','Thermal preservation (Hibler\'s method)'] },
+      { label: 'Medications', items: ['Tranexamic Acid 2 g IV/IO over 10 min · Peds 15 mg/kg (max 1 g)','Calcium Chloride 1 g IV/IO · Peds 20 mg/kg (max 1 g)'] },
+      { label: 'Advanced', items: ['Whole blood administration (preferred over crystalloid)'] },
+    ], pearls: [ 'Permissive hypotension — target return of peripheral pulses' ]},
+    { id: 'traumaarrest', name: 'Traumatic Circulatory Arrest', banner: 'Traumatic Circulatory Arrest', sections: [
+      { label: 'Priorities (before/not delayed by CPR)', items: ['Hemorrhage control','Bilateral chest decompression — finger thoracostomy preferred','Pelvic splint for blunt-force arrest'] },
+      { label: 'Medications', items: ['Epinephrine 0.5–1 mg IV/IO q3–5 min (max 3 mg) · Peds 0.01 mg/kg','Tranexamic Acid 2 g IV/IO · Peds 15 mg/kg (max 1 g)','Calcium Chloride 1 g IV/IO · Peds 20 mg/kg (max 1 g)'] },
+      { label: 'Advanced', items: ['Whole blood (preferred over crystalloid)','Pericardiocentesis if indicated','POCUS for cardiac activity','→ Medical Cardiac Arrest if a shockable rhythm presents'] },
+    ], pearls: [
+      'CPR must not delay hemorrhage control or bilateral decompression',
+      'Transport to a trauma center if within a 20-minute window',
     ]},
-    { id: 'traumaarrest', name: 'Traumatic Arrest', banner: 'Traumatic Arrest', sections: [
-      { label: 'Consider Reversible Causes', items: ['Massive Hemorrhage','Tension Pneumothorax','Cardiac Tamponade','Hyperkalemia','Acidosis'] },
-      { label: 'Medications', items: ['TXA','Calcium Chloride','Sodium Bicarbonate'] },
+    { id: 'wholeblood', name: 'Whole Blood', banner: 'Whole Blood Administration', sections: [
+      { label: 'Indications (hemorrhagic shock)', items: ['SBP < 70','≥ 10 y: SBP < 90 with HR > 110','Peds 5–9 y: SBP < 80 with HR > 110','EtCO₂ < 25','Adult shock index > 1 (HR > SBP)','Witnessed traumatic circulatory arrest (≥ 5 y)'] },
+      { label: 'Treatment', items: ['Whole Blood 1 unit IV/IO (repeat as needed) · Peds ≥ 5 y: 10 mL/kg (max 1 unit)','Tranexamic Acid 2 g IV/IO · Peds 15 mg/kg (max 1 g)','Calcium Chloride 1 g IV/IO · Peds 20 mg/kg (max 1 g)'] },
+    ], warn: { label: 'Contraindication', items: ['Isolated penetrating cranial injury with GCS 3'] }, pearls: [
+      'Requires a dedicated IV/IO line; monitor for transfusion reaction',
+      'Medical control orders required for peds < 5 y',
+    ]},
+  ]},
+  { cat: 'Environmental', list: [
+    { id: 'burns', name: 'Burns / Electrocution / Smoke', banner: 'Burn, Electrocution & Smoke Inhalation', sections: [
+      { label: 'Burn Care', items: ['Stop the burning process; remove jewelry/constricting items','< 15% BSA: moist dressing · > 15% BSA: dry dressing (avoid hypothermia)'] },
+      { label: 'Smoke / Cyanide', items: ['Reactive Airway Disease guideline for bronchospasm','Cyanokit 5 g IV/IO over 15 min · Peds 70 mg/kg (max 1 kit)'] },
+      { label: 'Pain', items: ['Pain & Anxiety Management as needed'] },
+    ], pearls: [ 'Critical burns: > 25% BSA; 3° > 10% BSA; face/eyes/hands/feet/genitalia; inhalation; electrical' ]},
+    { id: 'thermal', name: 'Hypo / Hyperthermia', banner: 'Hypothermia & Hyperthermia', sections: [
+      { label: 'Hyperthermia', items: ['Cold-water immersion — primary, do not delay; titrate to mental status','Passive cooling: fans, misting, ice packs to groin/axilla/neck'] },
+      { label: 'Hypothermia', items: ['Passive external rewarming; remove wet clothing','Warm crystalloid 20 mL/kg IV/IO'] },
+      { label: 'Fever (Peds)', items: ['Acetaminophen 15 mg/kg PO (max 500 mg) — infectious source, not environmental'] },
+    ], pearls: [
+      'Any concern for heat stroke requires immediate water immersion',
+      'Handle hypothermic patients gently — risk of lethal arrhythmia',
+    ]},
+    { id: 'envenom', name: 'Bites & Envenomation', banner: 'Bites & Envenomation', sections: [
+      { label: 'Snake / Spider', items: ['Early contact with Venom 1 — (412) 849-8022','Immobilize extremity in elevated position'] },
+      { label: 'Stings', items: ['Bee/wasp: scrape off stingers/venom sacs','Jellyfish: remove tentacles, rinse vinegar, hot-water immersion','Stingray/catfish: do NOT remove barb, hot-water immersion'] },
+      { label: 'If reaction', items: ['Allergic Reaction / Anaphylaxis guideline as needed'] },
+    ], warn: { label: 'Snake/Spider — Do NOT', items: ['No ice, tourniquets, cutting, or suctioning','Do not attempt to catch/kill the snake'] }},
+    { id: 'drowning', name: 'Drowning / Submersion', banner: 'Drowning / Submersion', sections: [
+      { label: 'Treatment', items: ['CPAP 5–15 cmH₂O','Reactive Airway Disease guideline as needed','Hypo/Hyperthermia guideline as needed'] },
+    ], pearls: [ 'Resuscitate cold-water drowning until warm — transport' ]},
+    { id: 'dive', name: 'Dive Emergencies', banner: 'Dive Emergencies (DCI / AGE)', sections: [
+      { label: 'Treatment', items: ['High-flow oxygen 100% FiO₂','Consult DAN — (919) 684-9111','Consider air medical to a hyperbaric center for AGE'] },
+    ], pearls: [
+      'Give high-flow O₂ regardless of SpO₂ reading',
+      'Avoid Trendelenburg or High-Fowler\'s positioning',
     ]},
   ]},
   { cat: 'Reference', list: [
