@@ -2207,6 +2207,22 @@
   button.cc-proto-item.drug:hover { background: var(--clin-blue-light); }
   button.cc-proto-item.drug .arrow { color: var(--clin-red); font-size: 16px; flex-shrink: 0; }
 
+  button.cc-proto-item.jump {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    width: 100%; text-align: left; cursor: pointer; border: 1px dashed var(--clin-blue);
+    background: var(--clin-blue-light); color: var(--clin-blue);
+    font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 13px;
+    letter-spacing: 0.03em; text-transform: uppercase;
+  }
+  button.cc-proto-item.jump:hover { background: var(--clin-blue); color: #fff; }
+  button.cc-proto-item.jump .arrow { font-size: 17px; flex-shrink: 0; }
+
+  .cc-proto-peds-note {
+    margin: 10px 12px 0; padding: 10px 12px; border-radius: 6px;
+    background: rgba(253, 202, 104, 0.18); border-left: 3px solid var(--clin-yellow);
+    font-family: 'Inter', sans-serif; font-size: 12.5px; line-height: 1.4; color: var(--clin-text);
+  }
+
   .cc-proto-memory { padding: 8px 12px 14px; display: flex; flex-direction: column; gap: 4px; }
   .cc-mem-row {
     display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -6553,7 +6569,7 @@ const CC_PROTOCOLS = [
       { label: 'Stable Narrow Regular SVT', items: ['Adenosine 6 mg rapid IV push','Adenosine 12 mg rapid IV push','Repeat 12 mg if needed'] },
       { label: 'Stable AFib / AFlutter w/ RVR (not WPW)', items: ['Diltiazem 0.25 mg/kg IV'] },
       { label: 'Torsades — With Pulse', items: ['Magnesium Sulfate 2 g IV'] },
-      { label: 'Torsades — Without Pulse', items: ['Defibrillation','Magnesium Sulfate 2 g IV/IO','→ Cardiac Arrest Protocol'] },
+      { label: 'Torsades — Without Pulse', items: ['Defibrillation','Magnesium Sulfate 2 g IV/IO',{ jump: 'vfvt', t: 'Go to VF / Pulseless VT protocol' }] },
     ]},
     { id: 'acs', name: 'Chest Pain / ACS', banner: 'Chest Pain / ACS', sections: [
       { label: 'Treatment', items: ['Aspirin 324 mg PO','Nitroglycerin 0.4 mg SL every 5 min as indicated','Obtain & monitor 12-Lead ECG'] },
@@ -6665,12 +6681,18 @@ function rcRenderProtocolDetail(p) {
     <div class="cc-proto-section${warn ? ' warn' : ''}">
       <div class="cc-proto-section-label">${warn ? '⚠ ' : ''}${escapeHtml(label)}</div>
       ${items.map(it => {
+        if (it && it.jump) {
+          return `<button class="cc-proto-item jump" data-proto-sel="${escapeAttr(it.jump)}"><span>${escapeHtml(it.t)}</span><span class="arrow">→</span></button>`;
+        }
         const match = warn ? null : crProtoDrugMatch(it);
         return match
           ? `<button class="cc-proto-item drug" data-drug-name="${escapeAttr(match)}"><span>${escapeHtml(it)}</span><span class="arrow">›</span></button>`
           : `<div class="cc-proto-item">${escapeHtml(it)}</div>`;
       }).join('')}
     </div>`;
+  const pedsNote = (cr.patient && cr.patient.type === 'peds')
+    ? `<div class="cc-proto-peds-note">⚠ Pediatric patient — listed doses are <strong>adult</strong> references. Tap a drug for the weight-based pediatric dose.</div>`
+    : '';
   let body;
   if (p.memory) {
     body = `<div class="cc-proto-memory">${p.memory.map(([d, dose]) => `<div class="cc-mem-row"><span class="cc-mem-drug">${escapeHtml(d)}</span><span class="cc-mem-dose">${escapeHtml(dose)}</span></div>`).join('')}</div>`;
@@ -6680,6 +6702,7 @@ function rcRenderProtocolDetail(p) {
   return `
     <button class="cc-proto-back" data-proto-back>‹ All Protocols</button>
     <div class="cr-meds-banner"><span class="ico">▣</span><span>${escapeHtml(p.banner || p.name)}</span></div>
+    ${pedsNote}
     ${body}
   `;
 }
