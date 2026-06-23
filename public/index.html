@@ -3004,10 +3004,10 @@
         <span class="nav-num">QL</span>
         <span class="nav-text">Quick Links</span>
       </div>
-      <div class="nav-item" data-page="coderun">
+      <a class="nav-item" href="https://fielddose.com" style="text-decoration:none;">
         <span class="nav-num">FD</span>
         <span class="nav-text">FieldDose</span>
-      </div>
+      </a>
     </div>
 
     <div class="sidebar-footer">
@@ -3271,6 +3271,7 @@ async function tryRestoreSession() {
 // ---------- NAVIGATION ----------
 document.querySelectorAll('.nav-item').forEach(item => {
   item.addEventListener('click', () => {
+    if (!item.dataset.page) return; // external links (e.g. FieldDose) navigate normally
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     item.classList.add('active');
     currentPage = item.dataset.page;
@@ -3283,8 +3284,6 @@ document.querySelectorAll('.nav-item').forEach(item => {
 // ---------- RENDER ----------
 function render() {
   const main = document.getElementById('main');
-  // Toggle clinical-theme body class for FieldDose only
-  document.body.classList.toggle('on-coderun', currentPage === 'coderun');
   if (currentPage === 'home') {
     main.innerHTML = renderHome();
     bindHomeEvents();
@@ -3292,9 +3291,6 @@ function render() {
     main.innerHTML = renderDocs();
   } else if (currentPage === 'links') {
     main.innerHTML = renderLinks();
-  } else if (currentPage === 'coderun') {
-    main.innerHTML = renderRunCode();
-    bindRunCodeEvents();
   } else if (currentPage.startsWith('week-')) {
     const num = parseInt(currentPage.split('-')[1]);
     main.innerHTML = renderWeek(num);
